@@ -1,14 +1,20 @@
 "use client";
 
 import React from "react";
-import { ThemeProvider } from "./theme-provider";
+import ReduxProvider from "./redux/ReduxProvider";
+import QueryProvider from "./query/QueryProvider";
+import { ThemeProvider } from "./theme/ThemeProvider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="course-platform-theme">
-      {children}
-    </ThemeProvider>
+    <ReduxProvider>
+      <QueryProvider>
+        <ThemeProvider defaultTheme="system" storageKey="course-platform-theme">
+          {children}
+        </ThemeProvider>
+      </QueryProvider>
+    </ReduxProvider>
   );
 }
 
-export * from "./theme-provider";
+export * from "./theme/ThemeProvider";

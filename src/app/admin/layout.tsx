@@ -1,14 +1,15 @@
 import React from "react";
 import Link from "next/link";
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Users, 
-  Settings, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  Settings,
   LogOut,
-  Bell
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AppProviders } from "@/providers";
 
 export default function AdminLayout({
   children,
@@ -27,7 +28,10 @@ export default function AdminLayout({
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 hidden h-full w-64 border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 lg:block">
         <div className="flex h-16 items-center border-b border-zinc-200 px-6 dark:border-zinc-800">
-          <Link href="/admin/dashboard" className="text-xl font-bold tracking-tight">
+          <Link
+            href="/admin/dashboard"
+            className="text-xl font-bold tracking-tight"
+          >
             AdminPanel
           </Link>
         </div>
@@ -44,9 +48,12 @@ export default function AdminLayout({
               </Link>
             ))}
           </nav>
-          
+
           <div className="mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <Button variant="ghost" className="w-full justify-start gap-3 px-3 text-zinc-600 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 px-3 text-zinc-600 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
+            >
               <LogOut className="h-4 w-4" />
               <span className="text-sm font-medium">Logout</span>
             </Button>
@@ -72,7 +79,7 @@ export default function AdminLayout({
 
         {/* Page content */}
         <main className="p-8">
-          {children}
+          <AppProviders>{children}</AppProviders>
         </main>
       </div>
     </div>
