@@ -1,0 +1,39 @@
+{
+  "hero": {
+    "badge": {
+      "text": "FINANCIAL EVOLUTION",
+      "bgColor": "#10B981",
+      "textColor": "#ffffff"
+    },
+    "heading": {
+      "main": "Skill to Income",
+      "highlight": "Transformation",
+      "highlightColor": "#0052CC"
+    },
+    "description": "Real earning promise. Master the high-demand skills that actually pay and bridge the gap between learning and financial freedom.",
+    "buttons": [
+      {
+        "id": 1,
+        "text": "Start Learning",
+        "icon": "arrow",
+        "bgColor": "#0052CC",
+        "textColor": "#ffffff",
+        "href": "/student/courses"
+      },
+      {
+        "id": 2,
+        "text": "Earn as Affiliate",
+        "bgColor": "#f0f0f0",
+        "textColor": "#0052CC",
+        "href": "/affiliate"
+      }
+    ],
+    "card": {
+      "title": "Weekly Payout",
+      "amount": "+$4,290.00",
+      "amountColor": "#10B981",
+      "bgColor": "#f0fdf4",
+      "iconColor": "#10B981"
+    }
+  }
+}

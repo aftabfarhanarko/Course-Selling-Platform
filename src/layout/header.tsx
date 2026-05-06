@@ -120,7 +120,7 @@ function Header() {
               <Button
                 variant="outline"
                 size="sm"
-                className=" hover:bg-gray-500 cursor-pointer text-gray-700 hover:text-gray-100"
+                className="  cursor-pointer text-gray-700 "
               >
                 Login
               </Button>
