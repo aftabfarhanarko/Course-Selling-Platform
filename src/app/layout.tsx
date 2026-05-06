@@ -41,12 +41,12 @@ export default function RootLayout({
       className={`${inter.variable} ${manrope.variable} ${mono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
-        <div>
-          <Header />
+      <body className="h-full flex flex-col">
+        <Header />
+        <div className="flex-1">
           <AppProviders>{children}</AppProviders>
-          <Footer />
         </div>
+        <Footer />
       </body>
     </html>
   );
