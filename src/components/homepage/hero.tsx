@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, DollarSign } from "lucide-react";
 import { FaArrowTrendUp } from "react-icons/fa6";
 
+
 import Link from "next/link";
 
 function HomeHero() {
@@ -114,8 +115,8 @@ function HomeHero() {
               ))}
             </div>
           </div>
-v
-          {/*  crd - Card Section */}
+
+          {/* Right - Card Section */}
           <div className="flex items-center justify-center lg:justify-end mt-8 lg:mt-0">
             {/* Main Card Container */}
             <div
