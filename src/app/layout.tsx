@@ -1,6 +1,6 @@
 import { AppProviders } from "@/providers";
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Manrope, Bai_Jamjuree } from "next/font/google";
+import { Bai_Jamjuree } from "next/font/google";
 import Footer from "@/components/Footer";
 import Header from "@/components/Navbar";
 import "./globals.css";
