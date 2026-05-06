@@ -114,8 +114,8 @@ function HomeHero() {
               ))}
             </div>
           </div>
-
-          {/* Right - Card Section */}
+v
+          {/*  crd - Card Section */}
           <div className="flex items-center justify-center lg:justify-end mt-8 lg:mt-0">
             {/* Main Card Container */}
             <div
