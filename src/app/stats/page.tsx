@@ -1,8 +1,15 @@
+import ArchitectBlueprint from "@/components/stats-page/ArchitectBlueprint";
+import HeroSection from "@/components/stats-page/Hero";
+import MesterClass from "@/components/stats-page/MesterClass";
+import Profltpathway from "@/components/stats-page/Profltpathway";
+
 export default function StatsPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-4xl font-bold">Stats Page</h1>
-      <p className="text-muted-foreground mt-4">View our platform statistics.</p>
+      <HeroSection />
+      <ArchitectBlueprint />
+      <Profltpathway />
+      <MesterClass />
     </div>
   );
 }
