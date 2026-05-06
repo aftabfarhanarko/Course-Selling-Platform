@@ -52,7 +52,7 @@ const CourseSection = () => {
     </p>
   </div>
 
-  <Link href="/student/courses">
+  <Link href="/courses">
     <button className="text-blue-600 whitespace-nowrap cursor-pointer font-semibold  items-center gap-1">
       View All Courses →
     </button>
@@ -92,7 +92,7 @@ const CourseSection = () => {
                 </span>
               </div>
 
-            <Link href={`/student/courses/${course.id}`}>
+            <Link href={`/courses/${course.id}`}>
               <button className="w-full bg-[#e5e7eb] cursor-pointer hover:bg-[#d1d5db] text-blue-600 font-semibold py-3 rounded-xl transition">
                 Enroll Now
               </button>
