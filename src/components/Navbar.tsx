@@ -9,7 +9,15 @@ const navLinks = [
     name: "Home",
     href: "/",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M3 9.75L12 3l9 6.75V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.75z" />
         <path d="M9 22V12h6v10" />
       </svg>
@@ -19,7 +27,15 @@ const navLinks = [
     name: "Courses",
     href: "/courses",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M12 3L2 8l10 5 10-5-10-5z" />
         <path d="M2 16l10 5 10-5" />
         <path d="M2 12l10 5 10-5" />
@@ -30,7 +46,15 @@ const navLinks = [
     name: "Shop",
     href: "/shop",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
         <line x1="3" y1="6" x2="21" y2="6" />
         <path d="M16 10a4 4 0 01-8 0" />
@@ -41,7 +65,15 @@ const navLinks = [
     name: "Stats",
     href: "/stats",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <rect x="2" y="13" width="4" height="9" rx="1" />
         <rect x="9" y="8" width="4" height="14" rx="1" />
         <rect x="16" y="3" width="4" height="19" rx="1" />
@@ -52,7 +84,15 @@ const navLinks = [
     name: "Affiliate",
     href: "/affiliate",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <circle cx="18" cy="5" r="3" />
         <circle cx="6" cy="12" r="3" />
         <circle cx="18" cy="19" r="3" />
@@ -68,7 +108,15 @@ const authLinks = [
     name: "Login",
     href: "/login",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
         <polyline points="10 17 15 12 10 7" />
         <line x1="15" y1="12" x2="3" y2="12" />
@@ -79,7 +127,15 @@ const authLinks = [
     name: "Signup",
     href: "/signup",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
         <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <line x1="19" y1="8" x2="19" y2="14" />
@@ -103,7 +159,9 @@ function Header() {
   // Lock body scroll when drawer open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   const isActive = (href: string) =>
@@ -122,18 +180,25 @@ function Header() {
       >
         <div className="mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex h-16 items-center justify-between">
-
             {/* Logo */}
             <Link
               href="/"
               className="flex items-center gap-2 font-extrabold text-xl text-gray-900 tracking-tight"
             >
               <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center shadow-[0_2px_10px_rgba(37,99,235,0.4)]">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                >
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
-              IncomeArchitect
+              Income
             </Link>
 
             {/* Desktop Nav */}
@@ -176,11 +241,17 @@ function Header() {
               aria-label="Open menu"
               className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-[rgba(99,102,241,0.1)] transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 24 24">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                viewBox="0 0 24 24"
+              >
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-
           </div>
         </div>
       </header>
@@ -208,7 +279,15 @@ function Header() {
             className="flex items-center gap-2 font-extrabold text-lg text-gray-900 tracking-tight"
           >
             <div className="w-7 h-7 rounded-lg bg-[#2563EB] flex items-center justify-center shadow-[0_2px_8px_rgba(37,99,235,0.35)]">
-              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-3.5 h-3.5"
+              >
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </div>
@@ -222,7 +301,14 @@ function Header() {
               aria-label="Close menu"
               className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                viewBox="0 0 24 24"
+              >
                 <path d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
