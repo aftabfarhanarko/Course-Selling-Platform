@@ -8,13 +8,18 @@ import LiveInsight from '../components/homepage/liveInsight'
 
 function Main_Index_For_Call_Files() {
   return (
-    <div>
+    <div> 
+      {/*start  homepage here */}
+      {/* ================================= */}
         <HomeHero />
         <CountDownTrust />
         <PrecisionWorkflow />
         <CourseSection />
         <ArchitectureProgress />
         <LiveInsight />
+      {/* =================================  homepage end*/}
+      
+
     </div>
   )
 }
