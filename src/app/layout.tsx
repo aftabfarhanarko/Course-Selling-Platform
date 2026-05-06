@@ -1,18 +1,30 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { AppProviders } from "@/providers";
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono, Manrope } from "next/font/google";
+import Footer from "../layout/footer";
+import Header from "../layout/header";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// ✅ Fonts setup
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
+  display: "swap",
 });
 
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// ✅ Metadata
 export const metadata: Metadata = {
   title: "Course Selling Platform",
   description: "A comprehensive platform for selling and learning courses.",
@@ -20,19 +32,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${manrope.variable} ${mono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <AppProviders>
-          {children}
-        </AppProviders>
+        <div>
+          <Header />
+          <AppProviders>{children}</AppProviders>
+          <Footer />
+        </div>
       </body>
     </html>
   );
