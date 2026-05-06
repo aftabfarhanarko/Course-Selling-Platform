@@ -1,8 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, DollarSign } from "lucide-react";
-import { FaArrowTrendUp } from "react-icons/fa6";
+import { ArrowRight, ArrowRightCircle, DollarSign } from "lucide-react";
 
 
 import Link from "next/link";
@@ -108,7 +107,8 @@ function HomeHero() {
                   >
                     {btn.text}
                     {btn.icon === "arrow" && (
-                      <FaArrowTrendUp className="ml-2 h-5 w-5" />
+                      // <FaArrowTrendUp className="ml-2 h-5 w-5" />
+                      <ArrowRightCircle/>
                     )}
                   </Button>
                 </Link>

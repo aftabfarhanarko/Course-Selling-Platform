@@ -1,11 +1,11 @@
 import { AppProviders } from "@/providers";
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Manrope } from "next/font/google";
-import Footer from "../layout/footer";
-import Header from "../layout/header";
+import { Inter, JetBrains_Mono, Manrope, Bai_Jamjuree } from "next/font/google";
+import Footer from "@/components/Footer";
+import Header from "@/components/Navbar";
 import "./globals.css";
 
-// ✅ Fonts setup
+// ? Fonts setup
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -24,7 +24,14 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-// ✅ Metadata
+const baiJamjuree = Bai_Jamjuree({
+  variable: "--font-bai-jamjuree",
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+// ? Metadata
 export const metadata: Metadata = {
   title: "Course Selling Platform",
   description: "A comprehensive platform for selling and learning courses.",
@@ -38,14 +45,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${manrope.variable} ${mono.variable} h-full antialiased`}
+      className={`${inter.variable} ${manrope.variable} ${mono.variable} ${baiJamjuree.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full flex flex-col">
+      <body className="h-full flex flex-col font-bai-jamjuree">
         <Header />
-        <div className="flex-1">
+        <main className="flex-1">
           <AppProviders>{children}</AppProviders>
-        </div>
+        </main>
         <Footer />
       </body>
     </html>
