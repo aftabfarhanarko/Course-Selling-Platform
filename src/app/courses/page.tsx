@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -171,7 +171,6 @@ function StarRating({ rating }: { rating: number }) {
 function CourseCard({ course }: { course: Course }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group">
-      {/* Image */}
       <div className="relative h-44 overflow-hidden bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -188,8 +187,6 @@ function CourseCard({ course }: { course: Course }) {
           {course.category}
         </span>
       </div>
-
-      {/* Body */}
       <div className="p-5">
         <div className="flex justify-between items-start gap-3 mb-2">
           <h3 className="text-[15px] font-bold text-slate-900 leading-snug flex-1 group-hover:text-blue-600 transition-colors">
@@ -199,11 +196,9 @@ function CourseCard({ course }: { course: Course }) {
             ${course.price}
           </span>
         </div>
-
         <p className="text-[12.5px] text-slate-500 leading-relaxed mb-4 line-clamp-2">
           {course.desc}
         </p>
-
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
@@ -219,7 +214,6 @@ function CourseCard({ course }: { course: Course }) {
             <span className="text-xs text-slate-400">({course.reviews})</span>
           </div>
         </div>
-
         <button className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold transition-colors flex items-center justify-center gap-1.5">
           View Details
           <svg
@@ -270,23 +264,164 @@ function FilterTag({
   );
 }
 
-// ─── Main Page Component ──────────────────────────────────────────────────────
-export default function CoursesPage() {
+// ─── Filter Panel Content (shared between sidebar & bottom sheet) ─────────────
+function FilterContent({
+  selectedCats,
+  selectedEarning,
+  maxPrice,
+  hasActiveFilters,
+  searchQ,
+  toggleCat,
+  toggleEarning,
+  handlePriceChange,
+  clearAll,
+}: {
+  selectedCats: Category[];
+  selectedEarning: EarningTier | "";
+  maxPrice: number;
+  hasActiveFilters: boolean;
+  searchQ: string;
+  toggleCat: (cat: Category) => void;
+  toggleEarning: (tier: EarningTier) => void;
+  handlePriceChange: (val: number) => void;
+  clearAll: () => void;
+}) {
+  return (
+    <div className="space-y-6">
+      {/* CATEGORY */}
+      <div>
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+          Category
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => toggleCat(cat)}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
+                selectedCats.includes(cat)
+                  ? "bg-blue-600 border-blue-600 text-white"
+                  : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* PRICE RANGE */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+            Price Range
+          </p>
+          <span className="text-[12px] font-bold text-blue-600">
+            Up to ${maxPrice.toLocaleString()}
+          </span>
+        </div>
+        <input
+          type="range"
+          min={100}
+          max={2000}
+          step={50}
+          value={maxPrice}
+          onChange={(e) => handlePriceChange(parseInt(e.target.value, 10))}
+          className="w-full accent-blue-600 cursor-pointer h-1.5"
+        />
+        <div className="flex justify-between mt-1.5 text-[11px] text-slate-400">
+          <span>$100</span>
+          <span>$2,000</span>
+        </div>
+      </div>
+
+      {/* TARGET EARNINGS */}
+      <div>
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+          Target Earnings
+        </p>
+        <div className="space-y-2">
+          {EARNING_TIERS.map(({ label, badge }) => (
+            <button
+              key={label}
+              onClick={() => toggleEarning(label)}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold border transition-all ${
+                selectedEarning === label
+                  ? "bg-slate-900 border-slate-900 text-white"
+                  : "bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600"
+              }`}
+            >
+              {label}
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  selectedEarning === label
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {badge}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ACTIVE FILTER TAGS */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {selectedCats.map((cat) => (
+            <FilterTag key={cat} label={cat} onRemove={() => toggleCat(cat)} />
+          ))}
+          {selectedEarning && (
+            <FilterTag
+              label={selectedEarning}
+              onRemove={() => toggleEarning(selectedEarning as EarningTier)}
+            />
+          )}
+          {maxPrice < 2000 && (
+            <FilterTag
+              label={`≤ $${maxPrice.toLocaleString()}`}
+              onRemove={() => handlePriceChange(2000)}
+            />
+          )}
+          {searchQ && <FilterTag label={`"${searchQ}"`} onRemove={() => {}} />}
+        </div>
+      )}
+
+      {/* CLEAR ALL */}
+      <button
+        onClick={clearAll}
+        className="w-full py-2.5 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 text-[13px] font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+      >
+        Clear All Filters
+      </button>
+    </div>
+  );
+}
+
+// ─── Filterable Course List (Sub-component that uses useSearchParams) ──────
+function CourseList() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ── Filter state ──
   const [selectedCats, setSelectedCats] = useState<Category[]>([]);
   const [selectedEarning, setSelectedEarning] = useState<EarningTier | "">("");
   const [maxPrice, setMaxPrice] = useState<number>(2000);
   const [searchQ, setSearchQ] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortKey>("potential");
-
-  // ── UI state ──
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // ── Sync filters from URL on mount ──
+  // Mobile bottom sheet state
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+
+  // Lock body scroll when sheet open
+  useEffect(() => {
+    document.body.style.overflow = filterSheetOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [filterSheetOpen]);
+
   useEffect(() => {
     const cats = (searchParams.get("categories")?.split(",") ??
       []) as Category[];
@@ -294,7 +429,6 @@ export default function CoursesPage() {
     const price = parseInt(searchParams.get("price") ?? "2000", 10);
     const sort = (searchParams.get("sort") ?? "potential") as SortKey;
     const q = searchParams.get("q") ?? "";
-
     if (cats.length) setSelectedCats(cats);
     if (earn) setSelectedEarning(earn);
     if (!isNaN(price)) setMaxPrice(price);
@@ -302,7 +436,6 @@ export default function CoursesPage() {
     setSearchQ(q);
   }, [searchParams]);
 
-  // ── Push filters to URL ──
   const syncURL = useCallback(
     (
       cats: Category[],
@@ -322,7 +455,6 @@ export default function CoursesPage() {
     [router],
   );
 
-  // ── Toggle category (auto-apply) ──
   const toggleCat = (cat: Category) => {
     const next = selectedCats.includes(cat)
       ? selectedCats.filter((c) => c !== cat)
@@ -332,7 +464,6 @@ export default function CoursesPage() {
     syncURL(next, selectedEarning, maxPrice, sortBy, searchQ);
   };
 
-  // ── Toggle earning tier (auto-apply) ──
   const toggleEarning = (tier: EarningTier) => {
     const next = selectedEarning === tier ? "" : tier;
     setSelectedEarning(next);
@@ -340,27 +471,23 @@ export default function CoursesPage() {
     syncURL(selectedCats, next, maxPrice, sortBy, searchQ);
   };
 
-  // ── Price change (auto-apply with debounce-like via onMouseUp) ──
   const handlePriceChange = (val: number) => {
     setMaxPrice(val);
     setCurrentPage(1);
     syncURL(selectedCats, selectedEarning, val, sortBy, searchQ);
   };
 
-  // ── Sort change ──
   const handleSort = (val: SortKey) => {
     setSortBy(val);
     syncURL(selectedCats, selectedEarning, maxPrice, val, searchQ);
   };
 
-  // ── Search ──
   const handleSearch = (val: string) => {
     setSearchQ(val);
     setCurrentPage(1);
     syncURL(selectedCats, selectedEarning, maxPrice, sortBy, val);
   };
 
-  // ── Clear all ──
   const clearAll = () => {
     setSelectedCats([]);
     setSelectedEarning("");
@@ -370,7 +497,6 @@ export default function CoursesPage() {
     router.replace("/courses");
   };
 
-  // ── Derived filtered + sorted list ──
   const filtered: Course[] = COURSES.filter((c) => {
     if (selectedCats.length && !selectedCats.includes(c.category)) return false;
     if (selectedEarning && c.earnings !== selectedEarning) return false;
@@ -403,205 +529,135 @@ export default function CoursesPage() {
     maxPrice < 2000 ||
     searchQ !== "";
 
-  // ── Pagination (static display, extend with real data as needed) ──
+  const activeFilterCount =
+    selectedCats.length +
+    (selectedEarning ? 1 : 0) +
+    (maxPrice < 2000 ? 1 : 0) +
+    (searchQ ? 1 : 0);
+
   const TOTAL_PAGES = 8;
   const goPage = (dir: number) =>
     setCurrentPage((p) => Math.max(1, Math.min(TOTAL_PAGES, p + dir)));
 
+  const filterProps = {
+    selectedCats,
+    selectedEarning,
+    maxPrice,
+    hasActiveFilters,
+    searchQ,
+    toggleCat,
+    toggleEarning,
+    handlePriceChange,
+    clearAll,
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
-   
-
-      {/* ─── PAGE BODY ──────────────────────────────────────── */}
+    <>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-7 flex flex-col lg:flex-row gap-6">
-        {/* ─── SIDEBAR ──────────────────────────────────────── */}
-        <aside className="w-full lg:w-64 xl:w-72 shrink-0 lg:sticky lg:top-[76px] lg:self-start">
+        {/* ─── DESKTOP SIDEBAR (lg+) ──────────────────── */}
+        <aside className="hidden lg:block w-64 xl:w-72 shrink-0 lg:sticky lg:top-[76px] lg:self-start">
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            {/* Header + mobile toggle */}
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-4 h-4 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M3 5h18M7 12h10M10 19h4" strokeLinecap="round" />
-                </svg>
-                <span className="text-[14px] font-bold text-slate-900">
-                  Refine Pursuit
-                </span>
-              </div>
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-1 rounded-lg hover:bg-slate-100 transition-colors"
+            <div className="flex items-center gap-2 mb-5">
+              <svg
+                className="w-4 h-4 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className={`w-4 h-4 text-slate-500 transition-transform ${sidebarOpen ? "rotate-180" : ""}`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M18 15l-6-6-6 6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+                <path d="M3 5h18M7 12h10M10 19h4" strokeLinecap="round" />
+              </svg>
+              <span className="text-[14px] font-bold text-slate-900">
+                Refine Pursuit
+              </span>
             </div>
-
-            <div
-              className={`${sidebarOpen ? "block" : "hidden"} lg:block space-y-6`}
-            >
-              {/* ── CATEGORY ── */}
-              <div>
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                  Category
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => toggleCat(cat)}
-                      className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
-                        selectedCats.includes(cat)
-                          ? "bg-blue-600 border-blue-600 text-white"
-                          : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── PRICE RANGE ── */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                    Price Range
-                  </p>
-                  <span className="text-[12px] font-bold text-blue-600">
-                    Up to ${maxPrice.toLocaleString()}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={100}
-                  max={2000}
-                  step={50}
-                  value={maxPrice}
-                  onChange={(e) =>
-                    handlePriceChange(parseInt(e.target.value, 10))
-                  }
-                  className="w-full accent-blue-600 cursor-pointer h-1.5"
-                />
-                <div className="flex justify-between mt-1.5 text-[11px] text-slate-400">
-                  <span>$100</span>
-                  <span>$2,000</span>
-                </div>
-              </div>
-
-              {/* ── TARGET EARNINGS ── */}
-              <div>
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                  Target Earnings
-                </p>
-                <div className="space-y-2">
-                  {EARNING_TIERS.map(({ label, badge }) => (
-                    <button
-                      key={label}
-                      onClick={() => toggleEarning(label)}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold border transition-all ${
-                        selectedEarning === label
-                          ? "bg-slate-900 border-slate-900 text-white"
-                          : "bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600"
-                      }`}
-                    >
-                      {label}
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          selectedEarning === label
-                            ? "bg-white/20 text-white"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {badge}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── ACTIVE FILTER TAGS ── */}
-              {hasActiveFilters && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {selectedCats.map((cat) => (
-                    <FilterTag
-                      key={cat}
-                      label={cat}
-                      onRemove={() => toggleCat(cat)}
-                    />
-                  ))}
-                  {selectedEarning && (
-                    <FilterTag
-                      label={selectedEarning}
-                      onRemove={() =>
-                        toggleEarning(selectedEarning as EarningTier)
-                      }
-                    />
-                  )}
-                  {maxPrice < 2000 && (
-                    <FilterTag
-                      label={`≤ $${maxPrice.toLocaleString()}`}
-                      onRemove={() => handlePriceChange(2000)}
-                    />
-                  )}
-                  {searchQ && (
-                    <FilterTag
-                      label={`"${searchQ}"`}
-                      onRemove={() => handleSearch("")}
-                    />
-                  )}
-                </div>
-              )}
-
-              {/* ── CLEAR ALL ── */}
-              <button
-                onClick={clearAll}
-                className="w-full py-2.5 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 text-[13px] font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
-              >
-                Clear All Filters
-              </button>
-            </div>
+            <FilterContent {...filterProps} />
           </div>
         </aside>
 
-        {/* ─── MAIN CONTENT ─────────────────────────────────── */}
+        {/* ─── MAIN CONTENT ──────────────────────────── */}
         <main className="flex-1 min-w-0">
-          {/* Mobile search */}
-          <div className="sm:hidden relative mb-4">
-            <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
+          {/* ── MOBILE TOP BAR (search + filter button) ── */}
+          <div className="lg:hidden flex items-center gap-2 mb-4">
+            <div className="relative flex-1">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchQ}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-[14px] bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
+              />
+            </div>
+
+            {/* Filter Button */}
+            <button
+              onClick={() => setFilterSheetOpen(true)}
+              className="relative flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] font-semibold text-slate-700 hover:border-blue-300 hover:text-blue-600 transition-all shadow-sm shrink-0"
             >
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search courses..."
-              value={searchQ}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-[14px] bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
-            />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M3 5h18M7 12h10M10 19h4" strokeLinecap="round" />
+              </svg>
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-blue-600 text-white text-[10px] font-black">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
+
+          {/* ── MOBILE ACTIVE FILTER CHIPS ── */}
+          {hasActiveFilters && (
+            <div className="lg:hidden flex flex-wrap gap-1.5 mb-4">
+              {selectedCats.map((cat) => (
+                <FilterTag
+                  key={cat}
+                  label={cat}
+                  onRemove={() => toggleCat(cat)}
+                />
+              ))}
+              {selectedEarning && (
+                <FilterTag
+                  label={selectedEarning}
+                  onRemove={() => toggleEarning(selectedEarning as EarningTier)}
+                />
+              )}
+              {maxPrice < 2000 && (
+                <FilterTag
+                  label={`≤ $${maxPrice.toLocaleString()}`}
+                  onRemove={() => handlePriceChange(2000)}
+                />
+              )}
+              {searchQ && (
+                <FilterTag
+                  label={`"${searchQ}"`}
+                  onRemove={() => handleSearch("")}
+                />
+              )}
+              <button
+                onClick={clearAll}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-500 text-[11px] font-semibold border border-red-100 hover:bg-red-100 transition-all"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
 
           {/* Header row */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -690,7 +746,6 @@ export default function CoursesPage() {
                 />
               </svg>
             </button>
-
             {[1, 2, 3].map((n) => (
               <button
                 key={n}
@@ -704,9 +759,7 @@ export default function CoursesPage() {
                 {n}
               </button>
             ))}
-
             <span className="text-slate-300 font-bold px-1">...</span>
-
             <button
               onClick={() => setCurrentPage(8)}
               className={`w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-semibold border transition-all ${
@@ -717,7 +770,6 @@ export default function CoursesPage() {
             >
               8
             </button>
-
             <button
               onClick={() => goPage(1)}
               disabled={currentPage === TOTAL_PAGES}
@@ -737,30 +789,112 @@ export default function CoursesPage() {
                 />
               </svg>
             </button>
+          </div>
+        </main>
+      </div>
 
-            <button
-              onClick={() => goPage(1)}
-              disabled={currentPage === TOTAL_PAGES}
-              className="ml-1 flex items-center gap-1 px-3 py-1.5 text-[13px] font-bold text-blue-600 hover:underline disabled:opacity-30 transition-all"
-            >
-              Next
+      {/* ─── MOBILE FILTER BOTTOM SHEET ───────────────────── */}
+      {/* Backdrop */}
+      {filterSheetOpen && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px] lg:hidden"
+          onClick={() => setFilterSheetOpen(false)}
+        />
+      )}
+
+      {/* Sheet */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out lg:hidden ${
+          filterSheetOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+        style={{ maxHeight: "88vh", display: "flex", flexDirection: "column" }}
+      >
+        {/* Sheet Handle + Header */}
+        <div className="flex-shrink-0 px-5 pt-3 pb-4 border-b border-slate-100">
+          {/* Drag handle */}
+          <div className="w-10 h-1 rounded-full bg-slate-200 mx-auto mb-4" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <svg
-                className="w-4 h-4"
+                className="w-4 h-4 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M3 5h18M7 12h10M10 19h4" strokeLinecap="round" />
+              </svg>
+              <span className="text-[15px] font-bold text-slate-900">
+                Refine Pursuit
+              </span>
+              {activeFilterCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold">
+                  {activeFilterCount} active
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setFilterSheetOpen(false)}
+              className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500"
+            >
+              <svg
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
                 viewBox="0 0 24 24"
               >
-                <path
-                  d="M9 5l7 7-7 7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
               </svg>
             </button>
           </div>
-        </main>
+        </div>
+
+        {/* Scrollable filter content */}
+        <div className="flex-1 overflow-y-auto px-5 py-5">
+          <FilterContent {...filterProps} />
+        </div>
+
+        {/* Sheet Footer — Apply button */}
+        <div className="flex-shrink-0 px-5 py-4 border-t border-slate-100 bg-white">
+          <button
+            onClick={() => setFilterSheetOpen(false)}
+            className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-bold transition-colors shadow-[0_4px_14px_rgba(37,99,235,0.35)] flex items-center justify-center gap-2"
+          >
+            Show {filtered.length} Result{filtered.length !== 1 ? "s" : ""}
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M5 12h14M12 5l7 7-7 7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
+    </>
+  );
+}
+
+// ─── Main Page Component ──────────────────────────────────────────────────────
+export default function CoursesPage() {
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            Loading courses...
+          </div>
+        }
+      >
+        <CourseList />
+      </Suspense>
     </div>
   );
 }
