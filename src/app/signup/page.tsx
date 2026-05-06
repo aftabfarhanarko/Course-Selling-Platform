@@ -8,6 +8,7 @@ const SignUpPage: React.FC = () => {
     password: "",
     referralCode: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -16,84 +17,167 @@ const SignUpPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle account creation logic here
     console.log("Form submitted:", formData);
   };
 
   return (
-    <div className="min-h-screen  flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 lg:p-12 gap-8 lg:gap-16">
-      {/* Left Section - Brand & Features (Desktop: visible, Mobile: condensed) */}
-      <div className="w-full max-w-md lg:max-w-lg text-white space-y-6 sm:space-y-8 flex-shrink-0">
-        {/* Logo / Brand Name */}
+    <div
+      className="min-h-screen flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 lg:p-12 gap-8 lg:gap-16"
+      style={{
+        background:
+          "radial-gradient(ellipse at 15% 50%, rgba(99,179,237,0.15) 0%, transparent 55%), radial-gradient(ellipse at 85% 20%, rgba(154,230,180,0.12) 0%, transparent 50%), #eef0f8",
+      }}
+    >
+      {/* ── Left Section ── */}
+      <div className="w-full max-w-md lg:max-w-lg space-y-6 sm:space-y-8 flex-shrink-0">
+        {/* Tag */}
         <div className="text-center lg:text-left">
-          <p className="text-xs sm:text-sm tracking-[0.3em] text-amber-400/80 uppercase font-medium">
-            # PRECISION PROSPERITY
-          </p>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mt-2 leading-tight">
+          <span
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase"
+            style={{ background: "#d1fae5", color: "#065f46" }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: "#065f46" }}
+            />
+            Precision Prosperity
+          </span>
+
+          {/* Heading */}
+          <h1
+            className="mt-4 text-4xl sm:text-5xl font-extrabold leading-tight"
+            style={{ color: "#0d1117", fontFamily: "'Sora', sans-serif" }}
+          >
             Start Your{" "}
-            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+            <span style={{ color: "#2563eb", display: "block" }}>
               Transformation
             </span>
           </h1>
-          <p className="text-gray-400 mt-3 sm:mt-4 text-sm sm:text-base max-w-sm mx-auto lg:mx-0">
+
+          <p
+            className="mt-4 text-sm sm:text-base max-w-sm mx-auto lg:mx-0 leading-relaxed"
+            style={{ color: "#6b7280" }}
+          >
             Join the elite network of architects building sustainable, scalable
             income streams with professional-grade financial tools.
           </p>
         </div>
 
-        {/* Feature Bullets - Hidden on smallest mobile, shown on sm+ */}
-        <div className="hidden sm:block space-y-3">
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-            <span className="text-amber-400 text-xl mt-0.5">⚡</span>
-            <div>
-              <h3 className="font-semibold text-white text-sm">
-                Accelerated Growth
-              </h3>
-              <p className="text-gray-400 text-xs">
-                Proprietary wealth-building strategies engineered for the modern
-                economy.
-              </p>
+        {/* Feature Cards */}
+        <div className="hidden sm:flex flex-col gap-3">
+          {[
+            {
+              icon: "📈",
+              title: "Accelerated Growth",
+              desc: "Proprietary wealth-building strategies engineered for the modern economy.",
+              iconBg: "rgba(37,99,235,0.08)",
+            },
+            {
+              icon: "🔒",
+              title: "Institutional Security",
+              desc: "Bank-grade encryption protecting your architectural blueprints and earnings.",
+              iconBg: "rgba(37,99,235,0.08)",
+            },
+          ].map(({ icon, title, desc, iconBg }) => (
+            <div
+              key={title}
+              className="flex items-start gap-3 p-4 rounded-xl"
+              style={{
+                background: "rgba(255,255,255,0.6)",
+                border: "1px solid rgba(226,228,241,0.8)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <div
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-lg flex-shrink-0"
+                style={{ background: iconBg }}
+              >
+                {icon}
+              </div>
+              <div>
+                <h3
+                  className="text-sm font-semibold"
+                  style={{ color: "#0d1117", fontFamily: "'Sora', sans-serif" }}
+                >
+                  {title}
+                </h3>
+                <p
+                  className="text-xs mt-0.5 leading-relaxed"
+                  style={{ color: "#9ca3af" }}
+                >
+                  {desc}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-            <span className="text-amber-400 text-xl mt-0.5">🔒</span>
-            <div>
-              <h3 className="font-semibold text-white text-sm">
-                Institutional Security
-              </h3>
-              <p className="text-gray-400 text-xs">
-                Bank-grade encryption protecting your architectural blueprints
-                and earnings.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Trust Badge */}
-        <div className="text-center lg:text-left pt-4 border-t border-white/10">
-          <p className="text-xs tracking-widest text-amber-400/60 uppercase">
-            TRUSTED BY THE TOP 1%
+        <div
+          className="flex items-center gap-3 pt-5"
+          style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
+        >
+          {/* Avatars */}
+          <div className="flex">
+            {["A", "B", "C"].map((l, i) => (
+              <div
+                key={l}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                style={{
+                  marginLeft: i === 0 ? 0 : -8,
+                  border: "2px solid white",
+                  background:
+                    i === 0
+                      ? "linear-gradient(135deg,#f093fb,#f5576c)"
+                      : i === 1
+                        ? "linear-gradient(135deg,#4facfe,#00f2fe)"
+                        : "linear-gradient(135deg,#43e97b,#38f9d7)",
+                }}
+              >
+                {l}
+              </div>
+            ))}
+          </div>
+          <p
+            className="text-xs font-medium uppercase tracking-widest"
+            style={{ color: "#9ca3af" }}
+          >
+            Trusted by the Top 1%
           </p>
         </div>
       </div>
 
-      {/* Right Section - Form Card */}
-      <div className="w-full max-w-md bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/50">
-        {/* Form Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white">Create your account</h2>
-          <p className="text-gray-400 text-sm mt-1">
+      {/* ── Right Section — Form Card ── */}
+      <div
+        className="w-full max-w-md rounded-2xl p-7 sm:p-9"
+        style={{
+          background: "#ffffff",
+          boxShadow:
+            "0 20px 60px rgba(59,91,255,0.08), 0 4px 20px rgba(0,0,0,0.06)",
+          border: "1px solid rgba(226,228,241,0.6)",
+        }}
+      >
+        {/* Card Header */}
+        <div className="mb-7">
+          <h2
+            className="text-2xl font-bold"
+            style={{ color: "#0d1117", fontFamily: "'Sora', sans-serif" }}
+          >
+            Create your account
+          </h2>
+          <p className="text-sm mt-1" style={{ color: "#9ca3af" }}>
             Join 15,000+ income architects worldwide.
           </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Full Name */}
           <div>
             <label
               htmlFor="fullName"
-              className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1"
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+              style={{ color: "#6b7280" }}
             >
               Full Name
             </label>
@@ -104,16 +188,32 @@ const SignUpPage: React.FC = () => {
               value={formData.fullName}
               onChange={handleChange}
               placeholder="John Architect"
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all text-sm"
               required
+              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+              style={{
+                background: "#f7f8fc",
+                border: "1.5px solid #e2e5f1",
+                color: "#0d1117",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#2563eb";
+                e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.1)";
+                e.target.style.background = "#fff";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#e2e5f1";
+                e.target.style.boxShadow = "none";
+                e.target.style.background = "#f7f8fc";
+              }}
             />
           </div>
 
-          {/* Email Address */}
+          {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1"
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+              style={{ color: "#6b7280" }}
             >
               Email Address
             </label>
@@ -124,8 +224,23 @@ const SignUpPage: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="name@company.com"
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all text-sm"
               required
+              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+              style={{
+                background: "#f7f8fc",
+                border: "1.5px solid #e2e5f1",
+                color: "#0d1117",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#2563eb";
+                e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.1)";
+                e.target.style.background = "#fff";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#e2e5f1";
+                e.target.style.boxShadow = "none";
+                e.target.style.background = "#f7f8fc";
+              }}
             />
           </div>
 
@@ -133,27 +248,88 @@ const SignUpPage: React.FC = () => {
           <div>
             <label
               htmlFor="password"
-              className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1"
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+              style={{ color: "#6b7280" }}
             >
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all text-sm"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+                className="w-full px-4 py-3 pr-12 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  background: "#f7f8fc",
+                  border: "1.5px solid #e2e5f1",
+                  color: "#0d1117",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#2563eb";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.1)";
+                  e.target.style.background = "#fff";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#e2e5f1";
+                  e.target.style.boxShadow = "none";
+                  e.target.style.background = "#f7f8fc";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
+                style={{ color: "#9ca3af" }}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.8}
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.8}
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Referral Code (Optional) */}
+          {/* Referral Code */}
           <div>
             <label
               htmlFor="referralCode"
-              className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1"
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+              style={{ color: "#6b7280" }}
             >
               Referral Code (Optional)
             </label>
@@ -164,35 +340,86 @@ const SignUpPage: React.FC = () => {
               value={formData.referralCode}
               onChange={handleChange}
               placeholder="Enter code if you have one"
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all text-sm"
+              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+              style={{
+                background: "#f7f8fc",
+                border: "1.5px solid #e2e5f1",
+                color: "#0d1117",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#2563eb";
+                e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.1)";
+                e.target.style.background = "#fff";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#e2e5f1";
+                e.target.style.boxShadow = "none";
+                e.target.style.background = "#f7f8fc";
+              }}
             />
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-gray-950 font-bold rounded-lg transition-all duration-200 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 text-sm tracking-wide"
+            className="w-full py-3.5 rounded-xl font-bold text-sm tracking-wide text-white transition-all duration-200"
+            style={{
+              background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+              boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLButtonElement).style.boxShadow =
+                "0 6px 20px rgba(37,99,235,0.5)";
+              (e.target as HTMLButtonElement).style.transform =
+                "translateY(-1px)";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLButtonElement).style.boxShadow =
+                "0 4px 16px rgba(37,99,235,0.35)";
+              (e.target as HTMLButtonElement).style.transform = "translateY(0)";
+            }}
           >
             Create Account →
           </button>
         </form>
 
         {/* Divider */}
-        <div className="relative my-5">
+        <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-700"></div>
+            <div
+              className="w-full"
+              style={{ borderTop: "1px solid #e5e7eb" }}
+            />
           </div>
           <div className="relative flex justify-center">
-            <span className="px-3 bg-gray-900 text-gray-500 text-xs uppercase tracking-wider">
-              OR
+            <span
+              className="px-3 text-xs uppercase tracking-wider"
+              style={{ background: "#fff", color: "#9ca3af" }}
+            >
+              or
             </span>
           </div>
         </div>
 
-        {/* Google Sign Up */}
+        {/* Google */}
         <button
           type="button"
-          className="w-full py-2.5 border border-gray-700 rounded-lg text-white font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors text-sm"
+          className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2.5 transition-all"
+          style={{
+            background: "#fff",
+            border: "1.5px solid #e5e7eb",
+            color: "#0d1117",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor =
+              "#d1d5db";
+            (e.currentTarget as HTMLButtonElement).style.background = "#fafafa";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor =
+              "#e5e7eb";
+            (e.currentTarget as HTMLButtonElement).style.background = "#fff";
+          }}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -216,20 +443,24 @@ const SignUpPage: React.FC = () => {
         </button>
 
         {/* Login Link */}
-        <p className="text-center text-gray-500 text-xs mt-5">
+        <p className="text-center text-xs mt-5" style={{ color: "#9ca3af" }}>
           Already have an account?{" "}
           <a
             href="#"
-            className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+            className="font-semibold transition-colors"
+            style={{ color: "#2563eb" }}
           >
             Log in here
           </a>
         </p>
 
-        {/* Mobile Trust Badge (shows only on very small screens inside card) */}
+        {/* Mobile Trust */}
         <div className="text-center mt-4 sm:hidden">
-          <p className="text-[10px] tracking-widest text-amber-400/40 uppercase">
-            TRUSTED BY THE TOP 1%
+          <p
+            className="text-[10px] tracking-widest uppercase"
+            style={{ color: "#d1d5db" }}
+          >
+            Trusted by the Top 1%
           </p>
         </div>
       </div>
