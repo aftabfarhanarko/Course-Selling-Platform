@@ -5,25 +5,6 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Navbar";
 import "./globals.css";
 
-// ? Fonts setup
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const mono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 const baiJamjuree = Bai_Jamjuree({
   variable: "--font-bai-jamjuree",
   subsets: ["latin"],
@@ -45,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${manrope.variable} ${mono.variable} ${baiJamjuree.variable} h-full antialiased`}
+      className={`  ${baiJamjuree.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="h-full flex flex-col font-bai-jamjuree">

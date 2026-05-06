@@ -2,161 +2,42 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Home,
+  GraduationCap,
+  ShoppingBag,
+  BarChart2,
+  Users,
+  LogIn,
+  UserPlus,
+  Menu,
+  X,
+  ArrowRight,
+  SignalIcon,
+} from "lucide-react";
 
 const navLinks = [
-  {
-    name: "Home",
-    href: "/",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <path d="M3 9.75L12 3l9 6.75V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.75z" />
-        <path d="M9 22V12h6v10" />
-      </svg>
-    ),
-  },
-  {
-    name: "Courses",
-    href: "/courses",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <path d="M12 3L2 8l10 5 10-5-10-5z" />
-        <path d="M2 16l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
-    ),
-  },
-  {
-    name: "Shop",
-    href: "/shop",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <path d="M16 10a4 4 0 01-8 0" />
-      </svg>
-    ),
-  },
-  {
-    name: "Stats",
-    href: "/stats",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <rect x="2" y="13" width="4" height="9" rx="1" />
-        <rect x="9" y="8" width="4" height="14" rx="1" />
-        <rect x="16" y="3" width="4" height="19" rx="1" />
-      </svg>
-    ),
-  },
-  {
-    name: "Affiliate",
-    href: "/affiliate",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <circle cx="18" cy="5" r="3" />
-        <circle cx="6" cy="12" r="3" />
-        <circle cx="18" cy="19" r="3" />
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-      </svg>
-    ),
-  },
-];
-
-const authLinks = [
-  {
-    name: "Login",
-    href: "/login",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-        <polyline points="10 17 15 12 10 7" />
-        <line x1="15" y1="12" x2="3" y2="12" />
-      </svg>
-    ),
-  },
-  {
-    name: "Signup",
-    href: "/signup",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <line x1="19" y1="8" x2="19" y2="14" />
-        <line x1="22" y1="11" x2="16" y2="11" />
-      </svg>
-    ),
-  },
+  { name: "Home", href: "/", icon: Home },
+  { name: "Courses", href: "/courses", icon: GraduationCap },
+  { name: "Shop", href: "/shop", icon: ShoppingBag },
+  { name: "Stats", href: "/stats", icon: BarChart2 },
+  { name: "Affiliate", href: "/affiliate", icon: Users },
 ];
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll when drawer open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
@@ -164,196 +45,183 @@ function Header() {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (
+        isOpen &&
+        drawerRef.current &&
+        !drawerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [isOpen]);
+
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <>
-      {/* ── HEADER ── */}
+      {/* ===== HEADER ===== */}
       <header
-        style={{ fontFamily: "var(--font-manrope)" }}
-        className={`sticky top-0 z-50 w-full bg-[#DFE2FF] transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${
           scrolled
-            ? "shadow-[0_4px_24px_rgba(99,102,241,0.12)] backdrop-blur-md bg-opacity-85"
-            : "shadow-sm"
+            ? "bg-white/80 backdrop-blur-xl shadow-sm py-2"
+            : "bg-white py-3"
         }`}
+        style={{ fontFamily: "var(--font-bai-jamjuree)" }}
       >
-        <div className="mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 font-extrabold text-xl text-gray-900 tracking-tight"
-            >
-              <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center shadow-[0_2px_10px_rgba(37,99,235,0.4)]">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              Income
-            </Link>
-
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`relative text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 ${
-                    isActive(link.href)
-                      ? "text-[#2563EB] bg-[rgba(37,99,235,0.1)] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[2px] after:rounded-full after:bg-[#2563EB]"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-[rgba(99,102,241,0.08)]"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Desktop Right */}
-            <div className="hidden md:flex items-center gap-3">
-              <Link
-                href="/login"
-                className="text-sm font-semibold text-gray-600 px-3 py-2 rounded-lg hover:text-gray-900 hover:bg-[rgba(99,102,241,0.08)] transition-all"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="text-sm font-bold text-white bg-[#2563EB] px-6 py-2 rounded-full shadow-[0_2px_12px_rgba(37,99,235,0.35)] hover:bg-[#1d4ed8] hover:-translate-y-px hover:shadow-[0_4px_18px_rgba(37,99,235,0.45)] transition-all duration-200 active:translate-y-0"
-              >
-                Signup
-              </Link>
-              <div className="w-8 h-8 rounded-full bg-[#E8C6B1] border-2 border-white shadow-md cursor-pointer hover:scale-105 transition-transform" />
-            </div>
-
-            {/* Mobile Hamburger */}
+        <div className="max-w-[1400px] mx-auto px-6">
+          <div className="flex items-center justify-between">
+            {/* ── Mobile: Hamburger ── */}
             <button
               onClick={() => setIsOpen(true)}
+              className="lg:hidden p-2 -ml-2 text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
               aria-label="Open menu"
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-[rgba(99,102,241,0.1)] transition-colors"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                viewBox="0 0 24 24"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="w-6 h-6" />
             </button>
+
+            {/* ── Logo ── */}
+            <Link
+              href="/"
+              className="text-2xl font-black text-[#0F172A] tracking-tighter flex items-center gap-2"
+            >
+              <span className="w-8 h-8 rounded-xl bg-[#0047FF] flex items-center justify-center text-white text-xs font-black">
+                IA
+              </span>
+              <span className="hidden sm:inline">IncomeArchitect</span>
+            </Link>
+
+            {/* ── Desktop Nav ── */}
+            <nav className="hidden lg:flex items-center gap-1 bg-slate-50 rounded-2xl px-2 py-1.5">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${
+                      isActive(link.href)
+                        ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
+                        : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* ── Desktop Auth ── */}
+            <div className="hidden lg:flex items-center gap-4">
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 text-[14px] font-bold text-slate-600 hover:text-blue-600 transition-colors px-3 py-2 rounded-xl hover:bg-blue-50"
+              >
+                <LogIn className="w-4 h-4" />
+                Login
+              </Link>
+              <Link href="/signup">
+                <Button className="rounded-full bg-[#0047FF] hover:bg-blue-700 px-6 py-5 text-white text-sm font-bold shadow-lg shadow-blue-200/60 transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2">
+                  Sign Up
+                  <UserPlus className="w-4 h-4" />
+                </Button>
+              </Link>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E8C6B1] to-[#D4A574] border-2 border-white shadow-md cursor-pointer hover:scale-105 transition-transform" />
+            </div>
+
+            {/* ── Mobile: Avatar ── */}
+            <div className="lg:hidden w-9 h-9 rounded-full bg-gradient-to-br from-[#E8C6B1] to-[#D4A574] border-2 border-white shadow-md cursor-pointer" />
           </div>
         </div>
       </header>
 
-      {/* ── MOBILE DRAWER OVERLAY ── */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px] md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {/* ===== MOBILE DRAWER OVERLAY ===== */}
+      <div
+        className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          isOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsOpen(false)}
+      />
 
-      {/* ── MOBILE DRAWER ── */}
-      <aside
-        style={{ fontFamily: "var(--font-manrope)" }}
-        className={`fixed top-0 left-0 z-[70] h-full w-72 bg-white shadow-[4px_0_40px_rgba(37,99,235,0.12)] flex flex-col transition-transform duration-300 ease-out md:hidden ${
+      {/* Drawer Panel */}
+      <div
+        ref={drawerRef}
+        className={`fixed top-0 left-0 z-[200] h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
           <Link
             href="/"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2 font-extrabold text-lg text-gray-900 tracking-tight"
+            className="flex items-center gap-2"
           >
-            <div className="w-7 h-7 rounded-lg bg-[#2563EB] flex items-center justify-center shadow-[0_2px_8px_rgba(37,99,235,0.35)]">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-3.5 h-3.5"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            IncomeArchitect
+            <span className="w-8 h-8 rounded-xl bg-[#0047FF] flex items-center justify-center text-white text-xs font-black">
+              IA
+            </span>
+            <span className="font-black text-[#0F172A] text-lg tracking-tight">
+              IncomeArchitect
+            </span>
           </Link>
-
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-[#E8C6B1] border-2 border-white shadow cursor-pointer" />
-            <button
-              onClick={() => setIsOpen(false)}
-              aria-label="Close menu"
-              className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                viewBox="0 0 24 24"
-              >
-                <path d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Nav Links */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
           {navLinks.map((link) => {
-            const active = isActive(link.href);
+            const Icon = link.icon;
             return (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150 ${
-                  active
-                    ? "bg-[#2563EB] text-white shadow-[0_4px_14px_rgba(37,99,235,0.35)]"
-                    : "text-gray-600 hover:bg-[#F0F2FF] hover:text-gray-900"
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${
+                  isActive(link.href)
+                    ? "bg-[#0047FF] text-white shadow-lg shadow-blue-200"
+                    : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                <span className={active ? "text-white" : "text-gray-400"}>
-                  {link.icon}
-                </span>
+                <Icon className="w-5 h-5" />
                 {link.name}
               </Link>
             );
           })}
         </nav>
 
-        {/* Divider + Auth */}
-        <div className="border-t border-gray-100 px-3 py-4 space-y-1">
-          {authLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-gray-600 hover:bg-[#F0F2FF] hover:text-gray-900 transition-all duration-150"
-            >
-              <span className="text-gray-400">{link.icon}</span>
-              {link.name}
-            </Link>
-          ))}
+        {/* Drawer Footer */}
+        <div className="px-4 py-5 border-t border-slate-100 flex flex-col gap-3">
+          <Link
+            href="/login"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <LogIn className="w-5 h-5 text-slate-400" />
+            Login
+          </Link>
+          <Link href="/signup" onClick={() => setIsOpen(false)}>
+            <Button className="w-full rounded-2xl bg-[#0047FF] hover:bg-blue-700 py-6 font-bold text-white shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
+              <UserPlus className="w-5 h-5" />
+              Sign Up Free
+            </Button>
+          </Link>
         </div>
-      </aside>
+      </div>
+
+      {/* Spacer */}
+      <div className="h-16 lg:h-[68px]" />
     </>
   );
 }
