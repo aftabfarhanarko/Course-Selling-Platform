@@ -1,0 +1,33 @@
+[33mf9c80df[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32msadek[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull origin main: Fast-forward
+[33mdd8e124[m[33m ([m[1;31morigin/sadek[m[33m)[m HEAD@{1}: commit: re desigined the card page
+[33ma505e88[m HEAD@{2}: checkout: moving from development to sadek
+[33med1b593[m[33m ([m[1;31morigin/development[m[33m, [m[1;32mdevelopment[m[33m)[m HEAD@{3}: checkout: moving from sadek to development
+[33ma505e88[m HEAD@{4}: commit: shop done
+[33m96f7d86[m HEAD@{5}: commit: marged main
+[33m089ede2[m HEAD@{6}: checkout: moving from sadek to sadek
+[33m089ede2[m HEAD@{7}: checkout: moving from sadek to sadek
+[33m089ede2[m HEAD@{8}: checkout: moving from main to sadek
+[33m476538d[m[33m ([m[1;32mmain[m[33m)[m HEAD@{9}: checkout: moving from sadek to main
+[33m089ede2[m HEAD@{10}: commit: aa
+[33med1b593[m[33m ([m[1;31morigin/development[m[33m, [m[1;32mdevelopment[m[33m)[m HEAD@{11}: checkout: moving from development to sadek
+[33med1b593[m[33m ([m[1;31morigin/development[m[33m, [m[1;32mdevelopment[m[33m)[m HEAD@{12}: merge sadek: Fast-forward
+[33m2bd1504[m HEAD@{13}: checkout: moving from sadek to development
+[33med1b593[m[33m ([m[1;31morigin/development[m[33m, [m[1;32mdevelopment[m[33m)[m HEAD@{14}: commit: home page completed at 06/05/2026
+[33m1c08d93[m HEAD@{15}: commit: count down complete
+[33m2bd1504[m HEAD@{16}: checkout: moving from development to sadek
+[33m2bd1504[m HEAD@{17}: merge sadek: Fast-forward
+[33ma04aeb7[m HEAD@{18}: checkout: moving from sadek to development
+[33m2bd1504[m HEAD@{19}: commit: modifyed hero
+[33ma04aeb7[m HEAD@{20}: checkout: moving from development to sadek
+[33ma04aeb7[m HEAD@{21}: merge sadek: Fast-forward
+[33m7b228bf[m HEAD@{22}: checkout: moving from sadek to development
+[33ma04aeb7[m HEAD@{23}: commit: f
+[33m2d48e62[m HEAD@{24}: commit: hero sections complete
+[33m7b228bf[m HEAD@{25}: merge development: Fast-forward
+[33m7d3c4e9[m HEAD@{26}: checkout: moving from development to sadek
+[33m7b228bf[m HEAD@{27}: commit: footer complete
+[33m7d3c4e9[m HEAD@{28}: checkout: moving from sadek to development
+[33m7d3c4e9[m HEAD@{29}: commit: header complete
+[33md162ff1[m HEAD@{30}: commit: sadek branch created
+[33m476538d[m[33m ([m[1;32mmain[m[33m)[m HEAD@{31}: checkout: moving from main to sadek
+[33m476538d[m[33m ([m[1;32mmain[m[33m)[m HEAD@{32}: clone: from https://github.com/jevxo26/Course-Selling-Platform
