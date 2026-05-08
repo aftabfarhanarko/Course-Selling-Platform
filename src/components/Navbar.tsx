@@ -16,6 +16,7 @@ import {
   X,
   ArrowRight,
   SignalIcon,
+  Shield,
 } from "lucide-react";
 
 const navLinks = [
@@ -67,8 +68,8 @@ function Header() {
       {/* ===== HEADER ===== */}
       <header
         className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${scrolled
-            ? "bg-white/80 backdrop-blur-xl shadow-sm py-2"
-            : "bg-white py-3"
+          ? "bg-white/80 backdrop-blur-xl shadow-sm py-2"
+          : "bg-white py-3"
           }`}
         style={{ fontFamily: "var(--font-bai-jamjuree)" }}
       >
@@ -103,8 +104,8 @@ function Header() {
                     key={link.name}
                     href={link.href}
                     className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${isActive(link.href)
-                        ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
-                        : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
+                      ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
+                      : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
                       }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -129,13 +130,29 @@ function Header() {
                   <UserPlus className="w-4 h-4" />
                 </Button>
               </Link>
+              <Link
+                href="/admin"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-blue-50 transition-colors"
+                aria-label="Admin panel"
+              >
+                <Shield className="w-5 h-5 text-slate-600" />
+              </Link>
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E8C6B1] to-[#D4A574] border-2 border-white shadow-md cursor-pointer hover:scale-105 transition-transform" />
             </div>
-            
-          
 
-            {/* ── Mobile: Avatar ── */}
-            <div className="lg:hidden w-9 h-9 rounded-full bg-gradient-to-br from-[#E8C6B1] to-[#D4A574] border-2 border-white shadow-md cursor-pointer" />
+
+
+            {/* ── Mobile: Avatar & Admin ── */}
+            <div className="lg:hidden flex items-center gap-2">
+              <Link
+                href="/admin"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-blue-50 transition-colors"
+                aria-label="Admin panel"
+              >
+                <Shield className="w-5 h-5 text-slate-600" />
+              </Link>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E8C6B1] to-[#D4A574] border-2 border-white shadow-md cursor-pointer" />
+            </div>
           </div>
 
         </div>
@@ -144,8 +161,8 @@ function Header() {
       {/* ===== MOBILE DRAWER OVERLAY ===== */}
       <div
         className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
           }`}
         onClick={() => setIsOpen(false)}
       />
@@ -188,8 +205,8 @@ function Header() {
                 href={link.href}
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${isActive(link.href)
-                    ? "bg-[#0047FF] text-white shadow-lg shadow-blue-200"
-                    : "text-slate-700 hover:bg-slate-50"
+                  ? "bg-[#0047FF] text-white shadow-lg shadow-blue-200"
+                  : "text-slate-700 hover:bg-slate-50"
                   }`}
               >
                 <Icon className="w-5 h-5" />
