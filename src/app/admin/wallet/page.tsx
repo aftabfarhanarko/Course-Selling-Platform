@@ -195,8 +195,8 @@ export default function Walletpage() {
                                     key={t}
                                     onClick={() => setAdjustType(t)}
                                     className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${adjustType === t
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-white text-gray-500 hover:bg-gray-50"
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-white text-gray-500 hover:bg-gray-50"
                                         }`}
                                 >
                                     {t}
@@ -308,8 +308,8 @@ export default function Walletpage() {
                                         <td className="py-3.5 pr-4">
                                             <span
                                                 className={`font-semibold ${tx.rawAmount < 0
-                                                        ? "text-red-500"
-                                                        : "text-gray-900"
+                                                    ? "text-red-500"
+                                                    : "text-gray-900"
                                                     }`}
                                             >
                                                 {tx.amount}
@@ -318,8 +318,8 @@ export default function Walletpage() {
                                         <td className="py-3.5 pr-4">
                                             <span
                                                 className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${tx.type === "CREDIT"
-                                                        ? "bg-green-50 text-green-700"
-                                                        : "bg-red-50 text-red-600"
+                                                    ? "bg-green-50 text-green-700"
+                                                    : "bg-red-50 text-red-600"
                                                     }`}
                                             >
                                                 {tx.type}
@@ -347,8 +347,8 @@ export default function Walletpage() {
                                 key={p}
                                 onClick={() => setCurrentPage(p)}
                                 className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === p
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
                                     }`}
                             >
                                 {p}
