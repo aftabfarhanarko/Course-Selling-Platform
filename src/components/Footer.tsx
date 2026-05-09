@@ -1,7 +1,16 @@
+"use client";
+
 import { Mail, Share2 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function Footer() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer
       className="bg-[#DFE2FF] md:rounded-t-none mb-0 rounded-t-2xl border-t border-gray-300"

@@ -67,25 +67,30 @@ export default function ShopPage() {
 
                   <div className="w-full">
                     <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                      You can now access your course in the “My Courses” section.
-                      A confirmation email has been sent to your inbox.
+                      You can now access your course in the “My Courses”
+                      section. A confirmation email has been sent to your inbox.
                     </p>
 
                     {/* Buttons responsive */}
                     <div className=" flex-col sm:flex-row gap-3 mt-5 w-full">
-                    <Link   href={`/shop/shopCard?id=${selectedEnrollment.id}&price=${selectedEnrollment.price}&title=${encodeURIComponent(selectedEnrollment.courseTitle)}`}
-  className="w-full sm:w-auto">
-                     <button className="w-full sm:w-auto px-6  py-3 rounded-full bg-blue-600 text-white font-medium shadow-md hover:scale-[1.02] transition">
-                        Start Learning Now
-                      </button>
-                    </Link>
+                      <Link
+                        href={`/shop/shopCard?id=${selectedEnrollment.id}&price=${selectedEnrollment.price}&title=${encodeURIComponent(selectedEnrollment.courseTitle)}`}
+                        className="w-full sm:w-auto"
+                      >
+                        <button className="w-full sm:w-auto px-6  py-3 rounded-full bg-blue-600 text-white font-medium shadow-md hover:scale-[1.02] transition">
+                          Start Learning Now
+                        </button>
+                      </Link>
 
-                     <Link href="/student/dashboard" className="w-full sm:w-auto  md:mt-0">
-                      <button className="w-full mt-4 sm:w-auto px-6 md:mt-2 py-3 rounded-full bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2">
-                        <LayoutDashboard className="w-4 h-4" />
-                        Go to Dashboard
-                      </button>
-                     </Link>
+                      <Link
+                        href="/student/dashboard"
+                        className="w-full sm:w-auto  md:mt-0"
+                      >
+                        <button className="w-full mt-4 sm:w-auto px-6 md:mt-2 py-3 rounded-full bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2">
+                          <LayoutDashboard className="w-4 h-4" />
+                          Go to Dashboard
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -111,10 +116,14 @@ export default function ShopPage() {
                   Join 15,000+ other students in our private Telegram group.
                 </p>
 
-                <Link href="https://t.me" target="_blank" rel="noopener noreferrer">
-                <button className="w-full cursor-pointer sm:w-auto bg-sky-500 text-white px-5 py-2.5 rounded-xl font-medium hover:opacity-90 transition">
-                  Join Telegram
-                </button>
+                <Link
+                  href="https://t.me"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <button className="w-full cursor-pointer sm:w-auto bg-sky-500 text-white px-5 py-2.5 rounded-xl font-medium hover:opacity-90 transition">
+                    Join Telegram
+                  </button>
                 </Link>
               </div>
             </div>
@@ -131,7 +140,9 @@ export default function ShopPage() {
               <Row label="Date" value={selectedEnrollment.date} />
 
               <div className="flex justify-between items-center gap-4">
-                <span className="text-gray-500 text-sm sm:text-base">Status</span>
+                <span className="text-gray-500 text-sm sm:text-base">
+                  Status
+                </span>
                 <span className="text-green-600 bg-green-100 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                   {selectedEnrollment.status}
                 </span>
