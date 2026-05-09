@@ -2,136 +2,16 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface Course {
-  id: number;
-  title: string;
-  desc: string;
-  price: number;
-  potential: string;
-  potentialVal: number;
-  commission: string;
-  commissionVal: number;
-  rating: number;
-  reviews: string;
-  image: string;
-  category: Category;
-  earnings: EarningTier;
-}
+import { Category, Course, COURSES, EarningTier } from "@/lib/courses";
 
-type Category =
-  | "Digital Design"
-  | "Growth Marketing"
-  | "Sales Architecture"
-  | "AI Automation";
-type EarningTier = "$1k - $5k /mo" | "$5k - $10k /mo" | "$10k+ / mo";
 type SortKey =
   | "potential"
   | "price_asc"
   | "price_desc"
   | "rating"
   | "commission";
-
-// ─── Static Data ─────────────────────────────────────────────────────────────
-const COURSES: Course[] = [
-  {
-    id: 1,
-    title: "SaaS Interface Architect Masterclass",
-    desc: "Master high-conversion SaaS design and build a recurring revenue agency from scratch.",
-    price: 499,
-    potential: "$8,500/MO POTENTIAL",
-    potentialVal: 8500,
-    commission: "40% COMMISSION",
-    commissionVal: 40,
-    rating: 4.9,
-    reviews: "1.2k",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
-    category: "Digital Design",
-    earnings: "$1k - $5k /mo",
-  },
-  {
-    id: 2,
-    title: "Growth Engine: Performance Marketing",
-    desc: "Advanced strategies for scaling digital products using meta-ads and psychological funneling.",
-    price: 795,
-    potential: "$12,000/MO POTENTIAL",
-    potentialVal: 12000,
-    commission: "35% COMMISSION",
-    commissionVal: 35,
-    rating: 4.8,
-    reviews: "850",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
-    category: "Growth Marketing",
-    earnings: "$10k+ / mo",
-  },
-  {
-    id: 3,
-    title: "AI-First Agency: The 2024 Playbook",
-    desc: "The definitive guide to building an automated service agency leveraging LLMs and custom GPTs.",
-    price: 1200,
-    potential: "$15,000/MO POTENTIAL",
-    potentialVal: 15000,
-    commission: "25% COMMISSION",
-    commissionVal: 25,
-    rating: 5.0,
-    reviews: "340",
-    image:
-      "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80",
-    category: "AI Automation",
-    earnings: "$10k+ / mo",
-  },
-  {
-    id: 4,
-    title: "High-Ticket Sales Psychology",
-    desc: "Learn the mental triggers that close $10k+ deals without feeling like a salesman.",
-    price: 599,
-    potential: "$9,000/MO POTENTIAL",
-    potentialVal: 9000,
-    commission: "50% COMMISSION",
-    commissionVal: 50,
-    rating: 4.7,
-    reviews: "2.1k",
-    image:
-      "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&q=80",
-    category: "Sales Architecture",
-    earnings: "$5k - $10k /mo",
-  },
-  {
-    id: 5,
-    title: "E-Commerce Brand Domination",
-    desc: "Build and scale a profitable DTC brand using Facebook & TikTok ads with proven frameworks.",
-    price: 449,
-    potential: "$7,500/MO POTENTIAL",
-    potentialVal: 7500,
-    commission: "30% COMMISSION",
-    commissionVal: 30,
-    rating: 4.6,
-    reviews: "980",
-    image:
-      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&q=80",
-    category: "Growth Marketing",
-    earnings: "$5k - $10k /mo",
-  },
-  {
-    id: 6,
-    title: "UI/UX Design System Mastery",
-    desc: "Create scalable design systems used by Fortune 500 companies and charge premium rates.",
-    price: 349,
-    potential: "$6,000/MO POTENTIAL",
-    potentialVal: 6000,
-    commission: "45% COMMISSION",
-    commissionVal: 45,
-    rating: 4.8,
-    reviews: "1.5k",
-    image:
-      "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=600&q=80",
-    category: "Digital Design",
-    earnings: "$1k - $5k /mo",
-  },
-];
 
 const CATEGORIES: Category[] = [
   "Digital Design",
@@ -215,7 +95,7 @@ function CourseCard({ course }: { course: Course }) {
             <span className="text-xs text-slate-400">({course.reviews})</span>
           </div>
         </div>
-        <button className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold transition-colors flex items-center justify-center gap-1.5">
+        <Link href={`/courses/${course.id}`} className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold transition-colors flex items-center justify-center gap-1.5">
           View Details
           <svg
             className="w-4 h-4"
@@ -230,7 +110,7 @@ function CourseCard({ course }: { course: Course }) {
               strokeLinejoin="round"
             />
           </svg>
-        </button>
+        </Link>
       </div>
     </div>
   );
@@ -299,11 +179,10 @@ function FilterContent({
             <button
               key={cat}
               onClick={() => toggleCat(cat)}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
-                selectedCats.includes(cat)
-                  ? "bg-blue-600 border-blue-600 text-white"
-                  : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600"
-              }`}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${selectedCats.includes(cat)
+                ? "bg-blue-600 border-blue-600 text-white"
+                : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600"
+                }`}
             >
               {cat}
             </button>
@@ -346,19 +225,17 @@ function FilterContent({
             <button
               key={label}
               onClick={() => toggleEarning(label)}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold border transition-all ${
-                selectedEarning === label
-                  ? "bg-slate-900 border-slate-900 text-white"
-                  : "bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600"
-              }`}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold border transition-all ${selectedEarning === label
+                ? "bg-slate-900 border-slate-900 text-white"
+                : "bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600"
+                }`}
             >
               {label}
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  selectedEarning === label
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-100 text-slate-500"
-                }`}
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${selectedEarning === label
+                  ? "bg-white/20 text-white"
+                  : "bg-slate-100 text-slate-500"
+                  }`}
               >
                 {badge}
               </span>
@@ -385,7 +262,7 @@ function FilterContent({
               onRemove={() => handlePriceChange(2000)}
             />
           )}
-          {searchQ && <FilterTag label={`"${searchQ}"`} onRemove={() => {}} />}
+          {searchQ && <FilterTag label={`"${searchQ}"`} onRemove={() => { }} />}
         </div>
       )}
 
@@ -751,11 +628,10 @@ function CourseList() {
               <button
                 key={n}
                 onClick={() => setCurrentPage(n)}
-                className={`w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-semibold border transition-all ${
-                  currentPage === n
-                    ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-200"
-                    : "border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600 bg-white"
-                }`}
+                className={`w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-semibold border transition-all ${currentPage === n
+                  ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-200"
+                  : "border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600 bg-white"
+                  }`}
               >
                 {n}
               </button>
@@ -763,11 +639,10 @@ function CourseList() {
             <span className="text-slate-300 font-bold px-1">...</span>
             <button
               onClick={() => setCurrentPage(8)}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-semibold border transition-all ${
-                currentPage === 8
-                  ? "bg-blue-600 border-blue-600 text-white"
-                  : "border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600 bg-white"
-              }`}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-semibold border transition-all ${currentPage === 8
+                ? "bg-blue-600 border-blue-600 text-white"
+                : "border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600 bg-white"
+                }`}
             >
               8
             </button>
@@ -805,9 +680,8 @@ function CourseList() {
 
       {/* Sheet */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out lg:hidden ${
-          filterSheetOpen ? "translate-y-0" : "translate-y-full"
-        }`}
+        className={`fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out lg:hidden ${filterSheetOpen ? "translate-y-0" : "translate-y-full"
+          }`}
         style={{ maxHeight: "88vh", display: "flex", flexDirection: "column" }}
       >
         {/* Sheet Handle + Header */}

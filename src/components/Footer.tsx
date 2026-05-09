@@ -16,6 +16,7 @@ function Footer() {
       className="bg-[#DFE2FF] md:rounded-t-none mb-0 rounded-t-2xl border-t border-gray-300"
       style={{ fontFamily: "var(--font-manrope)" }}
     >
+      {/* wqeyuihgdfu8yih */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           {/* Desktop Layout */}
