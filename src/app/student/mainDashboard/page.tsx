@@ -1,8 +1,8 @@
 "use client";
-import { DashboardRecentActivity } from "../../../components/student/studentDashboard/dashboardRecentActivity";
-import { DashBoardBalcnes } from "../../../components/student/studentDashboard/dashbordBalances";
-import { MainDashboard } from "../../../components/student/studentDashboard/mainDashboardHero";
 
+import { DashboardRecentActivity } from "../../../components/student/studentDashboard/DashboardRecentActivity";
+import { DashBoardBalcnes } from "../../../components/student/studentDashboard/DashbordBalances";
+import { MainDashboard } from "../../../components/student/studentDashboard/MainDashboardHero";
 
 function page() {
   return (

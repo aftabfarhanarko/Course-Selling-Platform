@@ -26,6 +26,11 @@ const menuItems = [
     icon: GraduationCap,
   },
   {
+    name: "Submit Product",
+    href: "/student/submitProduct",
+    icon: Upload,
+  },
+  {
     name: "Wallet",
     href: "/student/wallet",
     icon: Wallet,
@@ -45,11 +50,7 @@ const menuItems = [
     href: "/student/shop",
     icon: ShoppingBag,
   },
-  {
-    name: "Submit Product",
-    href: "/student/submitProduct",
-    icon: Upload,
-  },
+  
 ];
 
 export default function StudentSidebar({ onClose }: { onClose?: () => void }) {
