@@ -17,6 +17,7 @@ import {
   ArrowRight,
   SignalIcon,
   Shield,
+  LayoutDashboard,
 } from "lucide-react";
 
 const navLinks = [
@@ -71,10 +72,11 @@ function Header() {
     <>
       {/* ===== HEADER ===== */}
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${scrolled
-          ? "bg-white/80 backdrop-blur-xl shadow-sm py-2"
-          : "bg-white py-3"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${
+          scrolled
+            ? "bg-white/80 backdrop-blur-xl shadow-sm py-2"
+            : "bg-white py-3"
+        }`}
         style={{ fontFamily: "var(--font-bai-jamjuree)" }}
       >
         <div className="max-w-[1400px] mx-auto px-6">
@@ -107,10 +109,11 @@ function Header() {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${isActive(link.href)
-                      ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
-                      : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
-                      }`}
+                    className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${
+                      isActive(link.href)
+                        ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
+                        : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
+                    }`}
                   >
                     <Icon className="w-4 h-4" />
                     {link.name}
@@ -134,6 +137,14 @@ function Header() {
                   <UserPlus className="w-4 h-4" />
                 </Button>
               </Link>
+              {/* ── Student Dashboard (Desktop only) ── */}
+              <Link
+                href="/student"
+                className="flex items-center gap-1.5 text-[14px] font-bold text-slate-600 hover:text-blue-600 transition-colors px-3 py-2 rounded-xl hover:bg-blue-50"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                student
+              </Link>
               <Link
                 href="/admin"
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-blue-50 transition-colors"
@@ -143,8 +154,6 @@ function Header() {
               </Link>
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E8C6B1] to-[#D4A574] border-2 border-white shadow-md cursor-pointer hover:scale-105 transition-transform" />
             </div>
-
-
 
             {/* ── Mobile: Avatar & Admin ── */}
             <div className="lg:hidden flex items-center gap-2">
@@ -158,24 +167,25 @@ function Header() {
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#E8C6B1] to-[#D4A574] border-2 border-white shadow-md cursor-pointer" />
             </div>
           </div>
-
         </div>
       </header>
 
       {/* ===== MOBILE DRAWER OVERLAY ===== */}
       <div
-        className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isOpen
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          isOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsOpen(false)}
       />
 
       {/* Drawer Panel */}
       <div
         ref={drawerRef}
-        className={`fixed top-0 left-0 z-[200] h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 z-[200] h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
@@ -208,10 +218,11 @@ function Header() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${isActive(link.href)
-                  ? "bg-[#0047FF] text-white shadow-lg shadow-blue-200"
-                  : "text-slate-700 hover:bg-slate-50"
-                  }`}
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${
+                  isActive(link.href)
+                    ? "bg-[#0047FF] text-white shadow-lg shadow-blue-200"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
               >
                 <Icon className="w-5 h-5" />
                 {link.name}

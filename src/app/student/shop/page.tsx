@@ -30,6 +30,7 @@ const page = () => {
               <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium text-sm transition-colors">
                 Add to Cart
               </button>
+              {/* wehhbbfjihhfiuh */}
             </div>
           </div>
         ))}
