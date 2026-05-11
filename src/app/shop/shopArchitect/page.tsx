@@ -377,8 +377,10 @@ export default function ShopArchitectPage() {
       ══════════════════════════════ */}
       <section className="py-14 bg-[#f0f2f8] relative overflow-hidden">
         {/* bg decoration */}
-        <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 
-        w-[700px] h-[700px] rounded-full bg-blue-100/30 blur-[120px]" />
+        <div
+          className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 
+        w-[700px] h-[700px] rounded-full bg-blue-100/30 blur-[120px]"
+        />
 
         <div className="relative mx-auto max-w-[1060px] px-5">
           <motion.div
