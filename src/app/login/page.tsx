@@ -22,8 +22,8 @@ type LoginFormData = {
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function LoginPage(): React.JSX.Element {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [success, setSuccess] = useState<boolean>(false);
 
   const {
     register,
@@ -221,8 +221,8 @@ export default function LoginPage(): React.JSX.Element {
               ${success
                 ? "bg-green-600 shadow-[0_4px_18px_rgba(22,163,74,0.35)]"
                 : isSubmitting
-                ? "bg-blue-300 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 shadow-[0_4px_18px_rgba(37,99,235,0.30)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.42)] hover:-translate-y-0.5 cursor-pointer"
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 shadow-[0_4px_18px_rgba(37,99,235,0.30)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.42)] hover:-translate-y-0.5 cursor-pointer"
               }`}
           >
             {isSubmitting ? (
