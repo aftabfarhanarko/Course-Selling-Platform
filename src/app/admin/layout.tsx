@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { AppProviders } from "@/providers";
 import Sidebar from "@/components/admin/Sidebar";
 import TopNavbar from "@/components/admin/TopNavbar";
@@ -23,7 +22,7 @@ export default function AdminLayout({
         />
       )}
 
-      {/* Sidebar Wrapper */}
+      {/* Sidebar — fixed, w-56 matches Sidebar component */}
       <div
         className={`fixed left-0 top-0 z-50 h-screen transition-transform duration-300 ease-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -32,12 +31,13 @@ export default function AdminLayout({
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      {/* Main Content — lg:ml-56 matches sidebar w-56 */}
+      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+        {/* Sticky Top Navbar */}
         <TopNavbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Page content */}
-        <main className="px-2 py-4 sm:p-6 lg:p-8 flex-1 overflow-x-hidden">
+        {/* Page Content */}
+        <main className="flex-1 overflow-x-hidden px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
           <AppProviders>{children}</AppProviders>
         </main>
       </div>
