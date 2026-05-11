@@ -29,7 +29,7 @@ function AnimatedDollar({
 }) {
   return (
     <motion.span
-      className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight"
+      className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight"
       initial={{ opacity: 0, x: -12 }}
       animate={isInView ? { opacity: 1, x: 0 } : {}}
       transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
