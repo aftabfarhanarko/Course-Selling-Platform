@@ -1,17 +1,16 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   TrendingUp,
   ShoppingBag,
   Landmark,
-  ArrowRight
+  ArrowRight,
+  MoreVertical
 } from 'lucide-react'
 
 export const DashboardRecentActivity = () => {
-
-  // static data - later will come from backend
-  const recentActivities = [
+  const [activities] = useState([
     {
       id: 1,
       title: 'Affiliate Commission',
@@ -19,10 +18,9 @@ export const DashboardRecentActivity = () => {
       amount: '+$124.00',
       type: 'income',
       icon: TrendingUp,
-      iconBg: 'bg-[#DCFCE7]',
-      iconColor: 'text-[#16A34A]'
+      iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
+      iconColor: 'text-emerald-600 dark:text-emerald-400'
     },
-
     {
       id: 2,
       title: 'Course Purchase',
@@ -30,10 +28,9 @@ export const DashboardRecentActivity = () => {
       amount: '-$499.00',
       type: 'expense',
       icon: ShoppingBag,
-      iconBg: 'bg-[#DBEAFE]',
-      iconColor: 'text-[#2563EB]'
+      iconBg: 'bg-blue-50 dark:bg-blue-900/20',
+      iconColor: 'text-blue-600 dark:text-blue-400'
     },
-
     {
       id: 3,
       title: 'Wallet Withdrawal',
@@ -41,12 +38,11 @@ export const DashboardRecentActivity = () => {
       amount: '-$1,200.00',
       type: 'withdraw',
       icon: Landmark,
-      iconBg: 'bg-[#DCFCE7]',
-      iconColor: 'text-[#16A34A]'
+      iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
+      iconColor: 'text-emerald-600 dark:text-emerald-400'
     }
-  ]
+  ]);
 
-  // continue learning data
   const continueLearning = {
     title: 'High-Frequency Income Architecting',
     module: 'Module 4: Scaling your referral network to 5-figures.',
@@ -54,103 +50,84 @@ export const DashboardRecentActivity = () => {
   }
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-5">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 sm:gap-5 lg:gap-6">    
 
-      {/* Left Side */}
-      <div className="bg-[#F5F7FF] rounded-2xl p-7">
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-[30px] font-bold text-[#111827]">
+      {/* Recent Activity */}
+      <div className="bg-[#F8FAFF] dark:bg-zinc-900/50 rounded-2xl p-5 sm:p-6 lg:p-7 border border-[#E2E8F0] dark:border-zinc-800">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
             Recent Activity
           </h2>
-
-          <button className="text-[#1447E6] text-sm font-semibold hover:underline">
+          <button className="text-[#2563EB] text-[11px] sm:text-[12px] font-bold hover:underline uppercase tracking-wider">
             View All History
           </button>
         </div>
 
-        {/* Activities */}
-        <div className="mt-7 space-y-4">
-          {recentActivities.map((activity) => {
+        <div className="space-y-3">
+          {activities.map((activity) => {
             const Icon = activity.icon
-
             return (
               <div
                 key={activity.id}
-                className="bg-white rounded-2xl px-5 py-4 flex items-center justify-between"
+                className="bg-white dark:bg-zinc-900 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 flex items-center justify-between border border-transparent hover:border-slate-100 dark:hover:border-zinc-800 transition-all shadow-sm hover:shadow-md group"
               >
-
-                {/* left */}
-                <div className="flex items-center gap-4">
-
-                  {/* icon */}
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center ${activity.iconBg}`}
-                  >
-                    <Icon className={`w-5 h-5 ${activity.iconColor}`} />
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center ${activity.iconBg} transition-transform group-hover:scale-110`}>
+                    <Icon className={`w-4.5 h-4.5 sm:w-5 sm:h-5 ${activity.iconColor}`} />        
                   </div>
-
-                  {/* text */}
                   <div>
-                    <h3 className="text-[17px] font-semibold text-[#111827]">
+                    <h3 className="text-[13px] sm:text-[14.5px] font-bold text-slate-900 dark:text-white">   
                       {activity.title}
                     </h3>
-
-                    <p className="text-sm text-[#6B7280] mt-0.5">
+                    <p className="text-[11px] sm:text-[12px] text-slate-500 dark:text-gray-400 font-medium">
                       {activity.subtitle}
                     </p>
                   </div>
                 </div>
-
-                {/* amount */}
-                <p
-                  className={`text-[18px] font-bold ${
-                    activity.type === 'income'
-                      ? 'text-[#16A34A]'
-                      : activity.type === 'withdraw'
-                      ? 'text-[#DC2626]'
-                      : 'text-[#374151]'
-                  }`}
-                >
-                  {activity.amount}
-                </p>
+                <div className="text-right">
+                  <p className={`text-[14px] sm:text-[16px] font-black ${
+                    activity.type === 'income' ? 'text-emerald-600' : 'text-slate-900 dark:text-white'
+                  }`}>
+                    {activity.amount}
+                  </p>
+                </div>
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* Right Side */}
-      <div className="bg-[#E8EDFF] rounded-2xl p-7 flex flex-col justify-between min-h-[420px]">
-
-        {/* top */}
+      {/* Continue Learning */}
+      <div className="bg-[#EEF2FF] dark:bg-indigo-950/30 rounded-2xl p-5 sm:p-6 lg:p-7 flex flex-col justify-between min-h-[350px] border border-[#E0E7FF] dark:border-indigo-900/50 group transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10">
         <div>
-          <h2 className="text-[30px] font-bold text-[#111827]">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-2">
             Continue Learning
           </h2>
         </div>
 
-        {/* bottom */}
-        <div>
-
-          <h3 className="text-[32px] leading-[42px] font-bold text-[#111827] max-w-[320px]">
+        <div className="mt-6">
+          <h3 className="text-2xl sm:text-[28px] lg:text-[32px] leading-tight font-black text-slate-900 dark:text-white tracking-tight">
             {continueLearning.title}
           </h3>
-
-          <p className="text-[#6B7280] text-[16px] mt-4 leading-7">
+          <p className="text-slate-500 dark:text-gray-400 text-[13px] sm:text-[14px] mt-4 leading-relaxed font-medium">
             {continueLearning.module}
           </p>
 
-          {/* footer */}
           <div className="flex items-center justify-between mt-8">
+            <div className="flex flex-col">
+               <p className="text-[#2563EB] font-black text-[11px] sm:text-[12px] uppercase tracking-wider">
+                {continueLearning.progress}% Completed
+              </p>
+              <div className="w-32 h-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full mt-2 overflow-hidden">
+                <div className="h-full bg-blue-600 rounded-full" style={{ width: `${continueLearning.progress}%` }}></div>
+              </div>
+            </div>
 
-            <p className="text-[#1447E6] font-semibold text-sm">
-              {continueLearning.progress}% Completed
-            </p>
-
-            <button className="w-11 h-11 rounded-full bg-[#1447E6] flex items-center justify-center hover:bg-[#0f3fd0] transition-all">
-              <ArrowRight className="w-5 h-5 text-white" />
+            <button 
+              onClick={() => alert("Redirecting to course player...")}
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#2563EB] flex items-center justify-center hover:bg-[#1D4ED8] transition-all shadow-lg shadow-blue-500/30 active:scale-90"
+            >
+              <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </button>
           </div>
         </div>

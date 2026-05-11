@@ -19,7 +19,7 @@ import Image from "next/image";
 const menuItems = [
   {
     name: "Dashboard",
-    href: "/student/mainDashboard",
+    href: "/student",
     icon: LayoutDashboard,
   },
   {

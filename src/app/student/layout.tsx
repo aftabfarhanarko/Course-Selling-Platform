@@ -24,8 +24,9 @@ export default function StudentLayout({
 
       {/* Sidebar - Desktop Fixed, Mobile Overlay */}
       <div
-        className={`fixed left-0 top-0 z-50 h-screen w-[260px] transition-transform duration-300 ease-in-out md:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-          }`}
+        className={`fixed left-0 top-0 z-50 h-screen w-[260px] transition-transform duration-300 ease-in-out md:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
       >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>

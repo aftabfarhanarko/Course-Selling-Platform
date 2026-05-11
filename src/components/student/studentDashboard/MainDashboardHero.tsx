@@ -2,14 +2,12 @@
 import { useEffect, useState } from "react";
 
 export const MainDashboard = () => {
-  // Static array data - later will come from backend
   const [progressData, setProgressData] = useState({
     percentage: 85,
     label: "Course Progress",
     status: "Almost there!",
   });
 
-  // simulator for fetching dynamic data from backend
   useEffect(() => {
     const fetchProgressFromBackend = async () => {
       const backendData = {
@@ -17,65 +15,69 @@ export const MainDashboard = () => {
         label: "Module 3: Advanced Topics",
         status: "Keep going!",
       };
-
       setProgressData(backendData);
     };
-
     fetchProgressFromBackend();
   }, []);
 
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
       {/* LEFT CARD */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-[10px] sm:text-xs tracking-widest text-gray-500 dark:text-gray-400 uppercase">
-          Welcome Back, Alex
+      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-300 hover:shadow-md group">
+        <p className="text-[9px] sm:text-[10px] tracking-[0.2em] text-gray-400 dark:text-gray-500 uppercase font-bold">
+          WELCOME BACK, ALEX
         </p>
 
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-3 leading-tight sm:leading-snug">
+        <h1 className="text-xl sm:text-2xl lg:text-[28px] font-extrabold mt-3 leading-tight sm:leading-snug text-slate-900 dark:text-white">
           Fueling your journey to{" "}
-          <span className="text-blue-600 dark:text-blue-400">
+          <span className="text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-lg">
             precision prosperity.
           </span>
         </h1>
 
-        <p className="text-gray-500 dark:text-gray-400 mt-3 sm:mt-4 text-xs sm:text-sm leading-relaxed">
+        <p className="text-gray-500 dark:text-gray-400 mt-4 text-[11px] sm:text-[12.5px] leading-relaxed max-w-md">
           Track your progress, manage your earnings, and expand your portfolio
           from your personal architectural hub.
         </p>
       </div>
 
-      {/* RIGHT CARD - Dynamic Progress from Array/Backend Value */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-2 sm:gap-0">
-          <h2 className="text-base sm:text-lg font-semibold truncate">
-            {progressData.label}
-          </h2>
-          <span className="text-[11px] sm:text-xs bg-white/20 px-2 sm:px-3 py-1 rounded-full w-fit">
-            {progressData.percentage}% Complete
-          </span>
-        </div>
+      {/* RIGHT CARD - Dynamic Progress */}
+      <div className="bg-[#2563EB] text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-blue-500/20 relative overflow-hidden group transition-all duration-300 hover:scale-[1.01]">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-all"></div>
 
-        {/* Dynamic status text based on percentage */}
-        <p className="text-xs sm:text-sm text-blue-100 mt-2 sm:mt-3 leading-relaxed">
-          {progressData.status} You've completed {progressData.percentage}% of
-          your goal.
-        </p>
-
-        {/* Progress Bar */}
-        <div className="mt-3 sm:mt-4 space-y-2">
-          <div className="relative bg-blue-900/30 w-full h-2 sm:h-2.5 rounded-full overflow-hidden">
-            <div
-              className="absolute top-0 left-0 bg-[#69FF87] h-full rounded-full transition-all duration-700 ease-out"
-              style={{ width: `${progressData.percentage}%` }}
-            ></div>
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <h2 className="text-sm sm:text-[15px] font-bold tracking-tight">
+              {progressData.label}
+            </h2>
+            <span className="text-[10px] sm:text-[11px] font-black bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+              {progressData.percentage}% Complete
+            </span>
           </div>
-        </div>
 
-        {/* Action Button */}
-        <button className="mt-4 sm:mt-6 w-full sm:w-auto bg-white text-blue-600 font-medium px-4 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-gray-100 transition-colors text-sm">
-          view your growth
-        </button>
+          <p className="text-[11px] sm:text-[12.5px] text-blue-100/90 mt-3 leading-relaxed font-medium">
+            {progressData.status} You've completed {progressData.percentage}% of
+            your goal.
+          </p>
+
+          {/* Progress Bar */}
+          <div className="mt-5 space-y-2">
+            <div className="relative bg-white/10 w-full h-2 rounded-full overflow-hidden backdrop-blur-sm">
+              <div
+                className="absolute top-0 left-0 bg-[#4ADE80] h-full rounded-full transition-all duration-1000 ease-in-out shadow-[0_0_12px_rgba(74,222,128,0.5)]"
+                style={{ width: `${progressData.percentage}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <button
+            onClick={() => alert("Loading growth analytics...")}
+            className="mt-6 w-full sm:w-auto bg-white text-blue-600 font-bold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-all active:scale-95 text-[11px] sm:text-[12px] shadow-sm uppercase tracking-wider"
+          >
+            view your growth
+          </button>
+        </div>
       </div>
     </div>
   );

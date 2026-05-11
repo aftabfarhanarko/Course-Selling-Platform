@@ -75,7 +75,7 @@ export default function ShopPage() {
                       Start Learning Now
                     </Link>
                     <Link
-                      href="/student/dashboard"
+                      href="/student"
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-50 text-blue-600 text-[0.8rem] font-medium hover:bg-blue-100 transition-colors duration-150 no-underline"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
