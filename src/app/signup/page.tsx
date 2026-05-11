@@ -14,7 +14,7 @@ import {
   Zap,
   Star,
   Users,
-  Award
+  Award,
 } from "lucide-react";
 
 type SignupFormData = {
@@ -34,7 +34,13 @@ export default function SignupPage(): React.JSX.Element {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
-    defaultValues: { fullName: "", email: "", password: "", referralCode: "", agreeTerms: false },
+    defaultValues: {
+      fullName: "",
+      email: "",
+      password: "",
+      referralCode: "",
+      agreeTerms: false,
+    },
   });
 
   const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
@@ -57,33 +63,46 @@ export default function SignupPage(): React.JSX.Element {
       </div>
 
       <div className="relative w-full max-w-[1100px] bg-white rounded-[24px] shadow-[0_20px_80px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col lg:flex-row overflow-hidden">
-        
         {/* LEFT SIDE: Benefits/Testimonial */}
         <div className="hidden lg:flex lg:w-[40%] bg-slate-900 p-10 flex-col justify-between relative overflow-hidden">
           {/* Decorative pattern */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-               style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-          
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+
           <div className="relative z-10">
-            <Link href="/" className="flex items-center gap-2.5 text-white mb-12">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 text-white mb-12"
+            >
               <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                 <Zap className="w-5 h-5 fill-white text-white" />
               </div>
-              <span className="text-[17px] font-black tracking-tight">SkillPay</span>
+              <span className="text-[17px] font-black tracking-tight">
+                SkillPay
+              </span>
             </Link>
 
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1 mb-6">
               <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-              <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">Trustpilot 4.9/5</span>
+              <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">
+                Trustpilot 4.9/5
+              </span>
             </div>
 
             <h2 className="text-[32px] font-black text-white leading-[1.15] mb-6">
-              Start Your <br/> 
+              Start Your <br />
               <span className="text-primary">Wealth Journey.</span>
             </h2>
-            
+
             <p className="text-slate-400 text-[13.5px] leading-relaxed max-w-[300px]">
-              Join the world's most advanced platform for digital income generation and financial architecture.
+              Join the world's most advanced platform for digital income
+              generation and financial architecture.
             </p>
           </div>
 
@@ -93,8 +112,12 @@ export default function SignupPage(): React.JSX.Element {
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-white font-bold text-[13px]">15,000+ Students</p>
-                <p className="text-slate-500 text-[11px]">Growing daily worldwide</p>
+                <p className="text-white font-bold text-[13px]">
+                  15,000+ Students
+                </p>
+                <p className="text-slate-500 text-[11px]">
+                  Growing daily worldwide
+                </p>
               </div>
             </div>
 
@@ -103,8 +126,12 @@ export default function SignupPage(): React.JSX.Element {
                 <Award className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-white font-bold text-[13px]">Expert Curriculum</p>
-                <p className="text-slate-500 text-[11px]">Designed by industry leaders</p>
+                <p className="text-white font-bold text-[13px]">
+                  Expert Curriculum
+                </p>
+                <p className="text-slate-500 text-[11px]">
+                  Designed by industry leaders
+                </p>
               </div>
             </div>
 
@@ -112,16 +139,17 @@ export default function SignupPage(): React.JSX.Element {
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2">
                   {[1, 2, 3].map((i) => (
-                    <img 
+                    <img
                       key={i}
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i+10}`} 
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`}
                       className="w-8 h-8 rounded-full border-2 border-slate-900"
                       alt="Student"
                     />
                   ))}
                 </div>
                 <p className="text-[11px] text-slate-400 font-medium">
-                  Already making <span className="text-white font-bold">$2k+/mo</span>
+                  Already making{" "}
+                  <span className="text-white font-bold">$2k+/mo</span>
                 </p>
               </div>
             </div>
@@ -132,7 +160,9 @@ export default function SignupPage(): React.JSX.Element {
         <div className="flex-1 p-6 sm:p-10 lg:p-12">
           <div className="max-w-[420px] mx-auto">
             <div className="mb-8">
-              <h1 className="text-2xl font-black text-slate-900 mb-2">Create Account</h1>
+              <h1 className="text-2xl font-black text-slate-900 mb-2">
+                Create Account
+              </h1>
               <p className="text-[13px] text-slate-500 font-medium">
                 Enter your details to start your 7-day free trial.
               </p>
@@ -148,9 +178,13 @@ export default function SignupPage(): React.JSX.Element {
                     {...register("fullName", { required: "Name is required" })}
                     type="text"
                     placeholder="John Doe"
-                    className={`w-full bg-slate-50 border ${errors.fullName ? 'border-red-500' : 'border-slate-200'} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                    className={`w-full bg-slate-50 border ${errors.fullName ? "border-red-500" : "border-slate-200"} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
                   />
-                  {errors.fullName && <p className="text-[11px] text-red-500 font-bold ml-1">{errors.fullName.message}</p>}
+                  {errors.fullName && (
+                    <p className="text-[11px] text-red-500 font-bold ml-1">
+                      {errors.fullName.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -158,15 +192,22 @@ export default function SignupPage(): React.JSX.Element {
                     Email
                   </label>
                   <input
-                    {...register("email", { 
+                    {...register("email", {
                       required: "Email is required",
-                      pattern: { value: /^\S+@\S+$/i, message: "Invalid email" }
+                      pattern: {
+                        value: /^\S+@\S+$/i,
+                        message: "Invalid email",
+                      },
                     })}
                     type="email"
                     placeholder="john@example.com"
-                    className={`w-full bg-slate-50 border ${errors.email ? 'border-red-500' : 'border-slate-200'} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                    className={`w-full bg-slate-50 border ${errors.email ? "border-red-500" : "border-slate-200"} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
                   />
-                  {errors.email && <p className="text-[11px] text-red-500 font-bold ml-1">{errors.email.message}</p>}
+                  {errors.email && (
+                    <p className="text-[11px] text-red-500 font-bold ml-1">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -176,13 +217,13 @@ export default function SignupPage(): React.JSX.Element {
                 </label>
                 <div className="relative">
                   <input
-                    {...register("password", { 
+                    {...register("password", {
                       required: "Password is required",
-                      minLength: { value: 8, message: "Min 8 characters" }
+                      minLength: { value: 8, message: "Min 8 characters" },
                     })}
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className={`w-full bg-slate-50 border ${errors.password ? 'border-red-500' : 'border-slate-200'} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                    className={`w-full bg-slate-50 border ${errors.password ? "border-red-500" : "border-slate-200"} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
                   />
                   <button
                     type="button"
@@ -192,7 +233,11 @@ export default function SignupPage(): React.JSX.Element {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {errors.password && <p className="text-[11px] text-red-500 font-bold ml-1">{errors.password.message}</p>}
+                {errors.password && (
+                  <p className="text-[11px] text-red-500 font-bold ml-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -214,8 +259,22 @@ export default function SignupPage(): React.JSX.Element {
                   id="terms"
                   className="mt-1 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                 />
-                <label htmlFor="terms" className="text-[11px] text-slate-500 font-medium leading-relaxed select-none cursor-pointer">
-                  I agree to the <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+                <label
+                  htmlFor="terms"
+                  className="text-[11px] text-slate-500 font-medium leading-relaxed select-none cursor-pointer"
+                >
+                  I agree to the{" "}
+                  <Link href="/terms" className="text-primary hover:underline">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/privacy"
+                    className="text-primary hover:underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
                 </label>
               </div>
 
@@ -243,7 +302,10 @@ export default function SignupPage(): React.JSX.Element {
             <div className="mt-8 text-center">
               <p className="text-[13px] text-slate-500 font-medium">
                 Already have an account?{" "}
-                <Link href="/login" className="text-primary font-black hover:underline">
+                <Link
+                  href="/login"
+                  className="text-primary font-black hover:underline"
+                >
                   Sign In
                 </Link>
               </p>
