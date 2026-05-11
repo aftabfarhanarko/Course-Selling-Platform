@@ -14,6 +14,7 @@ import {
   LogOut,
   X,
 } from "lucide-react";
+import { LiaCloudShowersHeavySolid } from "react-icons/lia";
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
@@ -24,6 +25,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { label: "Wallet", href: "/admin/wallet", icon: Wallet },
     { label: "Withdraw Requests", href: "/admin/withdraw", icon: Banknote },
     { label: "Products", href: "/admin/products", icon: ShoppingBag },
+    { label: "Courses", href: "/admin/courses", icon: LiaCloudShowersHeavySolid },
     { label: "Coupons", href: "/admin/coupons", icon: Ticket },
     { label: "Analytics", href: "/admin/analytics", icon: BarChart },
   ];
@@ -38,6 +40,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
               onClick={onClose}
               className="p-1.5 text-zinc-400 hover:bg-zinc-100/80 hover:text-zinc-700 rounded-lg dark:text-zinc-500 dark:hover:bg-zinc-800/80 dark:hover:text-zinc-300 transition-all duration-300"
             >
+              
               <X size={16} strokeWidth={2.5} />
             </button>
           </div>
