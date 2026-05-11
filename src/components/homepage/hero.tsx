@@ -77,7 +77,7 @@ function HomeHero() {
 
   return (
     <section
-      className="min-h-screen bg-white flex items-center pt-20 md:pt-0 pb-12 overflow-hidden"
+      className="min-h-screen max-w-7xl mx-auto bg-white flex items-center pt-20 md:pt-0 pb-12 overflow-hidden"
       style={{ fontFamily: "var(--font-manrope)" }}
     >
       {/* subtle radial bg glow */}

@@ -31,7 +31,7 @@ export default function RootLayout({
     >
       <body className="h-full flex flex-col font-bai-jamjuree">
         <Header />
-        <main className="flex-1">
+        <main className="flex-1 ">
           <AppProviders>{children}</AppProviders>
         </main>
         <Footer />
