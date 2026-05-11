@@ -10,14 +10,18 @@ const plusJakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-// ── animation variants ────────────────────────────────────────────────────────
+// ── Fixed Animation Helper ─────────────────────────────────────────────────────
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 28 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: { 
+    duration: 0.6, 
+    delay, 
+    ease: [0.22, 1, 0.36, 1] as const 
+  },
 });
 
-// ── animated number ───────────────────────────────────────────────────────────
+// ── Animated Number Component ─────────────────────────────────────────────────
 function AnimatedDollar({
   value,
   isInView,
@@ -32,14 +36,18 @@ function AnimatedDollar({
       className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight"
       initial={{ opacity: 0, x: -12 }}
       animate={isInView ? { opacity: 1, x: 0 } : {}}
-      transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ 
+        delay, 
+        duration: 0.5, 
+        ease: [0.22, 1, 0.36, 1] as const 
+      }}
     >
       {value}
     </motion.span>
   );
 }
 
-// ── main ─────────────────────────────────────────────────────────────────────
+// ── Main Component ───────────────────────────────────────────────────────────
 const ArchitectureProgress = () => {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -79,13 +87,18 @@ const ArchitectureProgress = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-14 md:gap-20 items-center">
-          {/* ── LEFT ─────────────────────────────────────────────────────── */}
+          {/* LEFT SIDE */}
           <div>
-            {/* heading */}
+            {/* Heading - Fixed */}
             <motion.h2
               className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-10"
-              {...fadeUp(0)}
+              initial={{ opacity: 0, y: 28 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+              transition={{ 
+                duration: 0.6, 
+                delay: 0, 
+                ease: [0.22, 1, 0.36, 1] as const 
+              }}
             >
               The Architecture of{" "}
               <span className="text-[#0052CC]">Progress</span>
@@ -99,10 +112,9 @@ const ArchitectureProgress = () => {
               transition={{
                 delay: 0.15,
                 duration: 0.6,
-                ease: [0.22, 1, 0.36, 1],
+                ease: [0.22, 1, 0.36, 1] as const,
               }}
             >
-              {/* left accent bar */}
               <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-red-300" />
 
               <p className="text-[10px] font-extrabold tracking-[0.16em] text-gray-400 uppercase mb-3">
@@ -121,7 +133,7 @@ const ArchitectureProgress = () => {
               </div>
             </motion.div>
 
-            {/* arrow connector */}
+            {/* Arrow */}
             <motion.div
               className="flex justify-center my-3"
               initial={{ opacity: 0, scale: 0.5 }}
@@ -146,10 +158,9 @@ const ArchitectureProgress = () => {
               transition={{
                 delay: 0.5,
                 duration: 0.6,
-                ease: [0.22, 1, 0.36, 1],
+                ease: [0.22, 1, 0.36, 1] as const,
               }}
             >
-              {/* left accent bar */}
               <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-green-500" />
 
               <p className="text-[10px] font-extrabold tracking-[0.16em] text-green-600 uppercase mb-3">
@@ -165,7 +176,11 @@ const ArchitectureProgress = () => {
                   className="flex items-center gap-1.5 text-sm font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ delay: 0.8, duration: 0.4, type: "spring" }}
+                  transition={{ 
+                    delay: 0.8, 
+                    duration: 0.4, 
+                    type: "spring" 
+                  }}
                 >
                   <TrendingUp className="w-3.5 h-3.5" />
                   +554% Growth
@@ -174,19 +189,22 @@ const ArchitectureProgress = () => {
             </motion.div>
           </div>
 
-          {/* ── RIGHT — image + testimonial ──────────────────────────────── */}
+          {/* RIGHT SIDE */}
           <motion.div
             className="relative flex justify-center"
             initial={{ opacity: 0, x: 40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ 
+              delay: 0.2, 
+              duration: 0.7, 
+              ease: [0.22, 1, 0.36, 1] as const 
+            }}
           >
-            {/* glow behind card */}
+            {/* glow */}
             <div className="absolute inset-4 rounded-3xl bg-gradient-to-br from-green-200/40 to-blue-100/30 blur-2xl pointer-events-none" />
 
-            {/* main image card — dark olive like screenshot */}
+            {/* Main Image Card */}
             <div className="relative w-[300px] md:w-[340px] rounded-3xl overflow-hidden shadow-2xl">
-              {/* image */}
               <img
                 src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=700&q=85"
                 alt="Student success"
@@ -196,7 +214,6 @@ const ArchitectureProgress = () => {
                 }}
               />
 
-              {/* dark overlay — matches screenshot's dark-olive tone */}
               <div
                 className="absolute inset-0"
                 style={{
@@ -205,7 +222,6 @@ const ArchitectureProgress = () => {
                 }}
               />
 
-              {/* text on image */}
               <div className="absolute inset-0 flex flex-col justify-center px-8">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -227,15 +243,14 @@ const ArchitectureProgress = () => {
                     <span style={{ fontStyle: "normal" }}>Success</span>
                   </h3>
                   <p className="text-[12px] text-white/50 leading-relaxed max-w-[220px]">
-                    Lorem ipsum memory alifericenter pax education simrotio
-                    alibing efutu tot vela, naci flet gel dera oki explore
-                    comolo lorem.
+                    I went from struggling freelancer to running a $10k/mo agency in
+                    less than a year thanks to the systems here.
                   </p>
                 </motion.div>
               </div>
             </div>
 
-            {/* ── floating testimonial card ── */}
+            {/* Floating Testimonial */}
             <motion.div
               className="absolute -bottom-4 -left-4 md:-left-10 bg-white rounded-2xl shadow-xl p-5 w-[240px] md:w-[270px] border border-gray-100"
               initial={{ opacity: 0, y: 24, x: -10 }}
@@ -243,10 +258,9 @@ const ArchitectureProgress = () => {
               transition={{
                 delay: 0.8,
                 duration: 0.65,
-                ease: [0.22, 1, 0.36, 1],
+                ease: [0.22, 1, 0.36, 1] as const,
               }}
             >
-              {/* quote mark */}
               <div className="text-[32px] text-green-200 font-serif leading-none mb-1 select-none">
                 "
               </div>
@@ -255,7 +269,6 @@ const ArchitectureProgress = () => {
                 less than a year thanks to the systems here.
               </p>
               <div className="flex items-center gap-2">
-                {/* avatar */}
                 <div className="w-7 h-7 rounded-full bg-[#0052CC] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                   MJ
                 </div>
@@ -265,7 +278,7 @@ const ArchitectureProgress = () => {
               </div>
             </motion.div>
 
-            {/* floating top-right stat badge */}
+            {/* Floating Stat Badge */}
             <motion.div
               className="absolute -top-3 -right-3 bg-[#0052CC] text-white rounded-xl px-3 py-2 shadow-lg text-center"
               initial={{ opacity: 0, scale: 0.7 }}

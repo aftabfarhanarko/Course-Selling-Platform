@@ -9,7 +9,11 @@ const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true },
-  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: {
+    duration: 0.6,
+    delay,
+    ease: [0.22, 1, 0.36, 1] as const,
+  },
 });
 
 const stagger = {
@@ -21,7 +25,10 @@ const stagger = {
 const cardVariant = {
   initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
-  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  transition: {
+    duration: 0.55,
+    ease: [0.22, 1, 0.36, 1] as const,
+  },
 };
 
 /* ── data ── */
@@ -153,7 +160,7 @@ export default function AffiliatePage() {
           <motion.div
             initial={{ opacity: 0, x: -32 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
           >
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -165,7 +172,7 @@ export default function AffiliatePage() {
               Affiliate Program
             </motion.div>
 
-            <h1 className="text-[2.4rem] sm:text-[3rem] lg:text-[3.4rem] font-black leading-[1.1] tracking-tight mb-5">
+            <h1 className="text-[2.4rem] sm:text-[2.6rem] lg:text-[3rem] font-black leading-[1.1] tracking-tight mb-5">
               Earn while you
               <br />
               <span className="text-blue-600">teach others</span> to grow
@@ -213,7 +220,11 @@ export default function AffiliatePage() {
           <motion.div
             initial={{ opacity: 0, x: 32, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{
+              duration: 0.7,
+              delay: 0.1,
+              ease: [0.22, 1, 0.36, 1] as const,
+            }}
             className="relative"
           >
             <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-[0_12px_48px_rgba(0,0,0,0.08)]">
@@ -515,7 +526,10 @@ export default function AffiliatePage() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{
+                        duration: 0.3,
+                        ease: [0.22, 1, 0.36, 1] as const,
+                      }}
                       className="overflow-hidden"
                     >
                       <p className="text-[0.78rem] text-slate-500 leading-relaxed pb-5 pr-10">
@@ -529,29 +543,6 @@ export default function AffiliatePage() {
           })}
         </div>
       </section>
-
-      {/* ══ BOTTOM CTA ══ */}
-      {/* <motion.section
-        {...fadeUp()}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4"
-      >
-        <div className="relative overflow-hidden bg-blue-600 rounded-2xl px-8 py-12 text-center text-white">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_60%)]" />
-          <p className="text-[0.65rem] font-bold tracking-widest uppercase opacity-70 mb-3">
-            Start Today
-          </p>
-          <h2 className="text-[1.6rem] sm:text-[2rem] font-black tracking-tight mb-3">
-            Ready to build your income stack?
-          </h2>
-          <p className="text-[0.82rem] opacity-80 mb-7 max-w-md mx-auto leading-relaxed">
-            Join 12,000+ affiliates already earning commissions. No approval
-            required.
-          </p>
-          <button className="bg-white text-blue-600 px-7 py-3 rounded-xl text-sm font-black hover:bg-blue-50 transition-all hover:-translate-y-0.5 shadow-lg active:scale-[0.97]">
-            Create free account →
-          </button>
-        </div>
-      </motion.section> */}
     </div>
   );
 }

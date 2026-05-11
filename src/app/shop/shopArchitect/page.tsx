@@ -58,18 +58,25 @@ const products = [
 
 const tabs = ["All Products", "Software", "Templates"];
 
+/* ─── Fixed Animation Variants ─── */
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.12, duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+    transition: {
+      delay: i * 0.12,
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
   }),
 };
 
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: {
+    transition: { staggerChildren: 0.1 },
+  },
 };
 
 export default function ShopArchitectPage() {
@@ -82,18 +89,13 @@ export default function ShopArchitectPage() {
 
   return (
     <div className="min-h-screen bg-[#f0f2f8] pt-10 font-sans overflow-x-hidden">
-      {/* ══════════════════════════════
-          HERO
-      ══════════════════════════════ */}
-      <section className="relative mx-auto max-w-7xl  px-5 pt-20 pb-14 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
-        {/* Soft glow blob behind left text */}
-        {/* <div className="pointer-events-none absolute -top-20 -left-32 w-[520px] h-[520px] rounded-full bg-blue-100/40 blur-[90px]" /> */}
-
+      {/* HERO */}
+      <section className="relative mx-auto max-w-7xl px-5 pt-20 pb-14 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
         {/* Left */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
         >
           <motion.span
             initial={{ opacity: 0, y: -10 }}
@@ -105,7 +107,7 @@ export default function ShopArchitectPage() {
             Digital Assets Platform
           </motion.span>
 
-          <h1 className="text-[2.8rem] sm:text-[3.5rem] font-extrabold leading-[1.1] text-[#0f1629] tracking-tight">
+          <h1 className="text-[2.8rem] sm:text-[3rem] font-extrabold leading-[1.1] text-[#0f1629] tracking-tight">
             Architect Your
             <br />
             <span className="text-blue-600">Prosperity.</span>
@@ -164,11 +166,14 @@ export default function ShopArchitectPage() {
         <motion.div
           initial={{ opacity: 0, x: 40, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          transition={{
+            duration: 0.7,
+            delay: 0.15,
+            ease: [0.22, 1, 0.36, 1] as const,
+          }}
           className="flex justify-center lg:justify-end"
         >
           <div className="relative w-full max-w-[340px]">
-            {/* Main card */}
             <div className="bg-white rounded-2xl border border-[#e2e5f0] p-6 shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
@@ -213,7 +218,7 @@ export default function ShopArchitectPage() {
                       transition={{
                         delay: 0.8,
                         duration: 1.2,
-                        ease: [0.22, 1, 0.36, 1],
+                        ease: [0.22, 1, 0.36, 1] as const,
                       }}
                       className="h-full bg-green-500 rounded-full"
                     />
@@ -255,9 +260,7 @@ export default function ShopArchitectPage() {
         </motion.div>
       </section>
 
-      {/* ══════════════════════════════
-          ESSENTIAL TOOLKIT
-      ══════════════════════════════ */}
+      {/* ESSENTIAL TOOLKIT */}
       <section id="toolkit" className="bg-[#eaecf5] py-10">
         <div className="mx-auto max-w-7xl px-5">
           {/* Header */}
@@ -325,7 +328,6 @@ export default function ShopArchitectPage() {
                       alt={p.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     <span
                       className={`absolute top-3 left-3 text-[0.58rem] font-bold tracking-[0.16em] bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full ${p.categoryColor}`}
@@ -372,15 +374,9 @@ export default function ShopArchitectPage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════
-          WEALTH STACK ADVANTAGE
-      ══════════════════════════════ */}
+      {/* WEALTH STACK ADVANTAGE */}
       <section className="py-14 bg-[#f0f2f8] relative overflow-hidden">
-        {/* bg decoration */}
-        <div
-          className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 
-        w-[700px] h-[700px] rounded-full bg-blue-100/30 blur-[120px]"
-        />
+        <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-blue-100/30 blur-[120px]" />
 
         <div className="relative mx-auto max-w-[1060px] px-5">
           <motion.div
@@ -402,7 +398,7 @@ export default function ShopArchitectPage() {
             </p>
           </motion.div>
 
-          {/* 3 feature cards */}
+          {/* Feature Cards */}
           <motion.div
             variants={stagger}
             initial="hidden"
@@ -437,6 +433,7 @@ export default function ShopArchitectPage() {
                   </svg>
                 ),
               },
+              // ... (other two items remain same)
               {
                 emoji: "⚡",
                 bg: "bg-blue-50",
@@ -496,7 +493,6 @@ export default function ShopArchitectPage() {
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 className={`${item.bg} border ${item.border} rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden`}
               >
-                {/* Decorative circle */}
                 <div
                   className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-20"
                   style={{ background: item.iconColor }}

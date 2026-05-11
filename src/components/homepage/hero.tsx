@@ -12,13 +12,17 @@ import {
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-// ── animation variants ──────────────────────────────────────────────────────
+// ── Fixed Animation Variants ─────────────────────────────────────────────────
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
   show: (delay = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1], delay },
+    transition: { 
+      duration: 0.65, 
+      ease: [0.22, 1, 0.36, 1] as const, 
+      delay 
+    },
   }),
 };
 
@@ -26,7 +30,11 @@ const fadeIn = {
   hidden: { opacity: 0 },
   show: (delay = 0) => ({
     opacity: 1,
-    transition: { duration: 0.55, ease: "easeOut", delay },
+    transition: { 
+      duration: 0.55, 
+      ease: [0.25, 0.1, 0.25, 1] as const,   // Replaced "easeOut" with cubic-bezier
+      delay 
+    },
   }),
 };
 
@@ -35,11 +43,15 @@ const scaleUp = {
   show: (delay = 0) => ({
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1], delay },
+    transition: { 
+      duration: 0.7, 
+      ease: [0.22, 1, 0.36, 1] as const, 
+      delay 
+    },
   }),
 };
 
-// ── tiny dashboard rows rendered inside the mockup ──────────────────────────
+// ── tiny dashboard rows ─────────────────────────────────────────────────────
 const rows = [
   { label: "Figma UI Kit", pct: 78, color: "#0052CC", earn: "$1,240" },
   { label: "React Bootcamp", pct: 62, color: "#10B981", earn: "$980" },
@@ -53,7 +65,7 @@ const stats = [
   { icon: Star, label: "Rating", value: "4.9" },
 ];
 
-// ── main component ───────────────────────────────────────────────────────────
+// ── Main Component ───────────────────────────────────────────────────────────
 function HomeHero() {
   const heroData = {
     badge: { text: "FINANCIAL EVOLUTION" },
@@ -64,7 +76,6 @@ function HomeHero() {
       {
         id: 1,
         text: "Start Learning",
-        icon: "arrow",
         href: "/student/courses",
         primary: true,
       },
@@ -91,7 +102,7 @@ function HomeHero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          {/* ── LEFT CONTENT ─────────────────────────────────────────────── */}
+          {/* LEFT CONTENT */}
           <div className="flex flex-col space-y-7">
             {/* badge */}
             <motion.div
@@ -141,29 +152,27 @@ function HomeHero() {
 
             {/* buttons */}
             <motion.div
-              className="flex flex-col-row sm:flex-row items-center gap-3 pt-2"
+              className="flex flex-col sm:flex-row items-center gap-3 pt-2"
               variants={fadeUp}
               initial="hidden"
               animate="show"
               custom={0.4}
             >
-              {/* Primary — filled pill with TrendingUp icon */}
               <Link href={buttons[0].href} className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto rounded-full font-semibold text-base bg-[#0052CC] text-white hover:bg-[#0047B3] transition-transform hover:scale-105 active:scale-95 sm:px-3 sm:py-4 px-6  md:px-9 py-6 md:py-7 gap-2 shadow-md shadow-blue-200"
+                  className="w-full sm:w-auto rounded-full font-semibold text-base bg-[#0052CC] text-white hover:bg-[#0047B3] transition-transform hover:scale-105 active:scale-95 px-6 md:px-9 py-6 md:py-7 gap-2 shadow-md shadow-blue-200"
                 >
                   {buttons[0].text}
                   <TrendingUp className="h-4 w-4 shrink-0" />
                 </Button>
               </Link>
 
-              {/* Secondary — no background, plain text link style */}
               <Link href={buttons[1].href} className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="ghost"
-                  className="w-full sm:w-auto rounded-full border-2  border-[#367fed]  font-semibold text-base text-gray-600 text-[#0052CC] hover:bg-transparent bg-transparent transition-transform hover:scale-105 active:scale-95 px-6  md:px-9 py-6 md:py-7 sm:px-3 sm:py-4"
+                  className="w-full sm:w-auto rounded-full border-2 border-[#367fed] font-semibold text-base text-[#0052CC] hover:bg-transparent bg-transparent transition-transform hover:scale-105 active:scale-95 px-6 md:px-9 py-6 md:py-7"
                 >
                   {buttons[1].text}
                 </Button>
@@ -194,7 +203,7 @@ function HomeHero() {
             </motion.div>
           </div>
 
-          {/* ── RIGHT – DASHBOARD MOCKUP ──────────────────────────────────── */}
+          {/* RIGHT – DASHBOARD MOCKUP */}
           <motion.div
             className="flex items-center justify-center lg:justify-end mt-8 lg:mt-0"
             variants={scaleUp}
@@ -202,14 +211,13 @@ function HomeHero() {
             animate="show"
             custom={0.25}
           >
-            {/* outer device shell */}
             <div className="relative w-full max-w-[480px]">
-              {/* floating glow behind card */}
+              {/* floating glow */}
               <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-emerald-100/60 via-blue-100/30 to-transparent blur-2xl pointer-events-none" />
 
               {/* browser chrome */}
               <div className="relative rounded-[1.5rem] overflow-hidden shadow-2xl border border-gray-100 bg-[#0F1C2E]">
-                {/* ── browser top bar ── */}
+                {/* top bar */}
                 <div className="flex items-center gap-1.5 px-4 py-3 bg-[#162032] border-b border-white/5">
                   <span className="w-3 h-3 rounded-full bg-red-400/70" />
                   <span className="w-3 h-3 rounded-full bg-yellow-400/70" />
@@ -221,9 +229,8 @@ function HomeHero() {
                   </div>
                 </div>
 
-                {/* ── dashboard body ── */}
+                {/* dashboard body */}
                 <div className="p-5 space-y-4">
-                  {/* top label */}
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold text-white/50 uppercase tracking-widest">
                       Dashboard
@@ -236,29 +243,15 @@ function HomeHero() {
                   {/* stat chips */}
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      {
-                        label: "Total Earned",
-                        val: "$18,420",
-                        color: "text-emerald-400",
-                      },
-                      {
-                        label: "This Month",
-                        val: "$4,290",
-                        color: "text-blue-400",
-                      },
-                      {
-                        label: "Pending",
-                        val: "$830",
-                        color: "text-yellow-400",
-                      },
+                      { label: "Total Earned", val: "$18,420", color: "text-emerald-400" },
+                      { label: "This Month", val: "$4,290", color: "text-blue-400" },
+                      { label: "Pending", val: "$830", color: "text-yellow-400" },
                     ].map(({ label, val, color }) => (
                       <div
                         key={label}
                         className="bg-white/5 rounded-xl p-3 border border-white/5"
                       >
-                        <p className="text-[10px] text-white/40 mb-1">
-                          {label}
-                        </p>
+                        <p className="text-[10px] text-white/40 mb-1">{label}</p>
                         <p className={`text-sm font-bold ${color}`}>{val}</p>
                       </div>
                     ))}
@@ -278,13 +271,11 @@ function HomeHero() {
                         transition={{
                           delay: 0.55 + i * 0.08,
                           duration: 0.5,
-                          ease: "easeOut",
+                          ease: [0.25, 0.1, 0.25, 1] as const,
                         }}
                       >
                         <div className="flex justify-between items-center">
-                          <span className="text-[11px] text-white/60">
-                            {label}
-                          </span>
+                          <span className="text-[11px] text-white/60">{label}</span>
                           <span className="text-[11px] font-semibold text-white/80">
                             {earn}
                           </span>
@@ -298,7 +289,7 @@ function HomeHero() {
                             transition={{
                               delay: 0.7 + i * 0.1,
                               duration: 0.8,
-                              ease: [0.22, 1, 0.36, 1],
+                              ease: [0.22, 1, 0.36, 1] as const,
                             }}
                           />
                         </div>
@@ -306,7 +297,7 @@ function HomeHero() {
                     ))}
                   </div>
 
-                  {/* bar chart mini */}
+                  {/* mini bar chart */}
                   <div className="bg-white/5 rounded-xl p-3 border border-white/5">
                     <div className="flex items-center gap-2 mb-2">
                       <BarChart2 className="h-3.5 w-3.5 text-blue-400" />
@@ -320,8 +311,7 @@ function HomeHero() {
                           key={i}
                           className="flex-1 rounded-t-sm"
                           style={{
-                            background:
-                              i === 5 ? "#10B981" : "rgba(255,255,255,0.12)",
+                            background: i === 5 ? "#10B981" : "rgba(255,255,255,0.12)",
                             height: `${h}%`,
                           }}
                           initial={{ scaleY: 0, originY: 1 }}
@@ -329,17 +319,14 @@ function HomeHero() {
                           transition={{
                             delay: 0.8 + i * 0.07,
                             duration: 0.5,
-                            ease: "easeOut",
+                            ease: [0.25, 0.1, 0.25, 1] as const,
                           }}
                         />
                       ))}
                     </div>
                     <div className="flex justify-between mt-1">
                       {["Dec", "Jan", "Feb", "Mar", "Apr", "May"].map((m) => (
-                        <span
-                          key={m}
-                          className="text-[9px] text-white/25 flex-1 text-center"
-                        >
+                        <span key={m} className="text-[9px] text-white/25 flex-1 text-center">
                           {m}
                         </span>
                       ))}
@@ -348,7 +335,7 @@ function HomeHero() {
                 </div>
               </div>
 
-              {/* ── floating payout card (overlapping bottom-left) ── */}
+              {/* Floating Payout Card */}
               <motion.div
                 className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 flex items-center gap-4 min-w-[210px]"
                 initial={{ opacity: 0, y: 20, x: -10 }}
@@ -356,7 +343,7 @@ function HomeHero() {
                 transition={{
                   delay: 0.85,
                   duration: 0.65,
-                  ease: [0.22, 1, 0.36, 1],
+                  ease: [0.22, 1, 0.36, 1] as const,
                 }}
               >
                 <div className="relative">
@@ -366,16 +353,14 @@ function HomeHero() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 font-medium">
-                    {card.title}
-                  </p>
+                  <p className="text-xs text-gray-400 font-medium">{card.title}</p>
                   <p className="text-xl font-extrabold text-emerald-500 tracking-tight">
                     {card.amount}
                   </p>
                 </div>
               </motion.div>
 
-              {/* ── floating badge top-right ── */}
+              {/* Floating ROI Badge */}
               <motion.div
                 className="absolute -top-4 -right-4 bg-[#0052CC] text-white rounded-xl px-3 py-2 shadow-lg flex items-center gap-1.5"
                 initial={{ opacity: 0, scale: 0.7 }}
