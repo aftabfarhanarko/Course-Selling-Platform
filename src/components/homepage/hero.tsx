@@ -109,7 +109,7 @@ function HomeHero() {
             {/* heading */}
             <div className="space-y-1">
               <motion.h1
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight"
+                className="text-4xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
                 variants={fadeUp}
                 initial="hidden"
                 animate="show"
@@ -118,7 +118,7 @@ function HomeHero() {
                 {heading.main}
               </motion.h1>
               <motion.h2
-                className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-[#0052CC]"
+                className="text-4xl md:text-4xl lg:text-5xl font-bold leading-tight text-[#0052CC]"
                 variants={fadeUp}
                 initial="hidden"
                 animate="show"
