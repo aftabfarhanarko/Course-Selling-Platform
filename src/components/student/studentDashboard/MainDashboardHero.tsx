@@ -30,24 +30,24 @@ export const MainDashboard = () => {
 
         <h1 className="text-xl sm:text-2xl lg:text-[28px] font-extrabold mt-3 leading-tight sm:leading-snug text-slate-900 dark:text-white">
           Fueling your journey to{" "}
-          <span className="text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-lg">
+          <span className="text-primary dark:text-blue-500 bg-primary/10 dark:bg-blue-900/20 px-2 py-0.5 rounded-lg">
             precision prosperity.
           </span>
         </h1>
 
         <p className="text-gray-500 dark:text-gray-400 mt-4 text-[11px] sm:text-[12.5px] leading-relaxed max-w-md">
-          Track your progress, manage your earnings, and expand your portfolio
+          Track your progress, manage your earnings, and expand your portfolio  
           from your personal architectural hub.
         </p>
       </div>
 
       {/* RIGHT CARD - Dynamic Progress */}
-      <div className="bg-[#2563EB] text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-blue-500/20 relative overflow-hidden group transition-all duration-300 hover:scale-[1.01]">
+      <div className="bg-primary text-primary-foreground rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-primary/20 relative overflow-hidden group transition-all duration-300 hover:scale-[1.01]">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-all"></div>
 
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-            <h2 className="text-sm sm:text-[15px] font-bold tracking-tight">
+            <h2 className="text-sm sm:text-[15px] font-bold tracking-tight">    
               {progressData.label}
             </h2>
             <span className="text-[10px] sm:text-[11px] font-black bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
@@ -55,7 +55,7 @@ export const MainDashboard = () => {
             </span>
           </div>
 
-          <p className="text-[11px] sm:text-[12.5px] text-blue-100/90 mt-3 leading-relaxed font-medium">
+          <p className="text-[11px] sm:text-[12.5px] text-white/90 mt-3 leading-relaxed font-medium">
             {progressData.status} You've completed {progressData.percentage}% of
             your goal.
           </p>
@@ -73,7 +73,7 @@ export const MainDashboard = () => {
           {/* Action Button */}
           <button
             onClick={() => alert("Loading growth analytics...")}
-            className="mt-6 w-full sm:w-auto bg-white text-blue-600 font-bold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-all active:scale-95 text-[11px] sm:text-[12px] shadow-sm uppercase tracking-wider"
+            className="mt-6 w-full sm:w-auto bg-white text-primary font-bold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-all active:scale-95 text-[11px] sm:text-[12px] shadow-sm uppercase tracking-wider"
           >
             view your growth
           </button>

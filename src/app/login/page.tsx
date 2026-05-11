@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import Link from "next/link";
 import {
   TrendingUp,
   Eye,
@@ -9,9 +10,9 @@ import {
   ArrowRight,
   Check,
   Loader2,
+  ShieldCheck,
+  Zap
 } from "lucide-react";
-
-// ── Types ──────────────────────────────────────────────────────────────────
 
 type LoginFormData = {
   email: string;
@@ -19,11 +20,9 @@ type LoginFormData = {
   rememberMe: boolean;
 };
 
-// ── Component ──────────────────────────────────────────────────────────────
-
 export default function LoginPage(): React.JSX.Element {
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [success, setSuccess] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
 
   const {
     register,
@@ -33,231 +32,171 @@ export default function LoginPage(): React.JSX.Element {
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 
-  const onSubmit: SubmitHandler<LoginFormData> = async (_data) => {
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+    // Simulate API call
     await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    console.log("Login data:", data);
     setSuccess(true);
-    setTimeout(() => setSuccess(false), 2500);
+    setTimeout(() => {
+      setSuccess(false);
+      // In a real app, you would redirect here
+      window.location.href = "/student";
+    }, 2000);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-10">
+    <div className="min-h-screen bg-[#F8FAFF] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      {/* Background Decorative Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/5 rounded-full blur-[120px]" />
+      </div>
 
-      {/* ── Outer Card ───────────────────────────────────────────────────── */}
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-[0_8px_48px_rgba(0,0,0,0.09)] flex flex-col lg:flex-row overflow-hidden">
+      <div className="relative w-full max-w-[1000px] bg-white rounded-[24px] shadow-[0_20px_80px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col lg:flex-row overflow-hidden">
+        
+        {/* LEFT SIDE: Information/Hero */}
+        <div className="hidden lg:flex lg:w-[45%] bg-primary p-10 flex-col justify-between relative overflow-hidden">
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none" 
+               style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+          
+          <div className="relative z-10">
+            <Link href="/" className="flex items-center gap-2.5 text-white mb-12">
+              <div className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+                <Zap className="w-5 h-5 fill-white text-white" />
+              </div>
+              <span className="text-[17px] font-black tracking-tight">SkillPay</span>
+            </Link>
 
-        {/* ── LEFT PANEL ─────────────────────────────────────────────────── */}
-        <div className="lg:w-[44%] flex flex-col bg-[#f0f1f8] px-8 py-9 sm:px-10 sm:py-11 gap-8 min-h-[300px] lg:min-h-[580px]">
-
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#2563eb"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M16 10v11M12 10v11" />
-            </svg>
-            <span
-              className="text-[15px] font-semibold text-blue-600"
-              style={{ fontFamily: "'Sora', sans-serif" }}
-            >
-              Logo
-            </span>
-          </div>
-
-          {/* Hero Copy */}
-          <div className="flex-1 flex flex-col justify-center">
-            <h1
-              className="text-[28px] sm:text-[32px] lg:text-[34px] font-bold leading-[1.22] text-gray-900 mb-4"
-              style={{ fontFamily: "'Sora', sans-serif" }}
-            >
-              The Blueprint for{" "}
-              <span className="text-blue-600 block">Precision</span>
-              <span className="text-blue-600">Prosperity.</span>
-            </h1>
-            <p className="text-[13px] sm:text-[14px] text-gray-500 leading-[1.75] max-w-[285px]">
-              Access your premium wealth-management suite and continue your
-              journey toward total income transformation.
+            <h2 className="text-[32px] font-black text-white leading-[1.15] mb-6">
+              Empowering the <br/> 
+              <span className="text-blue-200">Architects of Wealth.</span>
+            </h2>
+            
+            <p className="text-blue-100/80 text-[13.5px] leading-relaxed max-w-[300px]">
+              Join over 15,000+ students mastering the art of digital income through our precision-engineered curriculum.
             </p>
           </div>
 
-          {/* Live Market Badge */}
-          <div className="flex items-center gap-3 bg-white/75 rounded-2xl px-4 py-3.5 border border-white/60">
-            <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center shrink-0">
-              <TrendingUp size={16} color="#fff" strokeWidth={2.5} />
+          <div className="relative z-10 space-y-4">
+            <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center gap-4 transition-transform hover:translate-x-1 duration-300">
+              <div className="w-10 h-10 rounded-xl bg-emerald-400/20 flex items-center justify-center border border-emerald-400/20">
+                <TrendingUp className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-[13px]">Real-time Analytics</p>
+                <p className="text-blue-100/60 text-[11px]">Track your growth instantly</p>
+              </div>
             </div>
-            <div>
-              <p
-                className="text-[13px] font-semibold text-gray-900 leading-tight"
-                style={{ fontFamily: "'Sora', sans-serif" }}
-              >
-                Live Market Data
-              </p>
-              <p className="text-[11px] sm:text-[12px] text-gray-400 mt-0.5 leading-snug">
-                Real-time architecture for your earnings.
-              </p>
+
+            <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center gap-4 transition-transform hover:translate-x-1 duration-300">
+              <div className="w-10 h-10 rounded-xl bg-blue-400/20 flex items-center justify-center border border-blue-400/20">
+                <ShieldCheck className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-[13px]">Enterprise Security</p>
+                <p className="text-blue-100/60 text-[11px]">Your data is bank-grade encrypted</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ── RIGHT PANEL ────────────────────────────────────────────────── */}
-        <div className="flex-1 flex flex-col justify-center px-8 sm:px-12 lg:px-14 py-10 sm:py-12">
-
-          {/* Header */}
-          <div className="mb-7">
-            <h2
-              className="text-[26px] sm:text-[28px] font-bold text-gray-900 leading-tight mb-1"
-              style={{ fontFamily: "'Sora', sans-serif" }}
-            >
-              Welcome Back
-            </h2>
-            <p className="text-[13px] sm:text-[14px] text-gray-400">
-              Enter your credentials to access your dashboard.
-            </p>
-          </div>
-
-          {/* ── Email ── */}
-          <div className="mb-5">
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-500 mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="name@company.com"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Enter a valid email address",
-                },
-              })}
-              className={`w-full px-4 py-[13px] rounded-xl border text-[14px] text-gray-900 outline-none transition-all placeholder:text-gray-300
-                focus:bg-white focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10
-                ${errors.email
-                  ? "border-red-400 bg-red-50/40"
-                  : "border-gray-200 bg-gray-50 hover:border-gray-300"
-                }`}
-            />
-            {errors.email && (
-              <p className="text-[12px] text-red-500 mt-1.5 flex items-center gap-1">
-                {errors.email.message}
+        {/* RIGHT SIDE: Login Form */}
+        <div className="flex-1 p-6 sm:p-10 lg:p-14">
+          <div className="max-w-[360px] mx-auto">
+            <div className="mb-10">
+              <h1 className="text-2xl font-black text-slate-900 mb-2">Welcome Back</h1>
+              <p className="text-[13px] text-slate-500 font-medium">
+                Enter your credentials to access your dashboard.
               </p>
-            )}
-          </div>
-
-          {/* ── Password ── */}
-          <div className="mb-5">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-500">
-                Password
-              </label>
-              <a
-                href="#"
-                className="text-[13px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-              >
-                Forgot Password?
-              </a>
             </div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: { value: 6, message: "Minimum 6 characters" },
-                })}
-                className={`w-full px-4 py-[13px] pr-11 rounded-xl border text-[14px] text-gray-900 outline-none transition-all placeholder:text-gray-400
-                  focus:bg-white focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10
-                  ${errors.password
-                    ? "border-red-400 bg-red-50/40"
-                    : "border-gray-200 bg-gray-50 hover:border-gray-300"
-                  }`}
-              />
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Email Address
+                </label>
+                <input
+                  {...register("email", { 
+                    required: "Email is required",
+                    pattern: { value: /^\S+@\S+$/i, message: "Invalid email" }
+                  })}
+                  type="email"
+                  placeholder="name@company.com"
+                  className={`w-full bg-slate-50 border ${errors.email ? 'border-red-500' : 'border-slate-200'} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                />
+                {errors.email && <p className="text-[11px] text-red-500 font-bold ml-1">{errors.email.message}</p>}
+              </div>
+
+              <div className="space-y-1.5 relative">
+                <div className="flex justify-between items-center">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Password
+                  </label>
+                  <button type="button" className="text-[11px] font-bold text-primary hover:underline">
+                    Forgot?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    {...register("password", { required: "Password is required" })}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className={`w-full bg-slate-50 border ${errors.password ? 'border-red-500' : 'border-slate-200'} focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-[11px] text-red-500 font-bold ml-1">{errors.password.message}</p>}
+              </div>
+
+              <div className="flex items-center gap-2 py-1">
+                <input
+                  {...register("rememberMe")}
+                  type="checkbox"
+                  id="remember"
+                  className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="remember" className="text-[12px] text-slate-500 font-medium select-none cursor-pointer">
+                  Keep me logged in
+                </label>
+              </div>
+
               <button
-                type="button"
-                tabIndex={-1}
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer p-1"
+                type="submit"
+                disabled={isSubmitting || success}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-black py-3.5 rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none text-[13px] flex items-center justify-center gap-2"
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : success ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Success
+                  </>
+                ) : (
+                  <>
+                    Sign In to Dashboard
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
-            </div>
-            {errors.password && (
-              <p className="text-[12px] text-red-500 mt-1.5">
-                {errors.password.message}
+            </form>
+
+            <div className="mt-10 text-center">
+              <p className="text-[13px] text-slate-500 font-medium">
+                Don't have an account?{" "}
+                <Link href="/signup" className="text-primary font-black hover:underline">
+                  Create Account
+                </Link>
               </p>
-            )}
+            </div>
           </div>
-
-          {/* ── Remember Me ── */}
-          <div className="flex items-center gap-2.5 mb-6">
-            <input
-              id="rememberMe"
-              type="checkbox"
-              {...register("rememberMe")}
-              className="w-[15px] h-[15px] rounded border-gray-300 accent-blue-600 cursor-pointer"
-            />
-            <label
-              htmlFor="rememberMe"
-              className="text-[13px] sm:text-[14px] text-gray-500 cursor-pointer select-none"
-            >
-              Keep me signed in for 30 days
-            </label>
-          </div>
-
-          {/* ── Submit Button ── */}
-          <button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            style={{ fontFamily: "'Sora', sans-serif" }}
-            className={`w-full flex items-center justify-center gap-2 py-[14px] rounded-full text-white text-[14px] font-semibold tracking-wide border-none transition-all duration-200
-              ${success
-                ? "bg-green-600 shadow-[0_4px_18px_rgba(22,163,74,0.35)]"
-                : isSubmitting
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 shadow-[0_4px_18px_rgba(37,99,235,0.30)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.42)] hover:-translate-y-0.5 cursor-pointer"
-              }`}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Signing in...
-              </>
-            ) : success ? (
-              <>
-                <Check size={16} />
-                Login Successful!
-              </>
-            ) : (
-              <>
-                Login to Dashboard
-                <ArrowRight size={15} />
-              </>
-            )}
-          </button>
-
-          {/* ── Sign Up Link ── */}
-          <p className="text-center text-[13px] sm:text-[14px] text-gray-400 mt-6">
-            New to the architecture?{" "}
-            <a
-              href="#"
-              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-            >
-              Create an Account
-            </a>
-          </p>
-
-          {/* ── Trusted Text ── */}
-          <p className="text-center text-[10px] uppercase tracking-[0.18em] text-gray-300 mt-8">
-            Trusted by Enterprise Leaders
-          </p>
         </div>
       </div>
     </div>

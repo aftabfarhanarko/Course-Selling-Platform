@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Calendar, TrendingUp, Users, Wallet, ArrowUpRight } from "lucide-react";   
+import { BookOpen, Calendar, TrendingUp, Users, Wallet, ArrowUpRight } from "lucide-react";
 
 export const DashBoardBalcnes = () => {
   const dashboardStats = {
@@ -27,9 +27,9 @@ export const DashBoardBalcnes = () => {
   return (
     <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
       {/* Card 1 */}
-      <div className="relative bg-white dark:bg-zinc-900 rounded-xl sm:rounded-2xl border border-[#ECECF2] dark:border-zinc-800 p-4 sm:p-5 lg:p-6 overflow-hidden group hover:border-blue-200 dark:hover:border-blue-900/50 transition-all duration-300">
+      <div className="relative bg-white dark:bg-zinc-900 rounded-xl sm:rounded-2xl border border-[#ECECF2] dark:border-zinc-800 p-4 sm:p-5 lg:p-6 overflow-hidden group hover:border-primary/20 dark:hover:border-primary/50 transition-all duration-300">
         <div className="absolute top-3 sm:top-5 right-3 sm:right-5 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
-          <Wallet className="w-12 sm:w-16 h-12 sm:h-16 text-[#1E3A8A]" strokeWidth={1.5} />
+          <Wallet className="w-12 sm:w-16 h-12 sm:h-16 text-primary" strokeWidth={1.5} />
         </div>
 
         <p className="text-[9px] sm:text-[10px] uppercase tracking-[2px] font-bold text-[#64748B] dark:text-gray-500">
@@ -46,9 +46,9 @@ export const DashBoardBalcnes = () => {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={() => alert("Withdrawal request initiated...")}
-          className="mt-5 bg-[#2563EB] hover:bg-[#1D4ED8] transition-all text-white text-[11px] sm:text-[12px] font-bold px-5 py-2.5 rounded-xl w-full sm:w-auto shadow-sm shadow-blue-200 dark:shadow-none active:scale-95"
+          className="mt-5 bg-primary hover:bg-primary/90 transition-all text-primary-foreground text-[11px] sm:text-[12px] font-bold px-5 py-2.5 rounded-xl w-full sm:w-auto shadow-sm shadow-primary/20 dark:shadow-none active:scale-95"
         >
           Withdraw funds
         </button>
@@ -73,11 +73,11 @@ export const DashBoardBalcnes = () => {
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 mt-5 text-[11px] sm:text-[12px] text-[#64748B] dark:text-gray-500 font-medium">    
+        <div className="flex items-center gap-1.5 mt-5 text-[11px] sm:text-[12px] text-[#64748B] dark:text-gray-500 font-medium">
           <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
           <p>
             Next payout:{" "}
-            <span className="font-bold text-[#1E293B] dark:text-white">     
+            <span className="font-bold text-[#1E293B] dark:text-white">
               {dashboardStats.affiliateEarnings.nextPayoutDate}
             </span>
           </p>
@@ -110,11 +110,11 @@ export const DashBoardBalcnes = () => {
                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i+20}`} alt="User" />
               </div>
             ))}
-            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-blue-50 dark:bg-blue-900/30 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[9px] sm:text-[10px] font-black text-[#2563EB] flex-shrink-0">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary/10 dark:bg-primary/20 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[9px] sm:text-[10px] font-black text-primary flex-shrink-0">   
               +10
             </div>
           </div>
-          <p className="text-[11px] sm:text-[12px] text-[#64748B] dark:text-gray-500 font-medium">  
+          <p className="text-[11px] sm:text-[12px] text-[#64748B] dark:text-gray-500 font-medium">
             {dashboardStats.coursesEnrolled.subtext}
           </p>
         </div>
