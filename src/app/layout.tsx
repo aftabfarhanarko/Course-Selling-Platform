@@ -30,7 +30,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="h-full flex flex-col font-bai-jamjuree">
-        <Header />
+        <AppProviders>
+          <Header />
+        </AppProviders>
         <main className="flex-1 ">
           <AppProviders>{children}</AppProviders>
         </main>
