@@ -26,8 +26,10 @@ function getInitialAuth(): { user: any | null; token: string | null } {
     if (!raw) return { user: null, token: null };
 
     const parsed = JSON.parse(raw) as { user?: any; token?: unknown };
-    const tokenFromRoot = typeof parsed.token === "string" ? parsed.token : null;
-    const tokenFromUser = typeof parsed.user?.token === "string" ? parsed.user.token : null;
+    const tokenFromRoot =
+      typeof parsed.token === "string" ? parsed.token : null;
+    const tokenFromUser =
+      typeof parsed.user?.token === "string" ? parsed.user.token : null;
     const token = tokenFromUser ?? tokenFromRoot;
 
     const user = parsed.user ?? (token ? { token } : null);
@@ -36,7 +38,10 @@ function getInitialAuth(): { user: any | null; token: string | null } {
       persistRoleCookie(String(user.role));
     }
 
-    return { user: user && token && !user.token ? { ...user, token } : user, token };
+    return {
+      user: user && token && !user.token ? { ...user, token } : user,
+      token,
+    };
   } catch {
     return { user: null, token: null };
   }

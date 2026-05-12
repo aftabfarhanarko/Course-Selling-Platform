@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -15,9 +15,17 @@ import {
   X,
 } from "lucide-react";
 import { LiaCloudShowersHeavySolid } from "react-icons/lia";
+import { useLogoutMutation } from "@/lib/api/authApi";
+import { useDispatch } from "react-redux";
+import { logout } from "@/store/slices/authSlice";
+import { baseApi } from "@/lib/api/baseApi";
+import { toast } from "sonner";
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   const navItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -25,7 +33,11 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { label: "Wallet", href: "/admin/wallet", icon: Wallet },
     { label: "Withdraw Requests", href: "/admin/withdraw", icon: Banknote },
     { label: "Products", href: "/admin/products", icon: ShoppingBag },
-    { label: "Courses", href: "/admin/courses", icon: LiaCloudShowersHeavySolid },
+    {
+      label: "Courses",
+      href: "/admin/courses",
+      icon: LiaCloudShowersHeavySolid,
+    },
     { label: "Coupons", href: "/admin/coupons", icon: Ticket },
     { label: "Analytics", href: "/admin/analytics", icon: BarChart },
   ];
@@ -33,20 +45,17 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   return (
     <aside className="h-full w-56 border-r border-zinc-200/80 bg-white/80 backdrop-blur-2xl dark:border-zinc-800/80 dark:bg-zinc-950/80 shadow-[8px_0_30px_rgba(0,0,0,0.03)] flex flex-col z-50 overflow-y-auto">
       <div className="flex flex-col h-full p-4">
-        {/* Mobile Close Button */}
         {onClose && (
           <div className="flex justify-end mb-1 lg:hidden">
             <button
               onClick={onClose}
               className="p-1.5 text-zinc-400 hover:bg-zinc-100/80 hover:text-zinc-700 rounded-lg dark:text-zinc-500 dark:hover:bg-zinc-800/80 dark:hover:text-zinc-300 transition-all duration-300"
             >
-              
               <X size={16} strokeWidth={2.5} />
             </button>
           </div>
         )}
 
-        {/* Profile Section */}
         <div className="flex items-center gap-2.5 mb-7 bg-white dark:bg-zinc-900 p-2.5 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none border border-slate-100 dark:border-zinc-800">
           <div className="relative flex-shrink-0">
             <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-blue-50 dark:ring-blue-900/30">
@@ -68,7 +77,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           </div>
         </div>
 
-        {/* Navigation Links */}
         <nav className="flex-1 space-y-1">
           {navItems.map((item) => {
             const isActive =
@@ -86,7 +94,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                     : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-50 dark:hover:bg-zinc-800/50"
                 }`}
               >
-                {/* Icon wrapper */}
                 <span
                   className={`flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-200 ${
                     isActive
@@ -109,23 +116,38 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           })}
         </nav>
 
-        {/* Sign Out Button */}
         <div className="mt-6 pt-4 border-t border-slate-100 dark:border-zinc-800/80">
           <button
-            onClick={onClose}
-            className="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50/80 dark:text-red-400 dark:hover:bg-red-500/10 transition-all duration-300"
+            onClick={async () => {
+              if (isLoggingOut) return;
+              const toastId = toast.loading("Signing out...");
+
+              try {
+                await logoutApi().unwrap();
+              } catch {
+              } finally {
+                dispatch(logout());
+                dispatch(baseApi.util.resetApiState());
+                toast.success("Signed out", { id: toastId });
+                onClose?.();
+                router.replace("/");
+              }
+            }}
+            disabled={isLoggingOut}
+            className="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50/80 dark:text-red-400 dark:hover:bg-red-500/10 transition-all duration-300 disabled:opacity-70 disabled:pointer-events-none"
           >
             <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 group-hover:bg-red-100 dark:bg-red-500/10 dark:group-hover:bg-red-500/20 transition-colors">
               <LogOut className="h-[14px] w-[14px]" />
             </span>
-            <span className="truncate text-[12px]">Sign Out</span>
+            <span className="truncate text-[12px]">
+              {isLoggingOut ? "Signing out..." : "Sign Out"}
+            </span>
           </button>
         </div>
 
-        {/* Bottom version badge */}
         <div className="mt-3">
           <p className="text-[9px] text-slate-400 dark:text-zinc-500 text-center font-semibold tracking-widest uppercase">
-            Admin Panel · v2.0
+            Admin Panel Â· v2.0
           </p>
         </div>
       </div>

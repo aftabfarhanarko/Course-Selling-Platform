@@ -28,6 +28,8 @@ export default function AdminLayout({
     }
   }, [isAuthenticated, router, user]);
 
+  if (!isAuthenticated) return null;
+
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
       {sidebarOpen && (
@@ -55,3 +57,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
+

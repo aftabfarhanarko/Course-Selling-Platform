@@ -28,6 +28,8 @@ export default function StudentLayout({
     }
   }, [isAuthenticated, router, user]);
 
+  if (!isAuthenticated) return null;
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
       {sidebarOpen && (
@@ -61,3 +63,5 @@ export default function StudentLayout({
     </div>
   );
 }
+
+
