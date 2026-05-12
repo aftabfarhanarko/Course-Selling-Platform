@@ -2,6 +2,11 @@
 
 export type UserProfileResponse = Record<string, unknown>;
 
+export type UpdateProfileRequest = {
+  name?: string;
+  photo?: string;
+};
+
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     profile: build.query<UserProfileResponse, void>({
@@ -11,8 +16,17 @@ export const usersApi = baseApi.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    updateProfile: build.mutation<UserProfileResponse, UpdateProfileRequest>({
+      query: (body) => ({
+        url: "/users/profile",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useProfileQuery, useLazyProfileQuery } = usersApi;
+export const { useProfileQuery, useLazyProfileQuery, useUpdateProfileMutation } =
+  usersApi;

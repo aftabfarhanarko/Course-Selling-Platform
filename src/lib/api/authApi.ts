@@ -19,6 +19,11 @@ export type RefreshRequest = {
   refreshToken: string;
 };
 
+export type ChangePasswordRequest = {
+  currentPassword: string;
+  newPassword: string;
+};
+
 export type AuthResponse = Record<string, unknown>;
 
 function toRegisterBody(
@@ -83,6 +88,14 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth"],
     }),
+    changePassword: build.mutation<AuthResponse, ChangePasswordRequest>({
+      query: (body) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -92,4 +105,5 @@ export const {
   useLoginMutation,
   useRefreshMutation,
   useLogoutMutation,
+  useChangePasswordMutation,
 } = authApi;

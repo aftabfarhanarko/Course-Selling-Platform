@@ -1,183 +1,298 @@
-"use client";
+﻿"use client";
 
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Pencil, Save, Shield, UserRound } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { uploadImageToImgBB } from "@/lib/images.upload";
 import {
-  Bell,
-  LogOut,
-  Pencil,
-  Shield,
-  TrendingUp,
-  UserRound,
-} from "lucide-react";
+  useProfileQuery,
+  useUpdateProfileMutation,
+} from "@/lib/api/usersApi";
+import { useChangePasswordMutation } from "@/lib/api/authApi";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { setUser } from "@/store/slices/authSlice";
 
-export default function ProfileDashboard() {
+function normalizeProfile(payload: any): any {
+  return payload?.user ?? payload?.data?.user ?? payload?.data ?? payload ?? null;
+}
+
+const AUTH_STORAGE_KEY = "course_platform_auth";
+
+export default function StudentProfilePage(): React.JSX.Element {
+  const dispatch = useDispatch();
+  const authUser = useSelector((s: RootState) => s.auth.user);
+
+  const { data, isFetching, refetch } = useProfileQuery();
+  const profile = useMemo(() => normalizeProfile(data), [data]);
+
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const [changePassword, { isLoading: isChangingPassword }] =
+    useChangePasswordMutation();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [name, setName] = useState<string>("");
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  const [currentPassword, setCurrentPassword] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+
+  useEffect(() => {
+    if (!profile) return;
+    setName(String(profile?.name ?? ""));
+    const p =
+      profile?.photo ??
+      profile?.avatar ??
+      profile?.image ??
+      profile?.profileImage ??
+      null;
+    setPhotoPreview(typeof p === "string" && p.length > 0 ? p : null);
+  }, [profile]);
+
+  useEffect(() => {
+    if (!selectedPhoto) return;
+    const url = URL.createObjectURL(selectedPhoto);
+    setPhotoPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [selectedPhoto]);
+
+  function persistUser(updated: any) {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+      const parsed = raw ? (JSON.parse(raw) as any) : {};
+      const token = updated?.token ?? parsed?.token ?? parsed?.user?.token ?? null;
+      const userToStore = token ? { ...updated, token } : updated;
+      localStorage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify({ ...parsed, token, user: userToStore }),
+      );
+    } catch {
+      return;
+    }
+  }
+
+  async function onSaveProfile() {
+    const toastId = toast.loading("Updating profile...");
+
+    try {
+      let photoUrl: string | undefined;
+      if (selectedPhoto) {
+        photoUrl = await uploadImageToImgBB(selectedPhoto);
+      }
+
+      const payload: { name?: string; photo?: string } = {};
+      if (name.trim().length > 0) payload.name = name.trim();
+      if (photoUrl) payload.photo = photoUrl;
+
+      const res = await updateProfile(payload).unwrap();
+      const updatedProfile = normalizeProfile(res) ?? profile;
+
+      await refetch();
+
+      const token = authUser?.token ?? authUser?.accessToken ?? null;
+      const merged = token
+        ? { ...authUser, ...updatedProfile, token }
+        : { ...authUser, ...updatedProfile };
+
+      dispatch(setUser(merged));
+      persistUser(merged);
+
+      setSelectedPhoto(null);
+      toast.success("Profile updated", { id: toastId });
+    } catch {
+      toast.error("Profile update failed", { id: toastId });
+    }
+  }
+
+  async function onChangePassword() {
+    if (!currentPassword || !newPassword) {
+      toast.error("Fill current and new password");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("New password not match");
+      return;
+    }
+
+    const toastId = toast.loading("Changing password...");
+
+    try {
+      await changePassword({ currentPassword, newPassword }).unwrap();
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success("Password changed", { id: toastId });
+    } catch {
+      toast.error("Password change failed", { id: toastId });
+    }
+  }
+
+  const email = String(profile?.email ?? "");
+  const phone = String(profile?.phone ?? "");
+  const country = String(profile?.country ?? "");
+
   return (
     <div className="min-h-screen bg-[#f5f5fb] px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-      <div className="mx-auto max-w-7xl">
-        {/* TOP PROFILE */}
-        <div className="mb-8 flex flex-col gap-8 lg:mb-10 lg:flex-row lg:items-start">
-          {/* IMAGE */}
-          <div className="relative mx-auto lg:mx-0">
-            <div className="h-32 w-32 rounded-[28px] border-4 border-white bg-[#f7f7fb] shadow-sm sm:h-36 sm:w-36 lg:h-40 lg:w-40" />
-
-            <button className="absolute bottom-1 right-1 flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white shadow-lg transition hover:scale-105 sm:h-11 sm:w-11 lg:h-12 lg:w-12">
-              <Pencil className="h-4 w-4 sm:h-5 sm:w-5" />
-            </button>
-          </div>
-
-          {/* TEXT */}
-          <div className="flex-1 pt-0 text-center lg:pt-4 lg:text-left">
-            <div className="flex flex-col items-center gap-4 lg:flex-row lg:flex-wrap lg:items-center">
-              <h1 className="text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl lg:text-5xl">
-                Alex Rivera
-              </h1>
-
-              <span className="rounded-full bg-[#4ade80] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black sm:px-5 sm:text-xs">
-                Pro Architect
-              </span>
-            </div>
-
-            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-gray-500 sm:text-lg lg:mx-0 lg:text-2xl">
-              Mastering the art of digital wealth creation since 2022.
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#111827]">
+              Profile
+            </h1>
+            <p className="mt-1 text-sm text-zinc-500">
+              Update your name, photo, and password
             </p>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            Refresh
+          </Button>
         </div>
 
-        {/* GRID */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* LEFT COLUMN */}
-          <div className="space-y-6 lg:col-span-2">
-            {/* PERSONAL INFO */}
-            <div className="rounded-[24px] border border-[#ececf5] bg-[#f7f7fc] p-5 shadow-sm sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8">
-              <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:mb-10">
-                <h2 className="text-2xl font-bold text-[#111827] sm:text-3xl">
-                  Personal Information
-                </h2>
-
-                <button className="w-fit text-sm font-semibold text-blue-700 hover:underline">
-                  Edit All
+          <div className="lg:col-span-1">
+            <div className="rounded-[24px] border border-[#ececf5] bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-[#111827]">Photo</h2>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:underline"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Change
                 </button>
               </div>
 
-              <div className="grid gap-8 sm:grid-cols-2 sm:gap-10">
-                <Info label="FULL NAME" value="Alex Rivera" />
-
-                <Info
-                  label="EMAIL ADDRESS"
-                  value="alex.rivera@architect.io"
-                />
-
-                <Info
-                  label="PHONE NUMBER"
-                  value="+1 (555) 234-8890"
-                />
-
-                <Info
-                  label="LOCATION"
-                  value="San Francisco, CA"
-                />
-              </div>
-            </div>
-
-            {/* BOTTOM GRID */}
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* SECURITY */}
-              <div className="rounded-[24px] border border-[#ececf5] bg-[#f7f7fc] p-5 shadow-sm sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8">
-                <div className="mb-6 flex items-center gap-4 lg:mb-8">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-700 sm:h-14 sm:w-14">
-                    <Shield className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </div>
-
-                  <h3 className="text-xl font-bold text-[#111827] sm:text-2xl">
-                    Account Security
-                  </h3>
-                </div>
-
-                <div className="space-y-4 sm:space-y-5">
-                  <ToggleCard
-                    title="Biometric Login"
-                    active
-                  />
-
-                  <ToggleCard
-                    title="Two-Factor Auth"
-                    active
-                    badge="ACTIVE"
-                  />
+              <div className="mt-5 flex items-center justify-center">
+                <div className="h-32 w-32 rounded-[28px] border-4 border-white bg-[#f7f7fb] shadow-sm overflow-hidden flex items-center justify-center">
+                  {photoPreview ? (
+                    <img
+                      src={photoPreview}
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <UserRound className="h-12 w-12 text-zinc-400" />
+                  )}
                 </div>
               </div>
 
-              {/* NOTIFICATIONS */}
-              <div className="rounded-[24px] border border-[#ececf5] bg-[#f7f7fc] p-5 shadow-sm sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8">
-                <div className="mb-6 flex items-center gap-4 lg:mb-8">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 text-yellow-700 sm:h-14 sm:w-14">
-                    <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setSelectedPhoto(file);
+                }}
+              />
 
-                  <h3 className="text-xl font-bold text-[#111827] sm:text-2xl">
-                    Notifications
-                  </h3>
-                </div>
-
-                <div className="space-y-5 sm:space-y-6">
-                  <Notification
-                    title="Earnings Alerts"
-                    active={false}
-                  />
-
-                  <Notification
-                    title="Course Updates"
-                    active
-                  />
-
-                  <Notification
-                    title="Network Messages"
-                    active
-                  />
-                </div>
+              <div className="mt-6">
+                <label className="text-xs font-bold tracking-wider text-zinc-500">
+                  FULL NAME
+                </label>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-2"
+                  placeholder="Your name"
+                />
               </div>
+
+              <Button
+                onClick={onSaveProfile}
+                disabled={isUpdating}
+                className="mt-5 w-full"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isUpdating ? "Saving..." : "Save Profile"}
+              </Button>
             </div>
           </div>
 
-          {/* RIGHT COLUMN */}
-          <div className="space-y-6">
-            {/* INCOME */}
-            <div className="rounded-[24px] bg-gradient-to-br from-[#eef2ff] to-[#e6eaff] p-5 shadow-sm sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8">
-              <TrendingUp className="mb-6 h-7 w-7 text-blue-700 sm:mb-8 sm:h-8 sm:w-8" />
+          <div className="lg:col-span-2 space-y-6">
+            <div className="rounded-[24px] border border-[#ececf5] bg-[#f7f7fc] p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-[#111827]">
+                Personal Information
+              </h2>
 
-              <h3 className="text-xl font-bold text-[#111827] sm:text-2xl">
-                Income Pulse
-              </h3>
-
-              <div className="mt-4 break-words text-3xl font-bold text-blue-700 sm:text-4xl lg:text-5xl">
-                $12,450.00
+              <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                <Info label="FULL NAME" value={String(profile?.name ?? "-")} />
+                <Info label="EMAIL" value={email || "-"} />
+                <Info label="PHONE" value={phone || "-"} />
+                <Info label="COUNTRY" value={country || "-"} />
               </div>
-
-              <p className="mt-3 text-sm font-semibold text-green-600 sm:text-base">
-                +12% this month
-              </p>
-
-              <button className="mt-8 w-full rounded-2xl bg-blue-700 py-4 text-base font-semibold text-white transition hover:bg-blue-800 sm:mt-10 sm:py-5 sm:text-lg">
-                View Portfolio
-              </button>
             </div>
 
-            {/* LOGOUT */}
-            <div className="rounded-[24px] border border-[#f4dede] bg-[#fff5f5] p-5 text-center shadow-sm sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#ffe3e3] text-red-600 sm:h-20 sm:w-20">
-                <LogOut className="h-7 w-7 sm:h-8 sm:w-8" />
+            <div className="rounded-[24px] border border-[#ececf5] bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <h2 className="text-xl font-bold text-[#111827]">
+                  Change Password
+                </h2>
               </div>
 
-              <h3 className="mt-6 text-2xl font-bold text-[#111827] sm:mt-8 sm:text-3xl">
-                End Session
-              </h3>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold tracking-wider text-zinc-500">
+                    CURRENT PASSWORD
+                  </label>
+                  <Input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="mt-2"
+                    placeholder="Current password"
+                  />
+                </div>
 
-              <p className="mt-3 text-base text-gray-500 sm:text-lg">
-                Safely exit your workspace
-              </p>
+                <div>
+                  <label className="text-xs font-bold tracking-wider text-zinc-500">
+                    NEW PASSWORD
+                  </label>
+                  <Input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="mt-2"
+                    placeholder="New password"
+                  />
+                </div>
 
-              <button className="mt-6 w-full rounded-2xl border border-[#f3caca] bg-white py-4 text-base font-semibold text-red-600 transition hover:bg-red-50 sm:mt-8 sm:py-5 sm:text-lg">
-                Logout
-              </button>
+                <div>
+                  <label className="text-xs font-bold tracking-wider text-zinc-500">
+                    CONFIRM PASSWORD
+                  </label>
+                  <Input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="mt-2"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+
+              <Button
+                onClick={onChangePassword}
+                disabled={isChangingPassword}
+                className="mt-5"
+              >
+                {isChangingPassword ? "Updating..." : "Update Password"}
+              </Button>
             </div>
           </div>
         </div>
@@ -186,94 +301,13 @@ export default function ProfileDashboard() {
   );
 }
 
-function Info({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="overflow-hidden">
-      <p className="mb-3 text-[10px] font-bold tracking-[0.2em] text-gray-400 sm:text-xs">
+    <div>
+      <p className="mb-2 text-[10px] font-bold tracking-[0.2em] text-gray-400">
         {label}
       </p>
-
-      <p className="break-words text-xl font-medium text-[#111827] sm:text-2xl lg:text-3xl">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function ToggleCard({
-  title,
-  active,
-  badge,
-}: {
-  title: string;
-  active?: boolean;
-  badge?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-4 rounded-2xl bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-5">
-      <div className="flex items-center gap-4">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 sm:h-11 sm:w-11">
-          <UserRound className="h-5 w-5 text-gray-500" />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <span className="text-sm font-semibold text-[#111827] sm:text-base">
-            {title}
-          </span>
-
-          {badge && (
-            <span className="text-[10px] font-bold tracking-wider text-green-600 sm:text-xs">
-              {badge}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div
-        className={`relative h-7 w-14 rounded-full transition ${
-          active ? "bg-green-600" : "bg-gray-300"
-        }`}
-      >
-        <div
-          className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${
-            active ? "right-1" : "left-1"
-          }`}
-        />
-      </div>
-    </div>
-  );
-}
-
-function Notification({
-  title,
-  active,
-}: {
-  title: string;
-  active?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-sm text-gray-600 sm:text-base lg:text-lg">
-        {title}
-      </span>
-
-      <div
-        className={`relative h-7 w-14 flex-shrink-0 rounded-full transition ${
-          active ? "bg-green-600" : "bg-gray-300"
-        }`}
-      >
-        <div
-          className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${
-            active ? "right-1" : "left-1"
-          }`}
-        />
-      </div>
+      <p className="break-words text-lg font-semibold text-[#111827]">{value}</p>
     </div>
   );
 }

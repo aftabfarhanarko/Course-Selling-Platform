@@ -13,6 +13,7 @@ import {
   Users,
   Wallet,
   X,
+  UserRound,
 } from "lucide-react";
 import Image from "next/image";
 import { useLogoutMutation } from "@/lib/api/authApi";
@@ -26,6 +27,11 @@ const menuItems = [
     name: "Dashboard",
     href: "/student",
     icon: LayoutDashboard,
+  },
+  {
+    name: "Profile",
+    href: "/student/dashboard",
+    icon: UserRound,
   },
   {
     name: "My Courses",
