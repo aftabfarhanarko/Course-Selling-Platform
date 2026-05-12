@@ -17,10 +17,6 @@ import {
   ArrowRight,
   Check,
   Loader2,
-  Zap,
-  Star,
-  Users,
-  Award,
   Camera,
   Upload,
 } from "lucide-react";
@@ -41,10 +37,42 @@ export default function SignupPage(): React.JSX.Element {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoName, setPhotoName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toastIdRef = useRef<string | number | null>(null);
   const [countries, setCountries] = useState<string[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const [registerUser, { isLoading: isRegisterLoading }] =
-    useRegisterMutation();
+  const [
+    registerUser,
+    {
+      isLoading: isRegisterLoading,
+      isSuccess: isRegisterSuccess,
+      isError: isRegisterError,
+      error: registerError,
+      reset: resetRegister,
+    },
+  ] = useRegisterMutation();
+
+  const getApiErrorMessage = (error: unknown): string => {
+    if (!error) return "Registration failed";
+    if (typeof error === "string") return error;
+    if (error instanceof Error) return error.message || "Registration failed";
+
+    const anyErr = error as any;
+    const data = anyErr?.data;
+
+    if (typeof data === "string") return data;
+    if (typeof data?.message === "string") return data.message;
+    if (typeof data?.error === "string") return data.error;
+    if (Array.isArray(data?.message))
+      return data.message.filter((x: any) => typeof x === "string").join(", ");
+
+    if (typeof anyErr?.error === "string") return anyErr.error;
+
+    try {
+      return JSON.stringify(data ?? error);
+    } catch {
+      return "Registration failed";
+    }
+  };
 
   const {
     register,
@@ -81,6 +109,23 @@ export default function SignupPage(): React.JSX.Element {
     };
   }, []);
 
+  useEffect(() => {
+    const id = toastIdRef.current;
+    if (!id) return;
+
+    if (isRegisterSuccess) {
+      setSuccess(true);
+      toast.success("Account created!", { id });
+      toastIdRef.current = null;
+      return;
+    }
+
+    if (isRegisterError) {
+      toast.error(getApiErrorMessage(registerError), { id });
+      toastIdRef.current = null;
+    }
+  }, [getApiErrorMessage, isRegisterError, isRegisterSuccess, registerError]);
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -116,27 +161,72 @@ export default function SignupPage(): React.JSX.Element {
 
       setSuccess(true);
       toast.success("Account created!", { id: toastId });
-    } catch {
-      toast.error("Registration failed", { id: toastId });
+    } catch (err) {
+      const message =
+        typeof err === "object" && err && "data" in err
+          ? JSON.stringify((err as any).data)
+          : err instanceof Error
+            ? err.message
+            : "Registration failed";
+      toast.error(message, { id: toastId });
     }
   };
 
+  /* ─── JEVXO color palette: dark navy + electric blue ─── */
+  const inputBase =
+    "w-full bg-[#F1F5F9] border border-[#E2E8F0] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700";
+
   return (
-    <div className="min-h-screen  flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full  md:max-w-9/12 mx-auto">
-        <div className="flex flex-col lg:flex-row bg-white/80 backdrop-blur rounded-3xl  overflow-hidden border border-slate-100">
-          <div className="lg:w-1/2 p-8 sm:p-10 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-900 flex items-center justify-center">
-            <SignupLotti />
+    <div className="min-h-screen md:mt-7 mt-10 bg-white flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full  md:max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row">
+          {/* ── LEFT: Lottie — hidden on mobile (< md), visible md and above ── */}
+          <div className="hidden md:flex lg:w-1/2 p-10 flex-col items-center justify-center bg-white">
+            <div className="w-full mb-6">
+              <h2 className="text-3xl font-extrabold text-slate-900 leading-tight">
+                Skill to Income{" "}
+                <span className="text-[#2563EB]">Transformation</span>
+              </h2>
+              <p className="text-[14px] text-slate-500 mt-2 leading-relaxed max-w-xs">
+                Master high-demand skills, track your progress, and grow faster
+                with our next-gen dashboard.
+              </p>
+            </div>
+            <div className="w-full flex items-center justify-center">
+              <SignupLotti />
+            </div>
           </div>
 
-          <div className="flex-1 p-6 sm:p-10 lg:p-10 overflow-y-auto">
-            <div className="max-w-[420px] mx-auto">
-              <div className="mb-6">
-                <h1 className="text-2xl font-black text-slate-900 mb-1.5">
+          {/* ── RIGHT: Form card ── */}
+          <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-10">
+            <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-sm shadow-blue-100 border border-slate-100 p-8">
+              {/* Lock icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#EFF6FF] flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-6 h-6 text-[#2563EB]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.8}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.5 10.5V7a4.5 4.5 0 00-9 0v3.5M5 10.5h14a1 1 0 011 1V20a1 1 0 01-1 1H5a1 1 0 01-1-1v-8.5a1 1 0 011-1z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Heading */}
+              <div className="text-center mb-6">
+                <h1 className="text-[20px] font-black text-slate-900">
                   Create Account
                 </h1>
-                <p className="text-[13px] text-slate-500 font-medium">
-                  Enter your details to start your 7-day free trial.
+                <p className="text-[#2563EB] text-[13px] font-semibold mt-0.5">
+                  Your Personal Dashboard
                 </p>
               </div>
 
@@ -148,10 +238,9 @@ export default function SignupPage(): React.JSX.Element {
                   </label>
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full bg-slate-50 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 rounded-xl px-4 py-4 cursor-pointer transition-all flex items-center gap-4 group"
+                    className="w-full bg-[#F1F5F9] border-2 border-dashed border-[#BFDBFE] hover:border-[#2563EB] hover:bg-[#EFF6FF]/40 rounded-xl px-4 py-3 cursor-pointer transition-all flex items-center gap-3 group"
                   >
-                    {/* Preview or placeholder */}
-                    <div className="w-14 h-14 rounded-full overflow-hidden bg-slate-200 border-2 border-white shadow-md shrink-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-[#EFF6FF] border-2 border-white shadow-sm shrink-0 flex items-center justify-center">
                       {photoPreview ? (
                         <img
                           src={photoPreview}
@@ -159,20 +248,19 @@ export default function SignupPage(): React.JSX.Element {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Camera className="w-6 h-6 text-slate-400 group-hover:text-blue-400 transition-colors" />
+                        <Camera className="w-5 h-5 text-[#2563EB] group-hover:text-[#1D4ED8] transition-colors" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
+                      <p className="text-[12px] font-bold text-slate-600 group-hover:text-[#2563EB] transition-colors truncate">
                         {photoName ? photoName : "Click to upload photo"}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         JPG, PNG or GIF · Max 5MB
                       </p>
                     </div>
-                    <Upload className="w-4 h-4 text-slate-300 group-hover:text-blue-400 transition-colors shrink-0" />
+                    <Upload className="w-4 h-4 text-[#93C5FD] group-hover:text-[#2563EB] transition-colors shrink-0" />
                   </div>
-                  {/* Hidden real file input */}
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -183,7 +271,7 @@ export default function SignupPage(): React.JSX.Element {
                 </div>
 
                 {/* Full Name + Email */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                       Full Name
@@ -194,7 +282,7 @@ export default function SignupPage(): React.JSX.Element {
                       })}
                       type="text"
                       placeholder="John Doe"
-                      className={`w-full bg-slate-50 border ${errors.fullName ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                      className={`${inputBase} ${errors.fullName ? "border-red-400" : ""}`}
                     />
                     {errors.fullName && (
                       <p className="text-[11px] text-red-500 font-bold ml-1">
@@ -217,7 +305,7 @@ export default function SignupPage(): React.JSX.Element {
                       })}
                       type="email"
                       placeholder="john@example.com"
-                      className={`w-full bg-slate-50 border ${errors.email ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                      className={`${inputBase} ${errors.email ? "border-red-400" : ""}`}
                     />
                     {errors.email && (
                       <p className="text-[11px] text-red-500 font-bold ml-1">
@@ -227,6 +315,7 @@ export default function SignupPage(): React.JSX.Element {
                   </div>
                 </div>
 
+                {/* Password */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                     Password
@@ -235,19 +324,16 @@ export default function SignupPage(): React.JSX.Element {
                     <input
                       {...register("password", {
                         required: "Password is required",
-                        minLength: {
-                          value: 6,
-                          message: "Password must be at least 6 characters",
-                        },
+                        minLength: { value: 6, message: "Min 6 characters" },
                       })}
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className={`w-full bg-slate-50 border ${errors.password ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 pr-11 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                      className={`${inputBase} pr-11 ${errors.password ? "border-red-400" : ""}`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#2563EB] transition-colors"
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -264,7 +350,7 @@ export default function SignupPage(): React.JSX.Element {
                 </div>
 
                 {/* Phone + Country */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                       Phone Number
@@ -279,7 +365,7 @@ export default function SignupPage(): React.JSX.Element {
                       })}
                       type="tel"
                       placeholder="+880 1700 000000"
-                      className={`w-full bg-slate-50 border ${errors.phone ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                      className={`${inputBase} ${errors.phone ? "border-red-400" : ""}`}
                     />
                     {errors.phone && (
                       <p className="text-[11px] text-red-500 font-bold ml-1">
@@ -302,7 +388,7 @@ export default function SignupPage(): React.JSX.Element {
                           onValueChange={field.onChange}
                         >
                           <SelectTrigger
-                            className={`w-full bg-slate-50 border ${errors.country ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all text-slate-700 font-medium cursor-pointer`}
+                            className={`w-full bg-[#F1F5F9] border ${errors.country ? "border-red-400" : "border-[#E2E8F0]"} focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 rounded-xl px-4 py-3 text-[13px] outline-none transition-all text-slate-700 font-medium cursor-pointer`}
                           >
                             <SelectValue placeholder="Select country" />
                           </SelectTrigger>
@@ -324,11 +410,11 @@ export default function SignupPage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Submit */}
+                {/* Submit — JEVXO "Start Learning" button style */}
                 <button
                   type="submit"
                   disabled={isSubmitting || isRegisterLoading || success}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none text-[13px] flex items-center justify-center gap-2"
+                  className="w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-black py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none text-[13px] flex items-center justify-center gap-2 mt-1"
                 >
                   {isSubmitting || isRegisterLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -346,17 +432,20 @@ export default function SignupPage(): React.JSX.Element {
                 </button>
               </form>
 
-              <div className="mt-6 text-center">
-                <p className="text-[13px] text-slate-500 font-medium">
-                  Already have an account?{" "}
-                  <Link
-                    href="/login"
-                    className="text-blue-600 font-black hover:underline"
-                  >
-                    Sign In
-                  </Link>
-                </p>
-              </div>
+              {/* Footer */}
+              <p className="text-center text-[12px] text-slate-400 mt-5">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="text-[#2563EB] font-black hover:underline"
+                >
+                  Sign In
+                </Link>
+              </p>
+
+              <p className="text-center text-[11px] text-slate-300 mt-3">
+                © 2026 Developed by Aftab Farhan ARKO . All rights reserved.
+              </p>
             </div>
           </div>
         </div>

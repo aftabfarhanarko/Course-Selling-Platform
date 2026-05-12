@@ -1,9 +1,9 @@
 import { AppProviders } from "@/providers";
 import type { Metadata } from "next";
 import { Bai_Jamjuree } from "next/font/google";
-import Footer from "@/components/Footer";
 import Header from "@/components/Navbar";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 const baiJamjuree = Bai_Jamjuree({
   variable: "--font-bai-jamjuree",
@@ -36,7 +36,7 @@ export default function RootLayout({
         <main className="flex-1 ">
           <AppProviders>{children}</AppProviders>
         </main>
-        <Footer />
+        <Footer/>
       </body>
     </html>
   );
