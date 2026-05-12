@@ -1,9 +1,9 @@
 ﻿"use client";
-
-import React, { useEffect, useRef, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Link from "next/link";
 import SignupLotti from "@/components/signup/Lotti";
+import { useRegisterMutation } from "@/lib/api/authApi";
+import { uploadImageToImgBB } from "@/lib/images.upload";
 import {
   Select,
   SelectContent,
@@ -24,13 +24,15 @@ import {
   Camera,
   Upload,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useEffect, useRef, useState } from "react";
 
 type SignupFormData = {
   fullName: string;
   email: string;
   phone: string;
   country: string;
-  photo: FileList;
+  password: string;
 };
 
 export default function SignupPage(): React.JSX.Element {
@@ -40,6 +42,9 @@ export default function SignupPage(): React.JSX.Element {
   const [photoName, setPhotoName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [countries, setCountries] = useState<string[]>([]);
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [registerUser, { isLoading: isRegisterLoading }] =
+    useRegisterMutation();
 
   const {
     register,
@@ -52,6 +57,7 @@ export default function SignupPage(): React.JSX.Element {
       email: "",
       phone: "",
       country: "",
+      password: "",
     },
   });
 
@@ -78,6 +84,7 @@ export default function SignupPage(): React.JSX.Element {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedPhoto(file);
       setPhotoName(file.name);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -88,10 +95,33 @@ export default function SignupPage(): React.JSX.Element {
   };
 
   const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
-    await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-    console.log("Signup data:", data);
-    setSuccess(true);
-    
+    if (!selectedPhoto) {
+      toast.error("Please upload a profile photo");
+      return;
+    }
+
+    const toastId = toast.loading("Creating account...");
+
+    try {
+      const photoUrl = await uploadImageToImgBB(selectedPhoto);
+
+      await registerUser({
+        name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        country: data.country,
+        password: data.password,
+        photo: photoUrl,
+      }).unwrap();
+
+      setSuccess(true);
+      toast.success("Account created!", { id: toastId });
+      setTimeout(() => {
+        // window.location.href = "/login";
+      }, 1200);
+    } catch {
+      toast.error("Registration failed", { id: toastId });
+    }
   };
 
   return (
@@ -200,6 +230,42 @@ export default function SignupPage(): React.JSX.Element {
                   </div>
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      {...register("password", {
+                        required: "Password is required",
+                        minLength: {
+                          value: 6,
+                          message: "Password must be at least 6 characters",
+                        },
+                      })}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a password"
+                      className={`w-full bg-slate-50 border ${errors.password ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 pr-11 text-[13px] outline-none transition-all placeholder:text-slate-400 font-medium`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-[11px] text-red-500 font-bold ml-1">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </div>
+
                 {/* Phone + Country */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
@@ -264,10 +330,10 @@ export default function SignupPage(): React.JSX.Element {
                 {/* Submit */}
                 <button
                   type="submit"
-                  disabled={isSubmitting || success}
+                  disabled={isSubmitting || isRegisterLoading || success}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none text-[13px] flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || isRegisterLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : success ? (
                     <>

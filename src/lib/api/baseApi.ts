@@ -8,7 +8,7 @@ const API_BASE_URL =
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: API_BASE_URL,
+    baseUrl: "/api",
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
 
@@ -31,3 +31,5 @@ export const baseApi = createApi({
   tagTypes: ["Auth", "User", "Course", "Payment"],
   endpoints: () => ({}),
 });
+
+
