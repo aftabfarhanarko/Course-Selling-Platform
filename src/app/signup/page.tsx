@@ -116,9 +116,6 @@ export default function SignupPage(): React.JSX.Element {
 
       setSuccess(true);
       toast.success("Account created!", { id: toastId });
-      setTimeout(() => {
-        // window.location.href = "/login";
-      }, 1200);
     } catch {
       toast.error("Registration failed", { id: toastId });
     }

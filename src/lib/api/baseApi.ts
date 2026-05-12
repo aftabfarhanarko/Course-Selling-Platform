@@ -18,7 +18,7 @@ export const baseApi = createApi({
         (state.auth as unknown as { token?: string } | undefined)?.token;
 
       if (token && !headers.has("authorization")) {
-        headers.set("authorization", `Bearer ${token}`);
+        headers.set("Authorization", `Bearer ${token}`);
       }
 
       if (!headers.has("accept")) {
@@ -31,5 +31,3 @@ export const baseApi = createApi({
   tagTypes: ["Auth", "User", "Course", "Payment"],
   endpoints: () => ({}),
 });
-
-
