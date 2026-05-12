@@ -1,105 +1,343 @@
 "use client";
 
-import { AlertCircle, Building2, CreditCard, HandCoins } from "lucide-react";
+import { AlertCircle, Building2, CreditCard, HandCoins, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
 
-function page() {
+const BALANCE = 12450.5;
+
+const METHODS = [
+  {
+    id: "bank",
+    icon: CreditCard,
+    title: "Bank Transfer",
+    desc: "Direct bank account transfer",
+    fee: "Free",
+    duration: "1-3 business days",
+  },
+  {
+    id: "wallet",
+    icon: Building2,
+    title: "Wallet Payment",
+    desc: "Digital wallet transfer",
+    fee: "0.5%",
+    duration: "Instant",
+  },
+];
+
+const QUICK_AMOUNTS = [100, 500, 1000, 5000];
+
+type Step = "form" | "loading" | "success";
+
+export default function WithdrawPage() {
+  const [selectedMethod, setSelectedMethod] = useState<string>("bank");
+  const [amount, setAmount] = useState<string>("");
+  const [step, setStep] = useState<Step>("form");
+  const [error, setError] = useState<string>("");
+
+  const numericAmount = parseFloat(amount) || 0;
+  const isValid = numericAmount >= 10 && numericAmount <= BALANCE;
+
+  const selectedMethodData = METHODS.find((m) => m.id === selectedMethod);
+  const fee =
+    selectedMethod === "wallet" ? numericAmount * 0.005 : 0;
+  const youReceive = numericAmount - fee;
+
+  function handleAmountChange(val: string) {
+    setError("");
+    setAmount(val);
+    const num = parseFloat(val);
+    if (val && num < 10) setError("Minimum withdrawal is $10.00");
+    else if (val && num > BALANCE)
+      setError(`Maximum is $${BALANCE.toLocaleString()}`);
+  }
+
+  function handleSubmit() {
+    if (!isValid) return;
+    setStep("loading");
+    setTimeout(() => setStep("success"), 2200);
+  }
+
+  function handleReset() {
+    setAmount("");
+    setError("");
+    setSelectedMethod("bank");
+    setStep("form");
+  }
+
+  /* ── SUCCESS SCREEN ── */
+  if (step === "success") {
+    return (
+      <div className="w-full max-w-lg mx-auto px-4 py-12 flex flex-col items-center text-center">
+        <div className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-6 animate-bounce-once">
+          <CheckCircle2 size={44} className="text-emerald-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
+          Withdrawal Requested!
+        </h2>
+        <p className="text-zinc-500 dark:text-zinc-400 mb-1">
+          <span className="font-semibold text-zinc-800 dark:text-zinc-100">
+            ${youReceive.toFixed(2)}
+          </span>{" "}
+          will be sent via{" "}
+          <span className="font-semibold text-zinc-800 dark:text-zinc-100">
+            {selectedMethodData?.title}
+          </span>
+        </p>
+        <p className="text-sm text-zinc-400 dark:text-zinc-500 mb-8">
+          Est. arrival: {selectedMethodData?.duration}
+        </p>
+
+        <div className="w-full bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 text-left mb-8 space-y-3 text-sm">
+          {[
+            ["Amount Requested", `$${numericAmount.toFixed(2)}`],
+            ["Processing Fee", fee > 0 ? `-$${fee.toFixed(2)}` : "Free"],
+            ["You Receive", `$${youReceive.toFixed(2)}`],
+            ["Method", selectedMethodData?.title ?? ""],
+            ["Status", "Pending"],
+          ].map(([label, value]) => (
+            <div key={label} className="flex justify-between">
+              <span className="text-zinc-500 dark:text-zinc-400">{label}</span>
+              <span
+                className={`font-semibold ${
+                  label === "You Receive"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-zinc-800 dark:text-zinc-100"
+                }`}
+              >
+                {value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={handleReset}
+          className="w-full py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+        >
+          Make Another Withdrawal
+        </button>
+      </div>
+    );
+  }
+
+  /* ── LOADING SCREEN ── */
+  if (step === "loading") {
+    return (
+      <div className="w-full max-w-lg mx-auto px-4 py-24 flex flex-col items-center text-center">
+        <Loader2 size={48} className="text-blue-500 animate-spin mb-4" />
+        <p className="text-zinc-600 dark:text-zinc-400 font-medium">
+          Processing your withdrawal…
+        </p>
+      </div>
+    );
+  }
+
+  /* ── MAIN FORM ── */
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-zinc-900 dark:text-white mb-2">
+    <div className="w-full max-w-2xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">
           Withdraw Funds
         </h1>
-        <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Request a withdrawal from your account balance.
         </p>
       </div>
 
-      {/* Available Balance */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <HandCoins size={20} className="text-emerald-600" />
-          <p className="text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-            AVAILABLE BALANCE
+      {/* Balance Card */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 mb-8 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30">
+        <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10" />
+        <div className="absolute -bottom-8 -right-2 w-24 h-24 rounded-full bg-white/5" />
+        <div className="flex items-center gap-2 mb-1 relative z-10">
+          <HandCoins size={18} className="opacity-80" />
+          <p className="text-xs font-semibold tracking-widest uppercase opacity-80">
+            Available Balance
           </p>
         </div>
-        <p className="text-2xl sm:text-3xl font-bold text-emerald-900 dark:text-emerald-100">
-          $12,450.50
+        <p className="text-4xl font-bold relative z-10">
+          ${BALANCE.toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </p>
+        <p className="text-xs opacity-60 mt-1 relative z-10">Updated just now</p>
       </div>
 
-      {/* Withdrawal Methods */}
-      <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-        <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white mb-3 sm:mb-4">
-          Select Withdrawal Method
+      {/* Method Selection */}
+      <div className="mb-8">
+        <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3">
+          Withdrawal Method
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {METHODS.map((method) => {
+            const Icon = method.icon;
+            const active = selectedMethod === method.id;
+            return (
+              <button
+                key={method.id}
+                onClick={() => setSelectedMethod(method.id)}
+                className={`relative text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                  active
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40 shadow-sm"
+                    : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 bg-white dark:bg-zinc-900"
+                }`}
+              >
+                {active && (
+                  <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-blue-500" />
+                )}
+                <div className="flex items-center gap-3 mb-2">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      active
+                        ? "bg-blue-500 text-white"
+                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
+                    }`}
+                  >
+                    <Icon size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                      {method.title}
+                    </p>
+                    <p className="text-xs text-zinc-400">{method.desc}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 mt-1 text-xs">
+                  <span className="text-zinc-500">
+                    Fee:{" "}
+                    <span
+                      className={
+                        method.fee === "Free"
+                          ? "text-emerald-500 font-medium"
+                          : "text-zinc-700 dark:text-zinc-300 font-medium"
+                      }
+                    >
+                      {method.fee}
+                    </span>
+                  </span>
+                  <span className="text-zinc-500">
+                    Time:{" "}
+                    <span className="text-zinc-700 dark:text-zinc-300 font-medium">
+                      {method.duration}
+                    </span>
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Amount Input */}
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3">
+          Amount
         </h3>
 
-        {[
-          {
-            icon: CreditCard,
-            title: "Bank Transfer",
-            desc: "Direct bank account transfer",
-          },
-          {
-            icon: Building2,
-            title: "Wallet Payment",
-            desc: "Digital wallet transfer",
-          },
-        ].map((method, i) => (
-          <label
-            key={i}
-            className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+        {/* Quick amounts */}
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {QUICK_AMOUNTS.map((q) => (
+            <button
+              key={q}
+              onClick={() => handleAmountChange(String(q))}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                numericAmount === q
+                  ? "bg-blue-500 text-white border-blue-500"
+                  : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:border-blue-300 dark:hover:border-blue-600"
+              }`}
+            >
+              ${q.toLocaleString()}
+            </button>
+          ))}
+          <button
+            onClick={() => handleAmountChange(String(BALANCE))}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+              numericAmount === BALANCE
+                ? "bg-blue-500 text-white border-blue-500"
+                : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:border-blue-300 dark:hover:border-blue-600"
+            }`}
           >
-            <input type="radio" name="method" className="mt-1" />
-            <div className="flex items-center gap-3 flex-1">
-              <method.icon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
-              <div>
-                <p className="text-sm sm:text-base font-medium text-zinc-900 dark:text-white">
-                  {method.title}
-                </p>
-                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                  {method.desc}
-                </p>
-              </div>
-            </div>
-          </label>
-        ))}
-      </div>
+            Max
+          </button>
+        </div>
 
-      {/* Withdrawal Amount */}
-      <div className="bg-white dark:bg-zinc-900 rounded-lg sm:rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 mb-6 sm:mb-8">
-        <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-2">
-          Withdrawal Amount
-        </label>
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-zinc-900 dark:text-white">
-            $
-          </span>
+        {/* Input field */}
+        <div
+          className={`flex items-center gap-2 bg-white dark:bg-zinc-900 border-2 rounded-xl px-4 py-3 transition-colors ${
+            error
+              ? "border-red-400 dark:border-red-500"
+              : amount && isValid
+              ? "border-emerald-400 dark:border-emerald-500"
+              : "border-zinc-200 dark:border-zinc-700 focus-within:border-blue-400 dark:focus-within:border-blue-500"
+          }`}
+        >
+          <span className="text-2xl font-bold text-zinc-400">$</span>
           <input
             type="number"
+            value={amount}
+            onChange={(e) => handleAmountChange(e.target.value)}
             placeholder="0.00"
-            className="flex-1 px-3 py-2 sm:py-3 border border-zinc-200 dark:border-zinc-700 rounded-lg dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            min={10}
+            max={BALANCE}
+            className="flex-1 bg-transparent text-2xl font-bold text-zinc-900 dark:text-white placeholder-zinc-300 focus:outline-none"
           />
+          {amount && isValid && (
+            <CheckCircle2 size={20} className="text-emerald-500 flex-shrink-0" />
+          )}
         </div>
-        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-2">
-          Minimum: $10 | Maximum: $12,450.50
+
+        {error ? (
+          <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+            <AlertCircle size={12} /> {error}
+          </p>
+        ) : (
+          <p className="text-xs text-zinc-400 mt-1.5">
+            Min $10 · Max ${BALANCE.toLocaleString()}
+          </p>
+        )}
+      </div>
+
+      {/* Summary */}
+      {numericAmount > 0 && isValid && (
+        <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 mb-6 text-sm space-y-2">
+          <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
+            <span>Withdrawal Amount</span>
+            <span className="text-zinc-800 dark:text-zinc-100 font-medium">
+              ${numericAmount.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
+            <span>Processing Fee</span>
+            <span className="text-zinc-800 dark:text-zinc-100 font-medium">
+              {fee > 0 ? `-$${fee.toFixed(2)}` : "Free"}
+            </span>
+          </div>
+          <div className="h-px bg-zinc-200 dark:bg-zinc-700" />
+          <div className="flex justify-between font-semibold">
+            <span className="text-zinc-700 dark:text-zinc-200">You Receive</span>
+            <span className="text-emerald-600 dark:text-emerald-400">
+              ${youReceive.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Info */}
+      <div className="flex gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-3 mb-6">
+        <AlertCircle size={16} className="text-blue-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-blue-600 dark:text-blue-300">
+          Withdrawals are processed within {selectedMethodData?.duration}.{" "}
+          {fee > 0 ? `A ${selectedMethodData?.fee} processing fee applies.` : "No processing fee."}
         </p>
       </div>
 
-      {/* Info Alert */}
-      <div className="flex gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 mb-6 sm:mb-8">
-        <AlertCircle size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
-          Withdrawals are typically processed within 1-3 business days. A small
-          processing fee may apply.
-        </p>
-      </div>
-
-      {/* Submit Button */}
-      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors text-sm">
+      {/* Submit */}
+      <button
+        onClick={handleSubmit}
+        disabled={!isValid}
+        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 dark:disabled:bg-zinc-800 disabled:text-zinc-400 dark:disabled:text-zinc-600 text-white py-3.5 rounded-xl font-semibold transition-all duration-200 text-sm disabled:cursor-not-allowed"
+      >
         Request Withdrawal
+        <ArrowRight size={16} />
       </button>
     </div>
   );
 }
-
-export default page;
