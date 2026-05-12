@@ -1,271 +1,356 @@
 "use client";
 
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
-
-const enrollments = [
-  {
-    id: 1,
-    orderId: "#IA-98234",
-    userName: "Alex",
-    courseTitle: "SaaS Interface Architect Masterclass",
-    price: "$499.00",
-    date: "Oct 24, 2024",
-    status: "Paid",
-  },
-];
+import { COURSES, type Category } from "@/lib/courses";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Search,
+  ShieldCheck,
+  Star,
+} from "lucide-react";
 
 export default function ShopPage() {
-  const [selectedEnrollment] = useState(enrollments[0]);
+  type CategoryFilter = "All" | Category;
+
+  const filters = useMemo<CategoryFilter[]>(() => {
+    const unique = Array.from(new Set(COURSES.map((c) => c.category)));
+    return ["All", ...unique] as CategoryFilter[];
+  }, []);
+
+  const [query, setQuery] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>("All");
+
+  const filteredCourses = useMemo(() => {
+    const q = query.trim().toLowerCase();
+
+    return COURSES.filter((c) => {
+      if (activeCategory !== "All" && c.category !== activeCategory)
+        return false;
+
+      if (!q) return true;
+
+      const haystack =
+        `${c.title} ${c.desc} ${c.category} ${c.earnings}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [activeCategory, query]);
+
+  const popularCourses = useMemo(() => {
+    return [...COURSES].sort((a, b) => b.rating - a.rating).slice(0, 3);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] flex items-start justify-center px-4 py-10 font-sans">
-      <div className="mt-15 max-w-7xl mx-auto">
-        {/* Check Icon */}
-        <div className="flex justify-center mb-5">
-          <div className="w-[52px] h-[52px] rounded-full bg-green-500 flex items-center justify-center shadow-[0_4px_20px_rgba(34,197,94,0.28)]">
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Heading */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-[2rem] font-semibold text-[#0f1629] leading-tight tracking-tight">
-            Welcome to the Academy, {selectedEnrollment.userName}!
-          </h1>
-          <p className="mt-2 text-xs sm:text-sm text-[#7a839a] font-normal leading-relaxed">
-            Your enrollment in{" "}
-            <span className="text-blue-600 font-medium">
-              &quot;{selectedEnrollment.courseTitle}&quot;
-            </span>{" "}
-            is complete.
-          </p>
-        </div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
-          {/* Left Column */}
-          <div className="flex flex-col gap-4 order-2 lg:order-1">
-            {/* Access Details Card */}
-            <div className="bg-white rounded-[18px] p-5 border border-black/[0.07]">
-              <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-[#aab0c0] uppercase mb-3.5">
-                Access Details
+    <div className="min-h-screen bg-slate-50 mt-10 font-sans">
+      <section className="relative overflow-hidden border-b border-slate-200 bg-white">
+        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-[420px] w-[760px] rounded-full bg-blue-100/70 blur-[90px]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-16 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-black tracking-widest text-blue-700 uppercase">
+                <ShieldCheck className="h-4 w-4" />
+                Verified Marketplace
+              </div>
+              <h1 className="mt-5 text-[2.2rem] sm:text-[2.8rem] font-black tracking-tight text-slate-900 leading-[1.1]">
+                Shop Producats & Digital Assets
+                <span className="text-blue-600"> built to earn.</span>
+              </h1>
+              <p className="mt-4 text-[14px] sm:text-[15px] text-slate-600 leading-relaxed max-w-xl">
+                Pick a course, learn the system, and ship outcomes. Instant
+                access, lifetime updates, and secure checkout.
               </p>
-              <div className="bg-[#f7f8fc] rounded-[14px] p-4 border border-black/[0.05] flex gap-3.5 items-start">
-                <div className="w-10 h-10 rounded-[10px] bg-blue-100 flex items-center justify-center shrink-0 text-blue-600">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[0.82rem] text-[#56627a] leading-relaxed">
-                    You can now access your course in the &quot;My Courses&quot;
-                    section. A confirmation email has been sent to your inbox.
-                  </p>
-                  <div className="flex flex-wrap gap-2.5 mt-3.5">
-                    <Link
-                      href={`/shop/shopCard?id=${selectedEnrollment.id}&price=${selectedEnrollment.price}&title=${encodeURIComponent(selectedEnrollment.courseTitle)}`}
-                      className="inline-flex items-center px-4 py-2 rounded-full bg-blue-600 text-white text-[0.8rem] font-medium hover:scale-[1.02] hover:shadow-[0_4px_14px_rgba(37,99,235,0.3)] transition-all duration-150 no-underline"
-                    >
-                      Start Learning Now
-                    </Link>
-                    <Link
-                      href="/student"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-50 text-blue-600 text-[0.8rem] font-medium hover:bg-blue-100 transition-colors duration-150 no-underline"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect x="3" y="3" width="7" height="7" rx="1" />
-                        <rect x="14" y="3" width="7" height="7" rx="1" />
-                        <rect x="3" y="14" width="7" height="7" rx="1" />
-                        <rect x="14" y="14" width="7" height="7" rx="1" />
-                      </svg>
-                      Go to Dashboard
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Community Card */}
-            <div className="bg-white rounded-[18px] p-5 border border-black/[0.07]">
-              <div className="flex justify-between items-start mb-3.5">
-                <div>
-                  <h3 className="text-[1.05rem] font-semibold text-[#0f1629]">
-                    Join the Collective
-                  </h3>
-                  <p className="text-[0.78rem] text-[#7a839a] mt-0.5">
-                    Connect with elite architects and start earning.
-                  </p>
-                </div>
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#d1d5e0"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </div>
-              <div className="bg-[#f8f9fd] rounded-[13px] border border-black/[0.06] p-3.5 flex flex-wrap justify-between items-center gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {/* Avatar Stack */}
-                  <div className="flex">
-                    <div className="w-[26px] h-[26px] rounded-full border-2 border-white bg-[#c7d7f5] flex items-center justify-center text-[0.6rem] font-semibold text-blue-600 -mr-1.5 z-30">
-                      AJ
-                    </div>
-                    <div className="w-[26px] h-[26px] rounded-full border-2 border-white bg-pink-100 flex items-center justify-center text-[0.6rem] font-semibold text-pink-700 -mr-1.5 z-20">
-                      MK
-                    </div>
-                    <div className="w-[26px] h-[26px] rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-[0.6rem] font-semibold text-emerald-800 z-10">
-                      RS
-                    </div>
-                  </div>
-                  <p className="text-[0.78rem] text-[#56627a]">
-                    Join 15,000+ students in our private Telegram group.
-                  </p>
-                </div>
+              <div className="mt-7 flex flex-wrap gap-3">
                 <Link
-                  href="https://t.me"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] bg-sky-500 text-white text-[0.77rem] font-medium hover:opacity-90 transition-opacity duration-150 whitespace-nowrap no-underline"
+                  href="/courses"
+                  className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-[13px] font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all"
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" />
-                  </svg>
-                  Join Telegram
+                  Browse Courses <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/shop/shopArchitect"
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-slate-900 text-[13px] font-black hover:bg-slate-50 active:scale-[0.98] transition-all"
+                >
+                  Explore Toolkit
                 </Link>
               </div>
-            </div>
-          </div>
 
-          {/* Right Column — Order Summary */}
-          <div className="order-1 lg:order-2">
-            <div className="bg-[#f8f8fc] rounded-[18px] p-5 border border-black/[0.07] h-fit">
-              <h3 className="text-[0.95rem] font-semibold text-[#0f1629] mb-4">
-                Order Summary
-              </h3>
-
-              <div className="border-t border-black/[0.07] pt-4 flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-[0.78rem] text-[#7a839a]">
-                    Order ID
-                  </span>
-                  <span className="text-[0.8rem] font-medium text-blue-600">
-                    {selectedEnrollment.orderId}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[0.78rem] text-[#7a839a]">Date</span>
-                  <span className="text-[0.8rem] font-medium text-[#0f1629]">
-                    {selectedEnrollment.date}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[0.78rem] text-[#7a839a]">Status</span>
-                  <span className="text-[0.7rem] font-medium text-green-700 bg-green-100 px-2.5 py-0.5 rounded-full">
-                    {selectedEnrollment.status}
-                  </span>
-                </div>
-              </div>
-
-              <div className="border-t border-black/[0.07] mt-5 pt-4">
-                <p className="text-[0.63rem] tracking-[0.12em] uppercase text-[#aab0c0] font-semibold mb-1">
-                  Total Paid
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl sm:text-3xl font-semibold text-[#0f1629]">
-                    {selectedEnrollment.price}
-                  </span>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#aab0c0"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { k: "Instant Access", v: "Start in 60 seconds" },
+                  { k: "Lifetime Updates", v: "New modules included" },
+                  { k: "Secure Checkout", v: "Encrypted payments" },
+                ].map((x) => (
+                  <div
+                    key={x.k}
+                    className="rounded-2xl border border-slate-200 bg-white p-4"
                   >
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                  </svg>
+                    <p className="text-[11px] font-black tracking-widest text-slate-400 uppercase">
+                      {x.k}
+                    </p>
+                    <p className="mt-1 text-[13px] font-bold text-slate-800">
+                      {x.v}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 p-6 sm:p-7 shadow-xl shadow-slate-200">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-black tracking-widest text-slate-400 uppercase">
+                    Popular Right Now
+                  </p>
+                  <h2 className="mt-2 text-[20px] font-black text-white">
+                    Top-rated picks
+                  </h2>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-black tracking-widest text-white">
+                  <BadgeCheck className="h-4 w-4 text-emerald-300" />
+                  Trusted
                 </div>
               </div>
 
-              {/* Preview placeholder */}
-              <div className="mt-4 rounded-[10px] overflow-hidden border border-black/[0.08] h-[72px] flex items-center justify-center bg-gradient-to-br from-[#c7d7f5] to-[#e0e7ff]">
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#6b7baa"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="opacity-50"
-                >
-                  <rect x="2" y="3" width="20" height="14" rx="2" />
-                  <line x1="8" y1="21" x2="16" y2="21" />
-                  <line x1="12" y1="17" x2="12" y2="21" />
-                </svg>
+              <div className="mt-5 space-y-3">
+                {popularCourses.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/courses/${c.id}`}
+                    className="block rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-black tracking-widest text-blue-300 uppercase">
+                          {c.category}
+                        </p>
+                        <p className="mt-1 text-[14px] font-black text-white truncate">
+                          {c.title}
+                        </p>
+                        <div className="mt-2 flex items-center gap-2 text-[12px] text-slate-300">
+                          <span className="inline-flex items-center gap-1">
+                            <Star className="h-4 w-4 text-amber-300" />
+                            <span className="font-bold text-white">
+                              {c.rating}
+                            </span>
+                          </span>
+                          <span className="text-slate-400">
+                            ({c.reviews} reviews)
+                          </span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-[11px] font-black tracking-widest text-slate-400 uppercase">
+                          Price
+                        </p>
+                        <p className="mt-1 text-[16px] font-black text-white">
+                          ${c.price.toFixed(0)}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-
-              <p className="text-[0.6rem] tracking-[0.1em] uppercase text-[#aab0c0] text-center mt-10 leading-relaxed">
-                Transaction secured by
-                <br />
-                IncomeArchitect Vault
-              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-12">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="text-[18px] sm:text-[20px] font-black text-slate-900">
+              Producats
+            </h2>
+            <p className="mt-1 text-[13px] text-slate-500 font-medium">
+              Filter by category or search by title.
+            </p>
+          </div>
+
+          <div className="w-full sm:w-[380px]">
+            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <Search className="h-4 w-4 text-slate-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search courses..."
+                className="w-full bg-transparent text-[13px] font-semibold text-slate-700 placeholder:text-slate-400 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {filters.map((f) => {
+            const active = f === activeCategory;
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setActiveCategory(f)}
+                className={
+                  active
+                    ? "rounded-full bg-blue-600 px-4 py-2 text-[12px] font-black text-white shadow-lg shadow-blue-200 active:scale-[0.98] transition-all"
+                    : "rounded-full border border-slate-200 bg-white px-4 py-2 text-[12px] font-black text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all"
+                }
+              >
+                {f}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCourses.map((c) => {
+            const price = `$${c.price.toFixed(2)}`;
+
+            return (
+              <div
+                key={c.id}
+                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:shadow-slate-200 transition-shadow"
+              >
+                <div className="relative h-[190px] bg-slate-100 overflow-hidden">
+                  <img
+                    src={c.image}
+                    alt={c.title}
+                    className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-slate-900/0 to-slate-900/0" />
+                  <div className="absolute left-4 bottom-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black tracking-widest text-slate-900 uppercase">
+                    {c.category}
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-[15px] font-black text-slate-900 leading-snug">
+                      {c.title}
+                    </h3>
+                    <div className="shrink-0 text-right">
+                      <p className="text-[11px] font-black tracking-widest text-slate-400 uppercase">
+                        Price
+                      </p>
+                      <p className="mt-1 text-[16px] font-black text-blue-600">
+                        ${c.price.toFixed(0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="mt-2 text-[13px] text-slate-600 leading-relaxed line-clamp-2">
+                    {c.desc}
+                  </p>
+
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-[12px] text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <Star className="h-4 w-4 text-amber-500" />
+                        <span className="font-black text-slate-900">
+                          {c.rating}
+                        </span>
+                      </span>
+                      <span className="text-slate-400">
+                        ({c.reviews} reviews)
+                      </span>
+                    </div>
+
+                    <div className="text-[12px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+                      {c.earnings}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex gap-2">
+                    <Link
+                      href={`/courses/${c.id}`}
+                      className="flex-1 inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-black text-slate-900 hover:bg-slate-50 active:scale-[0.98] transition-all"
+                    >
+                      Details
+                    </Link>
+                    <Link
+                      href={`/shop/shopCard?title=${encodeURIComponent(c.title)}&price=${encodeURIComponent(price)}`}
+                      className="flex-1 inline-flex items-center justify-center rounded-2xl bg-blue-600 px-4 py-2.5 text-[12px] font-black text-white shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all"
+                    >
+                      Buy Now
+                    </Link>
+                  </div>
+
+                  <p className="mt-4 text-[11px] text-slate-400 font-semibold">
+                    30-day money-back guarantee · Lifetime access
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {filteredCourses.length === 0 ? (
+          <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-8 text-center">
+            <p className="text-[14px] font-black text-slate-900">
+              No Producats found.
+            </p>
+            <p className="mt-1 text-[13px] text-slate-500 font-medium">
+              Try a different keyword or category.
+            </p>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="border-t border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8">
+              <h3 className="text-[20px] font-black text-slate-900">
+                Want templates, tools, and software?
+              </h3>
+              <p className="mt-2 text-[14px] text-slate-600 leading-relaxed">
+                Explore the Digital Toolkit store for software and assets built
+                for creators and high-ticket operators.
+              </p>
+              <Link
+                href="/shop/shopArchitect"
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-[13px] font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all"
+              >
+                Open Toolkit <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-8">
+              <h3 className="text-[20px] font-black text-slate-900">FAQ</h3>
+              <div className="mt-4 space-y-3">
+                {[
+                  {
+                    q: "How do I access the course after purchase?",
+                    a: "Right after payment you can open your student dashboard and see the course in your courses area.",
+                  },
+                  {
+                    q: "Do I get lifetime access?",
+                    a: "Yes. Your purchase includes lifetime access and future updates for the course.",
+                  },
+                  {
+                    q: "Is there a refund policy?",
+                    a: "Yes. We offer a 30-day money-back guarantee if the course is not a fit.",
+                  },
+                ].map((x) => (
+                  <details
+                    key={x.q}
+                    className="group rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4"
+                  >
+                    <summary className="cursor-pointer list-none text-[13px] font-black text-slate-900 flex items-center justify-between gap-4">
+                      <span>{x.q}</span>
+                      <span className="text-slate-400 group-open:rotate-180 transition-transform">
+                        <ArrowRight className="h-4 w-4 rotate-90" />
+                      </span>
+                    </summary>
+                    <p className="mt-2 text-[13px] text-slate-600 leading-relaxed font-medium">
+                      {x.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
