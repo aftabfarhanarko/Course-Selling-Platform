@@ -24,14 +24,6 @@ npm install
 npm run dev
 ```
 
-### Environment Variables
-`.env` ফাইলে নিচেরগুলো রাখুন:
-
-```bash
-NEXT_PUBLIC_API_BASE_URL=https://course-selling-api.up.railway.app
-NEXT_PUBLIC_IMGBB_API_KEY=YOUR_IMGBB_KEY
-```
-
 ### API Proxy (CORS Fix)
 Frontend থেকে backend direct hit করলে CORS issue হতে পারে। তাই app এ proxy route ব্যবহার করা হয়:
 - Frontend calls: `/api/...`
