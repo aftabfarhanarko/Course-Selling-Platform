@@ -9,10 +9,6 @@ import {
   TrendingUp,
   Info,
   Mail,
-  FileText,
-  ShieldCheck,
-  ClipboardList,
-  Cookie,
   Lock,
   Twitter,
   Instagram,
@@ -34,14 +30,6 @@ const navLinks = [
   { label: "Community", href: "/community", Icon: Users },
   { label: "Results", href: "/results", Icon: TrendingUp },
   { label: "About", href: "/about", Icon: Info },
-];
-
-const legalLinks = [
-  { label: "Contact", href: "/contact", Icon: Mail },
-  { label: "Contract", href: "/contract", Icon: FileText },
-  { label: "Privacy Policy", href: "/privacy", Icon: ShieldCheck },
-  { label: "Terms of Use", href: "/terms", Icon: ClipboardList },
-  { label: "Cookies", href: "/cookies", Icon: Cookie },
 ];
 
 const stats = [
@@ -71,17 +59,12 @@ function Footer() {
       className={`${plusJakarta.className} bg-[#DFE2FF] border-t border-indigo-200/40 rounded-t-2xl md:rounded-t-none`}
     >
       {/* ── Top Grid ───────────────────────────────────────────────────── */}
-      <div className="max-w-8xl mx-auto w-full grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr_1.2fr] gap-10 px-6 md:px-12 py-10 border-b border-indigo-200/30">
+      <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-10 px-6 md:px-6 py-10 border-b border-indigo-200/30">
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-extrabold text-sm tracking-tight">
-                IA
-              </span>
-            </div>
             <span className="text-[17px] font-extrabold text-indigo-950 tracking-tight">
-              Income<span className="text-indigo-600">Architect</span>
+              JEV<span className="text-indigo-600">XO</span>
             </span>
           </div>
           <p className="text-[11px] font-bold tracking-[.06em] text-indigo-500 mb-3">
@@ -100,26 +83,6 @@ function Footer() {
           </p>
           <ul className="space-y-2.5">
             {navLinks.map(({ label, href, Icon }) => (
-              <li key={label}>
-                <Link
-                  href={href}
-                  className="flex items-center gap-2 text-[13.5px] font-medium text-gray-600 hover:text-indigo-600 transition-colors group"
-                >
-                  <Icon className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 transition-opacity" />
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Legal */}
-        <div>
-          <p className="text-[11px] font-extrabold tracking-[.1em] text-indigo-500 uppercase mb-4">
-            Legal
-          </p>
-          <ul className="space-y-2.5">
-            {legalLinks.map(({ label, href, Icon }) => (
               <li key={label}>
                 <Link
                   href={href}
@@ -162,7 +125,7 @@ function Footer() {
       </div>
 
       {/* ── Bottom Bar ─────────────────────────────────────────────────── */}
-      <div className="max-w-8xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4 px-6 md:px-12 py-4">
+      <div className="max-w-[1400px] mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4 px-6 md:px-12 py-4">
         {/* Copyright */}
         <p className="text-[12px] text-gray-500 font-medium">
           © 2024{" "}
