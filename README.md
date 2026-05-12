@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿## Course Selling Platform (Frontend)
 
-## Getting Started
+Next.js App Router ভিত্তিক course selling platform frontend। এখানে authentication (register/login/refresh/logout), role-based redirect (student/admin), protected routes (middleware), এবং profile management (photo upload + change password) সেট করা আছে।
 
-First, run the development server:
+### Features
+- Auth: Register, Login, Refresh, Logout
+- Role based routing: `student` → `/student`, `superadmin/admin` → `/admin/dashboard`
+- Protected routes: `/student/*`, `/admin/*` (middleware + client layout guard)
+- Profile (Student): `/student/dashboard`
+  - Current user: `GET /users/profile`
+  - Update profile: `PATCH /users/profile` (name + photo)
+  - Change password: `POST /auth/change-password`
+- Image upload: ImgBB (file → url)
 
+### Tech Stack
+- Next.js (App Router)
+- React + TypeScript
+- Redux Toolkit + RTK Query
+- Tailwind CSS
+
+### Run Locally
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
+`.env` ফাইলে নিচেরগুলো রাখুন:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+NEXT_PUBLIC_API_BASE_URL=https://course-selling-api.up.railway.app
+NEXT_PUBLIC_IMGBB_API_KEY=YOUR_IMGBB_KEY
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### API Proxy (CORS Fix)
+Frontend থেকে backend direct hit করলে CORS issue হতে পারে। তাই app এ proxy route ব্যবহার করা হয়:
+- Frontend calls: `/api/...`
+- Next.js rewrite করে: `${NEXT_PUBLIC_API_BASE_URL}/...`
 
-## Learn More
+Config: `next.config.js` এ rewrites সেট করা আছে।
 
-To learn more about Next.js, take a look at the following resources:
+### Protected Routes
+- `/student/*` → role cookie না থাকলে `/login`
+- `/admin/*` → role `superadmin/admin` না হলে `/login`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Middleware: `src/middleware.ts`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Useful Scripts
+```bash
+npm run dev
+npm run build
+npm run start
+```
 
-## Deploy on Vercel
+### Important Notes
+- `NEXT_PUBLIC_IMGBB_API_KEY` client-side এ expose হয় (ImgBB upload client-side বলে)। Production secure করতে চাইলে server-side upload route ব্যবহার করুন।
+- Login/Register এর পর user profile fetch হয় `GET /users/profile` দিয়ে এবং role cookie set হয়। Logout করলে localStorage + role cookie clear হয়।
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
