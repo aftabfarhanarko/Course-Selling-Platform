@@ -56,10 +56,10 @@ function Footer() {
 
   return (
     <footer
-      className={`${plusJakarta.className} bg-[#DFE2FF] border-t border-indigo-200/40 rounded-t-2xl md:rounded-t-none`}
+      className={`${plusJakarta.className} bg-[#DFE2FF] border-t border-indigo-200/40 `}
     >
       {/* ── Top Grid ───────────────────────────────────────────────────── */}
-      <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-10 px-6 md:px-6 py-10 border-b border-indigo-200/30">
+      <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-10 px-6 md:px-6 py-15 border-b border-indigo-200/30">
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2.5 mb-3">

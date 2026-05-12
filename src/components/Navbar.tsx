@@ -123,8 +123,8 @@ function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${
           scrolled
-            ? "bg-white/80 backdrop-blur-xl shadow-sm py-2"
-            : "bg-white py-3"
+            ? "bg-[#dde0f5] backdrop-blur-xl shadow-sm py-2"
+            : "bg-[#DFE2FF] py-2.5"
         }`}
         style={{ fontFamily: "var(--font-bai-jamjuree)" }}
       >
@@ -145,7 +145,7 @@ function Header() {
               <span className="hidden sm:inline">JEVXO</span>
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-1 bg-slate-50 rounded-2xl px-2 py-1.5">
+            <nav className="hidden lg:flex items-center gap-1  rounded-2xl px-2 py-1.5">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 return (
