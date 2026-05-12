@@ -41,7 +41,7 @@ async function fetchCurrentUser(
   token: string,
 ): Promise<Record<string, any> | null> {
   try {
-    const res = await axios.get("/api/auth/me", {
+    const res = await axios.get("/api/users/profile", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const candidate =
@@ -159,3 +159,4 @@ setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+

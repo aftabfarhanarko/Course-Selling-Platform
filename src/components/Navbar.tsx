@@ -95,10 +95,7 @@ function Header() {
               href="/"
               className="text-2xl font-black text-[#0F172A] tracking-tighter flex items-center gap-2"
             >
-              <span className="w-8 h-8 rounded-xl bg-[#0047FF] flex items-center justify-center text-white text-xs font-black">
-                IA
-              </span>
-              <span className="hidden sm:inline">IncomeArchitect</span>
+              <span className="hidden sm:inline"> JEVXO</span>
             </Link>
 
             {/* ── Desktop Nav ── */}
@@ -194,11 +191,8 @@ function Header() {
             onClick={() => setIsOpen(false)}
             className="flex items-center gap-2"
           >
-            <span className="w-8 h-8 rounded-xl bg-[#0047FF] flex items-center justify-center text-white text-xs font-black">
-              IA
-            </span>
             <span className="font-black text-[#0F172A] text-lg tracking-tight">
-              IncomeArchitect
+              JEVXO
             </span>
           </Link>
           <button
