@@ -1,9 +1,16 @@
 ﻿"use client";
 
-import React, { useState, useRef } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import React, { useEffect, useRef, useState } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Link from "next/link";
 import SignupLotti from "@/components/signup/Lotti";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Eye,
   EyeOff,
@@ -26,36 +33,18 @@ type SignupFormData = {
   photo: FileList;
 };
 
-const COUNTRIES = [
-  "Bangladesh",
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "India",
-  "Pakistan",
-  "Germany",
-  "France",
-  "Singapore",
-  "UAE",
-  "Saudi Arabia",
-  "Malaysia",
-  "Indonesia",
-  "Nigeria",
-  "South Africa",
-  "Other",
-];
-
 export default function SignupPage(): React.JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoName, setPhotoName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [countries, setCountries] = useState<string[]>([]);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     defaultValues: {
@@ -65,6 +54,27 @@ export default function SignupPage(): React.JSX.Element {
       country: "",
     },
   });
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/cuntrey.json")
+      .then((res) => res.json())
+      .then((data: Array<{ name?: unknown }>) => {
+        if (!active) return;
+        const names = data
+          .map((x) => (typeof x?.name === "string" ? x.name : null))
+          .filter((x): x is string => !!x);
+        const withOther = names.includes("Other") ? names : [...names, "Other"];
+        setCountries(withOther);
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -81,10 +91,7 @@ export default function SignupPage(): React.JSX.Element {
     await new Promise<void>((resolve) => setTimeout(resolve, 1500));
     console.log("Signup data:", data);
     setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      window.location.href = "/login";
-    }, 2000);
+    
   };
 
   return (
@@ -222,24 +229,30 @@ export default function SignupPage(): React.JSX.Element {
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                       Country
                     </label>
-                    <select
-                      {...register("country", {
-                        required: "Country is required",
-                      })}
-                      className={`w-full bg-slate-50 border ${errors.country ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all text-slate-700 font-medium appearance-none cursor-pointer`}
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 14px center",
-                      }}
-                    >
-                      <option value="">Select country</option>
-                      {COUNTRIES.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+                    <Controller
+                      control={control}
+                      name="country"
+                      rules={{ required: "Country is required" }}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger
+                            className={`w-full bg-slate-50 border ${errors.country ? "border-red-500" : "border-slate-200"} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-xl px-4 py-3 text-[13px] outline-none transition-all text-slate-700 font-medium cursor-pointer`}
+                          >
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countries.map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                     {errors.country && (
                       <p className="text-[11px] text-red-500 font-bold ml-1">
                         {errors.country.message}
