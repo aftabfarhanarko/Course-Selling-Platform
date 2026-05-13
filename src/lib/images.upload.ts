@@ -11,8 +11,7 @@ type ImgBBUploadApiResponse = {
 };
 
 export async function uploadImageToImgBB(file: File | Blob): Promise<string> {
-  const apiKey =
-    process.env.NEXT_PUBLIC_IMGBB_API_KEY ?? process.env.IMGBB_API_KEY;
+  const apiKey = "a6c948ab64f7987bbf9e5477cde3a1cb";
 
   if (!apiKey) {
     throw new Error(
@@ -32,9 +31,7 @@ export async function uploadImageToImgBB(file: File | Blob): Promise<string> {
   );
 
   const url =
-    response.data?.data?.display_url ??
-    response.data?.data?.url ??
-    null;
+    response.data?.data?.display_url ?? response.data?.data?.url ?? null;
 
   if (!url) {
     throw new Error("ImgBB upload failed: invalid response");
