@@ -9,6 +9,11 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const role = request.cookies.get("role")?.value;
 
+  if (pathname === "/admin/users") {
+    const url = new URL("/admin/users-api", request.url);
+    return NextResponse.redirect(url);
+  }
+
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!isAdmin(role)) {
       const url = new URL("/login", request.url);

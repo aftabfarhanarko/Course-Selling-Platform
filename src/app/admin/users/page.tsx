@@ -1,138 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
-  Search,
-  SlidersHorizontal,
-  ChevronDown,
+  AlertTriangle,
+  Check,
   ChevronLeft,
   ChevronRight,
-  UserPlus,
-  MoreHorizontal,
-  X,
-  Edit2,
-  Trash2,
+  Eye,
+  Loader2,
+  Search,
   Shield,
   ShieldOff,
-  Eye,
-  Check,
-  AlertTriangle,
-  Users,
-  GraduationCap,
-  BookOpen,
-  Mail,
-  Calendar,
-  Lock,
+  Trash2,
+  UserPlus,
+  X,
 } from "lucide-react";
+import {
+  useAdminBanUserMutation,
+  useAdminCreateUserMutation,
+  useAdminDeleteUserMutation,
+  useAdminRestoreUserMutation,
+  useAdminUnbanUserMutation,
+  useAdminUsersQuery,
+} from "@/lib/api/admin/user";
 
-/* ──────────────────────────── types ──────────────────────────── */
-type Role = "Instructor" | "Student" | "Admin";
-type Status = "Active" | "Suspended";
+type Role = "Student" | "Instructor" | "Admin";
+type Status = "Active" | "Suspended" | "Deleted";
 
-interface User {
-  id: number;
+type UiUser = {
+  id: number | string;
   name: string;
   email: string;
+  role: Role;
+  status: Status;
+  joinDate: string;
+  phone?: string;
   avatar: string;
   avatarBg: string;
   avatarColor: string;
-  role: Role;
-  joinDate: string;
-  status: Status;
-  phone?: string;
-}
-
-/* ──────────────────────────── seed data ───────────────────────── */
-const seed: User[] = [
-  {
-    id: 1,
-    name: "Marcus Sterling",
-    email: "marcus@incomeflow.com",
-    avatar: "MS",
-    avatarBg: "#FEE2E2",
-    avatarColor: "#EF4444",
-    role: "Instructor",
-    joinDate: "Oct 12, 2023",
-    status: "Active",
-    phone: "+1 555-0101",
-  },
-  {
-    id: 2,
-    name: "Elena Rodriguez",
-    email: "elena.rod@gmail.com",
-    avatar: "ER",
-    avatarBg: "#FEF3C7",
-    avatarColor: "#D97706",
-    role: "Student",
-    joinDate: "Nov 05, 2023",
-    status: "Active",
-    phone: "+1 555-0102",
-  },
-  {
-    id: 3,
-    name: "David Chen",
-    email: "d.chen@enterprise.co",
-    avatar: "DC",
-    avatarBg: "#F3F4F6",
-    avatarColor: "#6B7280",
-    role: "Student",
-    joinDate: "Jan 14, 2024",
-    status: "Suspended",
-    phone: "+1 555-0103",
-  },
-  {
-    id: 4,
-    name: "Sarah Jenkins",
-    email: "s.jenkins@academy.io",
-    avatar: "SJ",
-    avatarBg: "#FEE2E2",
-    avatarColor: "#EF4444",
-    role: "Instructor",
-    joinDate: "Dec 20, 2023",
-    status: "Active",
-    phone: "+1 555-0104",
-  },
-  {
-    id: 5,
-    name: "Omar Hussain",
-    email: "omar.h@platform.net",
-    avatar: "OH",
-    avatarBg: "#EDE9FE",
-    avatarColor: "#7C3AED",
-    role: "Admin",
-    joinDate: "Feb 01, 2024",
-    status: "Active",
-    phone: "+1 555-0105",
-  },
-  {
-    id: 6,
-    name: "Priya Nair",
-    email: "priya.n@learnhub.io",
-    avatar: "PN",
-    avatarBg: "#D1FAE5",
-    avatarColor: "#059669",
-    role: "Student",
-    joinDate: "Mar 08, 2024",
-    status: "Active",
-    phone: "+1 555-0106",
-  },
-];
-
-const roleStyles: Record<Role, string> = {
-  Instructor: "text-blue-700 bg-blue-50 border border-blue-200",
-  Student: "text-purple-700 bg-purple-50 border border-purple-200",
-  Admin: "text-orange-700 bg-orange-50 border border-orange-200",
 };
 
-const filterOptions = [
-  "All Members",
-  "Instructors",
-  "Students",
-  "Admins",
-  "Suspended",
-];
+const PAGE_SIZE = 8;
 
-/* ──────────────────────── helper: initials bg ─────────────────── */
 const bgPalette = [
   { bg: "#FEE2E2", color: "#EF4444" },
   { bg: "#FEF3C7", color: "#D97706" },
@@ -141,8 +50,6 @@ const bgPalette = [
   { bg: "#DBEAFE", color: "#2563EB" },
   { bg: "#FCE7F3", color: "#DB2777" },
 ];
-const pickPalette = (name: string) =>
-  bgPalette[name.charCodeAt(0) % bgPalette.length];
 
 function initials(name: string) {
   return name
@@ -153,217 +60,93 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-/* ═══════════════════════ MODAL: Add / Edit Member ══════════════════ */
-function MemberModal({
-  user,
-  onClose,
-  onSave,
-}: {
-  user?: User;
-  onClose: () => void;
-  onSave: (u: User) => void;
-}) {
-  const isEdit = !!user;
-  const [name, setName] = useState(user?.name ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
-  const [phone, setPhone] = useState(user?.phone ?? "");
-  const [role, setRole] = useState<Role>(user?.role ?? "Student");
-  const [status, setStatus] = useState<Status>(user?.status ?? "Active");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!name.trim()) e.name = "Name is required";
-    if (!email.trim() || !email.includes("@")) e.email = "Valid email required";
-    return e;
-  };
-
-  const handleSave = () => {
-    const e = validate();
-    if (Object.keys(e).length) {
-      setErrors(e);
-      return;
-    }
-    const pal = pickPalette(name);
-    onSave({
-      id: user?.id ?? Date.now(),
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone.trim() || undefined,
-      avatar: initials(name),
-      avatarBg: pal.bg,
-      avatarColor: pal.color,
-      role,
-      status,
-      joinDate:
-        user?.joinDate ??
-        new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-        }),
-    });
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-        {/* header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-indigo-50 to-white border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
-              <UserPlus size={16} className="text-white" />
-            </div>
-            <div>
-              <h2 className="text-[14px] font-bold text-gray-900">
-                {isEdit ? "Edit Member" : "Add New Member"}
-              </h2>
-              <p className="text-[11px] text-gray-400">
-                {isEdit ? "Update member details" : "Fill in the details below"}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-          >
-            <X size={15} />
-          </button>
-        </div>
-
-        <div className="px-6 py-5 space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-              Full Name
-            </label>
-            <div className="relative">
-              <Users
-                size={13}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. John Smith"
-                className={`w-full h-9 pl-8 pr-3 text-[12px] border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors.name ? "border-red-400 bg-red-50" : "border-gray-200"}`}
-              />
-            </div>
-            {errors.name && (
-              <p className="text-[10px] text-red-500 mt-1">{errors.name}</p>
-            )}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail
-                size={13}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. john@example.com"
-                className={`w-full h-9 pl-8 pr-3 text-[12px] border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors.email ? "border-red-400 bg-red-50" : "border-gray-200"}`}
-              />
-            </div>
-            {errors.email && (
-              <p className="text-[10px] text-red-500 mt-1">{errors.email}</p>
-            )}
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-              Phone{" "}
-              <span className="text-gray-300 normal-case font-normal">
-                (optional)
-              </span>
-            </label>
-            <div className="relative">
-              <Lock
-                size={13}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 555-0000"
-                className="w-full h-9 pl-8 pr-3 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              />
-            </div>
-          </div>
-
-          {/* Role + Status row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-                Role
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-                className="w-full h-9 px-3 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
-              >
-                <option>Student</option>
-                <option>Instructor</option>
-                <option>Admin</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-                Status
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as Status)}
-                className="w-full h-9 px-3 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
-              >
-                <option>Active</option>
-                <option>Suspended</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2.5 pt-1">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-200 transition-colors"
-            >
-              <Check size={13} /> {isEdit ? "Save Changes" : "Add Member"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+function pickPalette(name: string) {
+  const first = name.trim().charCodeAt(0) || 0;
+  return bgPalette[first % bgPalette.length];
 }
 
-/* ═══════════════════════ MODAL: View Member ════════════════════════ */
-function ViewModal({
-  user,
-  onClose,
-  onEdit,
-}: {
-  user: User;
-  onClose: () => void;
-  onEdit: () => void;
-}) {
+function formatDate(value: unknown) {
+  if (!value) return "—";
+  const d = new Date(String(value));
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+}
+
+function normalizeRole(value: unknown): Role {
+  const v = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "admin" || v === "superadmin" || v === "super_admin")
+    return "Admin";
+  if (v === "instructor" || v === "teacher") return "Instructor";
+  return "Student";
+}
+
+function normalizeStatus(user: any): Status {
+  const deleted =
+    Boolean(user?.isDeleted) ||
+    Boolean(user?.deletedAt) ||
+    user?.status === "deleted";
+  if (deleted) return "Deleted";
+  const banned =
+    Boolean(user?.isBanned) ||
+    Boolean(user?.banned) ||
+    Boolean(user?.isSuspended) ||
+    user?.status === "banned" ||
+    user?.status === "suspended";
+  if (banned) return "Suspended";
+  return "Active";
+}
+
+function extractUsers(payload: any): any[] {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.users)) return payload.users;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.users)) return payload.data.users;
+  if (Array.isArray(payload?.data?.data)) return payload.data.data;
+  if (Array.isArray(payload?.data?.data?.users)) return payload.data.data.users;
+  return [];
+}
+
+function toUiUser(raw: any): UiUser | null {
+  const id = raw?.id ?? raw?._id ?? raw?.userId ?? null;
+  const name = String(raw?.name ?? raw?.fullName ?? raw?.username ?? "").trim();
+  const email = String(raw?.email ?? "").trim();
+  if (!id || !name || !email) return null;
+
+  const role = normalizeRole(raw?.role);
+  const status = normalizeStatus(raw);
+  const joinDate = formatDate(
+    raw?.createdAt ?? raw?.created_at ?? raw?.joinDate,
+  );
+  const phone =
+    typeof raw?.phone === "string" && raw.phone.trim().length > 0
+      ? raw.phone.trim()
+      : undefined;
+
+  const avatar = initials(name);
+  const palette = pickPalette(name);
+
+  return {
+    id,
+    name,
+    email,
+    role,
+    status,
+    joinDate,
+    phone,
+    avatar,
+    avatarBg: palette.bg,
+    avatarColor: palette.color,
+  };
+}
+
+function ViewModal({ user, onClose }: { user: UiUser; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
@@ -392,29 +175,16 @@ function ViewModal({
 
           <div className="mt-4 space-y-2.5">
             {[
-              { icon: <Shield size={13} />, label: "Role", value: user.role },
-              {
-                icon: <Calendar size={13} />,
-                label: "Joined",
-                value: user.joinDate,
-              },
-              { icon: <Lock size={13} />, label: "Status", value: user.status },
-              ...(user.phone
-                ? [
-                    {
-                      icon: <Mail size={13} />,
-                      label: "Phone",
-                      value: user.phone,
-                    },
-                  ]
-                : []),
-            ].map((r, i) => (
+              { label: "Role", value: user.role },
+              { label: "Joined", value: user.joinDate },
+              { label: "Status", value: user.status },
+              ...(user.phone ? [{ label: "Phone", value: user.phone }] : []),
+            ].map((r) => (
               <div
-                key={i}
-                className="flex items-center gap-3 py-2 border-b border-gray-50"
+                key={r.label}
+                className="flex items-center justify-between gap-3 py-2 border-b border-gray-50"
               >
-                <span className="text-gray-400">{r.icon}</span>
-                <span className="text-[11px] text-gray-400 w-12 flex-shrink-0">
+                <span className="text-[11px] text-gray-400 font-semibold">
                   {r.label}
                 </span>
                 <span className="text-[12px] font-semibold text-gray-800">
@@ -424,36 +194,40 @@ function ViewModal({
             ))}
           </div>
 
-          <div className="flex gap-2 mt-5">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2 rounded-xl border border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
-            >
-              Close
-            </button>
-            <button
-              onClick={onEdit}
-              className="flex-1 py-2 rounded-xl bg-indigo-600 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
-            >
-              <Edit2 size={12} /> Edit Member
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="mt-5 w-full py-2 rounded-xl border border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-/* ═══════════════════════ MODAL: Delete Confirm ═════════════════════ */
-function DeleteModal({
-  user,
+function ConfirmModal({
+  title,
+  description,
+  confirmText,
+  confirmTone,
+  loading,
   onClose,
   onConfirm,
 }: {
-  user: User;
+  title: string;
+  description: React.ReactNode;
+  confirmText: string;
+  confirmTone: "danger" | "primary";
+  loading: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }) {
+  const btn =
+    confirmTone === "danger"
+      ? "bg-red-500 hover:bg-red-600 shadow-red-200"
+      : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
@@ -465,25 +239,26 @@ function DeleteModal({
           <AlertTriangle size={26} className="text-red-500" />
         </div>
         <h3 className="text-[15px] font-extrabold text-gray-900 mb-1">
-          Remove Member?
+          {title}
         </h3>
         <p className="text-[12px] text-gray-500 leading-relaxed">
-          You're about to permanently remove{" "}
-          <span className="font-semibold text-gray-800">{user.name}</span>. This
-          action cannot be undone.
+          {description}
         </p>
         <div className="flex gap-2.5 mt-5">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+            disabled={loading}
+            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:pointer-events-none"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-red-200 transition-colors"
+            disabled={loading}
+            className={`flex-1 py-2.5 rounded-xl text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg transition-colors disabled:opacity-70 disabled:pointer-events-none ${btn}`}
           >
-            <Trash2 size={13} /> Delete
+            {loading ? <Loader2 size={14} className="animate-spin" /> : null}
+            {confirmText}
           </button>
         </div>
       </div>
@@ -491,324 +266,450 @@ function DeleteModal({
   );
 }
 
-/* ═══════════════════════ ROW ACTION DROPDOWN ═══════════════════════ */
-function ActionMenu({
-  user,
-  onView,
-  onEdit,
-  onDelete,
-  onToggleStatus,
+function CreateModal({
+  loading,
+  onClose,
+  onCreate,
 }: {
-  user: User;
-  onView: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onToggleStatus: () => void;
+  loading: boolean;
+  onClose: () => void;
+  onCreate: (payload: {
+    name: string;
+    email: string;
+    phone: string;
+    country: string;
+    password: string;
+    photo?: string | null;
+    role?: string;
+  }) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+  const [password, setPassword] = useState("");
+  const [photo, setPhoto] = useState("");
+  const [role, setRole] = useState<Role>("Student");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const actions = [
-    {
-      icon: <Eye size={13} />,
-      label: "View Profile",
-      color: "text-gray-700",
-      fn: onView,
-    },
-    {
-      icon: <Edit2 size={13} />,
-      label: "Edit Member",
-      color: "text-indigo-600",
-      fn: onEdit,
-    },
-    {
-      icon:
-        user.status === "Active" ? (
-          <ShieldOff size={13} />
-        ) : (
-          <Shield size={13} />
-        ),
-      label: user.status === "Active" ? "Suspend User" : "Reactivate",
-      color: user.status === "Active" ? "text-amber-600" : "text-green-600",
-      fn: onToggleStatus,
-    },
-    {
-      icon: <Trash2 size={13} />,
-      label: "Delete Member",
-      color: "text-red-500",
-      fn: onDelete,
-    },
-  ];
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!name.trim()) e.name = "Name is required";
+    if (!email.trim() || !email.includes("@")) e.email = "Valid email required";
+    if (!phone.trim()) e.phone = "Phone is required";
+    if (!country.trim()) e.country = "Country is required";
+    if (!password.trim() || password.trim().length < 6)
+      e.password = "Min 6 characters password";
+    return e;
+  };
+
+  const submit = () => {
+    const e = validate();
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
+
+    onCreate({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      country: country.trim(),
+      password: password.trim(),
+      photo: photo.trim().length > 0 ? photo.trim() : null,
+      role: role.toLowerCase(),
+    });
+  };
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
-      >
-        <MoreHorizontal size={16} />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-xl z-20 overflow-hidden py-1">
-            {actions.map((a, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  a.fn();
-                  setOpen(false);
-                }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium hover:bg-gray-50 transition-colors ${a.color}`}
-              >
-                {a.icon} {a.label}
-              </button>
-            ))}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center">
+              <UserPlus size={18} className="text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-[14px] font-bold text-gray-900">Add User</h2>
+              <p className="text-[11px] text-gray-400">
+                Create a user via /auth/register
+              </p>
+            </div>
           </div>
-        </>
-      )}
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-70 disabled:pointer-events-none"
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                Full Name
+              </label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={`w-full h-9 px-3 text-[12px] border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors.name ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+              />
+              {errors.name ? (
+                <p className="text-[10px] text-red-500 mt-1">{errors.name}</p>
+              ) : null}
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                Email
+              </label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full h-9 px-3 text-[12px] border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors.email ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+              />
+              {errors.email ? (
+                <p className="text-[10px] text-red-500 mt-1">{errors.email}</p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                Phone
+              </label>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={`w-full h-9 px-3 text-[12px] border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors.phone ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+              />
+              {errors.phone ? (
+                <p className="text-[10px] text-red-500 mt-1">{errors.phone}</p>
+              ) : null}
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                Country
+              </label>
+              <input
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className={`w-full h-9 px-3 text-[12px] border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors.country ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+              />
+              {errors.country ? (
+                <p className="text-[10px] text-red-500 mt-1">
+                  {errors.country}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                Password
+              </label>
+              <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                className={`w-full h-9 px-3 text-[12px] border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 ${errors.password ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+              />
+              {errors.password ? (
+                <p className="text-[10px] text-red-500 mt-1">
+                  {errors.password}
+                </p>
+              ) : null}
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                Role
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as Role)}
+                className="w-full h-9 px-3 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+              >
+                <option>Student</option>
+                <option>Instructor</option>
+                <option>Admin</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+              Photo URL{" "}
+              <span className="text-gray-300 normal-case font-normal">
+                (optional)
+              </span>
+            </label>
+            <input
+              value={photo}
+              onChange={(e) => setPhoto(e.target.value)}
+              placeholder="https://..."
+              className="w-full h-9 px-3 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            />
+          </div>
+
+          <div className="flex gap-2.5 pt-1">
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:pointer-events-none"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={submit}
+              disabled={loading}
+              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-200 transition-colors disabled:opacity-70 disabled:pointer-events-none"
+            >
+              {loading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Check size={13} />
+              )}
+              Add User
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-/* ═══════════════════════════ MAIN PAGE ═════════════════════════════ */
-const PAGE_SIZE = 5;
+export default function AdminUsersApiPage(): React.JSX.Element {
+  const { data, isLoading, isError } = useAdminUsersQuery();
+  const [createUser, { isLoading: isCreating }] = useAdminCreateUserMutation();
+  const [deleteUser, { isLoading: isDeleting }] = useAdminDeleteUserMutation();
+  const [banUser, { isLoading: isBanning }] = useAdminBanUserMutation();
+  const [unbanUser, { isLoading: isUnbanning }] = useAdminUnbanUserMutation();
+  const [restoreUser, { isLoading: isRestoring }] =
+    useAdminRestoreUserMutation();
 
-export default function UserPage() {
-  const [users, setUsers] = useState<User[]>(seed);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All Members");
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<"All" | Role>("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | Status>("All");
   const [page, setPage] = useState(1);
 
-  // modals
-  const [addOpen, setAddOpen] = useState(false);
-  const [editUser, setEditUser] = useState<User | null>(null);
-  const [viewUser, setViewUser] = useState<User | null>(null);
-  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [viewUser, setViewUser] = useState<UiUser | null>(null);
+  const [confirm, setConfirm] = useState<
+    | null
+    | { type: "delete"; user: UiUser }
+    | { type: "ban"; user: UiUser }
+    | { type: "unban"; user: UiUser }
+    | { type: "restore"; user: UiUser }
+  >(null);
 
-  /* filtered list */
-  const filtered = users.filter((u) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      u.name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      u.role.toLowerCase().includes(q);
-    const matchFilter =
-      filter === "All Members" ||
-      (filter === "Instructors" && u.role === "Instructor") ||
-      (filter === "Students" && u.role === "Student") ||
-      (filter === "Admins" && u.role === "Admin") ||
-      (filter === "Suspended" && u.status === "Suspended");
-    return matchSearch && matchFilter;
-  });
+  const uiUsers = useMemo(() => {
+    const list = extractUsers(data);
+    return list.map(toUiUser).filter((x): x is UiUser => Boolean(x));
+  }, [data]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return uiUsers.filter((u) => {
+      if (roleFilter !== "All" && u.role !== roleFilter) return false;
+      if (statusFilter !== "All" && u.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.role.toLowerCase().includes(q)
+      );
+    });
+  }, [roleFilter, search, statusFilter, uiUsers]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
 
-  /* actions */
-  const handleSave = (u: User) => {
-    setUsers((prev) =>
-      prev.find((x) => x.id === u.id)
-        ? prev.map((x) => (x.id === u.id ? u : x))
-        : [u, ...prev],
-    );
-    setAddOpen(false);
-    setEditUser(null);
-  };
-  const handleDelete = (id: number) => {
-    setUsers((prev) => prev.filter((x) => x.id !== id));
-    setDeleteUser(null);
-  };
-  const handleToggle = (id: number) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: u.status === "Active" ? "Suspended" : "Active" }
-          : u,
-      ),
-    );
-  };
+  const stats = useMemo(() => {
+    const total = uiUsers.length;
+    const active = uiUsers.filter((u) => u.status === "Active").length;
+    const banned = uiUsers.filter((u) => u.status === "Suspended").length;
+    const deleted = uiUsers.filter((u) => u.status === "Deleted").length;
+    return { total, active, banned, deleted };
+  }, [uiUsers]);
 
-  /* stats */
-  const totalUsers = users.length;
-  const instructors = users.filter(
-    (u) => u.role === "Instructor" && u.status === "Active",
-  ).length;
-  const newStudents = users.filter((u) => u.role === "Student").length;
+  const busy =
+    isCreating || isDeleting || isBanning || isUnbanning || isRestoring;
 
   return (
     <>
-      {addOpen && (
-        <MemberModal onClose={() => setAddOpen(false)} onSave={handleSave} />
-      )}
-      {editUser && (
-        <MemberModal
-          user={editUser}
-          onClose={() => setEditUser(null)}
-          onSave={handleSave}
-        />
-      )}
-      {viewUser && (
-        <ViewModal
-          user={viewUser}
-          onClose={() => setViewUser(null)}
-          onEdit={() => {
-            setEditUser(viewUser);
-            setViewUser(null);
+      {createOpen ? (
+        <CreateModal
+          loading={isCreating}
+          onClose={() => setCreateOpen(false)}
+          onCreate={async (payload) => {
+            await createUser(payload).unwrap();
+            setCreateOpen(false);
           }}
         />
-      )}
-      {deleteUser && (
-        <DeleteModal
-          user={deleteUser}
-          onClose={() => setDeleteUser(null)}
-          onConfirm={() => handleDelete(deleteUser.id)}
+      ) : null}
+
+      {viewUser ? (
+        <ViewModal user={viewUser} onClose={() => setViewUser(null)} />
+      ) : null}
+
+      {confirm ? (
+        <ConfirmModal
+          title={
+            confirm.type === "delete"
+              ? "Delete user?"
+              : confirm.type === "ban"
+                ? "Ban user?"
+                : confirm.type === "unban"
+                  ? "Unban user?"
+                  : "Restore user?"
+          }
+          description={
+            <>
+              You are about to{" "}
+              <span className="font-semibold text-gray-800">
+                {confirm.type}
+              </span>{" "}
+              <span className="font-semibold text-gray-800">
+                {confirm.user.name}
+              </span>
+              .
+            </>
+          }
+          confirmText={
+            confirm.type === "delete"
+              ? "Delete"
+              : confirm.type === "ban"
+                ? "Ban"
+                : confirm.type === "unban"
+                  ? "Unban"
+                  : "Restore"
+          }
+          confirmTone={confirm.type === "delete" ? "danger" : "primary"}
+          loading={busy}
+          onClose={() => setConfirm(null)}
+          onConfirm={async () => {
+            const u = confirm.user;
+            if (confirm.type === "delete") await deleteUser(u.id).unwrap();
+            if (confirm.type === "ban") await banUser(u.id).unwrap();
+            if (confirm.type === "unban") await unbanUser(u.id).unwrap();
+            if (confirm.type === "restore") await restoreUser(u.id).unwrap();
+            setConfirm(null);
+          }}
         />
-      )}
+      ) : null}
 
       <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
-        {/* ── Page Header ── */}
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-[18px] font-extrabold text-gray-900 tracking-tight">
               User Management
             </h1>
             <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
-              Manage members, roles & access levels
+              API connected (GET /users, GET /users/:id, DELETE /users/:id,
+              /ban, /unban, /restore, POST /auth/register)
             </p>
           </div>
           <button
-            onClick={() => setAddOpen(true)}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-[12px] font-semibold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200"
+            onClick={() => setCreateOpen(true)}
+            disabled={isCreating}
+            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-[12px] font-semibold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-70 disabled:pointer-events-none"
           >
-            <UserPlus size={14} /> Add Member
+            <UserPlus size={14} /> Add User
           </button>
         </div>
 
-        {/* ── Stat Cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-          <div className="bg-indigo-600 rounded-xl p-4 text-white shadow-lg shadow-indigo-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-                <Users size={14} className="text-white" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">
-                Total Users
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-5">
+          {[
+            {
+              label: "Total",
+              value: stats.total,
+              tone: "bg-indigo-600 text-white shadow-indigo-200",
+            },
+            {
+              label: "Active",
+              value: stats.active,
+              tone: "bg-white border border-emerald-200 shadow-sm",
+            },
+            {
+              label: "Banned",
+              value: stats.banned,
+              tone: "bg-white border border-amber-200 shadow-sm",
+            },
+            {
+              label: "Deleted",
+              value: stats.deleted,
+              tone: "bg-white border border-red-200 shadow-sm",
+            },
+          ].map((s) => (
+            <div key={s.label} className={`rounded-xl p-4 ${s.tone}`}>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                {s.label}
+              </p>
+              <p className="mt-1 text-[22px] font-extrabold text-gray-900">
+                {s.value}
               </p>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-[26px] font-extrabold">
-                {totalUsers.toLocaleString()}
-              </span>
-              <span className="text-[11px] font-bold text-indigo-200 bg-indigo-500 px-2 py-0.5 rounded-full">
-                +12%
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white border border-emerald-200 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <GraduationCap size={14} className="text-emerald-600" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">
-                Active Instructors
-              </p>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-[26px] font-extrabold text-gray-900">
-                {instructors}
-              </span>
-              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                Top 2%
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white border border-indigo-100 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <BookOpen size={14} className="text-indigo-500" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
-                Total Students
-              </p>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-[26px] font-extrabold text-gray-900">
-                {newStudents}
-              </span>
-              <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                Steady
-              </span>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* ── Search + Filter ── */}
-        <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
-          <div className="relative flex-1">
-            <Search
-              size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-2.5 w-full lg:w-[360px]">
+            <Search size={16} className="text-gray-400" />
             <input
-              type="text"
-              placeholder="Search by name, email or role…"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 pl-8 pr-4 text-[12px] bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-200 shadow-sm"
+              placeholder="Search name / email..."
+              className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none"
             />
           </div>
-          <div className="relative">
-            <button
-              onClick={() => setFilterOpen(!filterOpen)}
-              className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 h-9 text-[12px] font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value as any);
+                setPage(1);
+              }}
+              className="h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white"
             >
-              <SlidersHorizontal size={13} className="text-gray-500" />
-              <span className="hidden sm:inline text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                Filter
-              </span>
-              <span className="font-semibold text-gray-800">{filter}</span>
-              <ChevronDown size={13} className="text-gray-400" />
-            </button>
-            {filterOpen && (
-              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-xl shadow-xl z-10 overflow-hidden py-1">
-                {filterOptions.map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => {
-                      setFilter(opt);
-                      setFilterOpen(false);
-                      setPage(1);
-                    }}
-                    className={`w-full text-left px-3 py-2 text-[12px] font-medium transition-colors ${filter === opt ? "bg-indigo-50 text-indigo-700" : "text-gray-700 hover:bg-gray-50"}`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
+              <option value="All">All Roles</option>
+              <option value="Student">Student</option>
+              <option value="Instructor">Instructor</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as any);
+                setPage(1);
+              }}
+              className="h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white"
+            >
+              <option value="All">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Deleted">Deleted</option>
+            </select>
           </div>
         </div>
 
-        {/* ── Table ── */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          {/* Desktop */}
-          <div className="hidden sm:block overflow-x-auto">
+          <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/70">
-                  {[
-                    "User Profile",
-                    "Access Level",
-                    "Join Date",
-                    "Status",
-                    "Actions",
-                  ].map((h) => (
+                  {["User", "Role", "Joined", "Status", "Actions"].map((h) => (
                     <th
                       key={h}
                       className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3"
@@ -819,20 +720,38 @@ export default function UserPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {paginated.length === 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-10">
+                      <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Loading
+                        users...
+                      </div>
+                    </td>
+                  </tr>
+                ) : isError ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-10 text-center text-[12px] text-red-500 font-semibold"
+                    >
+                      Failed to load users
+                    </td>
+                  </tr>
+                ) : paginated.length === 0 ? (
                   <tr>
                     <td
                       colSpan={5}
                       className="px-4 py-10 text-center text-[12px] text-gray-400"
                     >
-                      No members found.
+                      No users found.
                     </td>
                   </tr>
                 ) : (
                   paginated.map((u) => (
                     <tr
-                      key={u.id}
-                      className="hover:bg-indigo-50/20 transition-colors group"
+                      key={String(u.id)}
+                      className="hover:bg-indigo-50/20 transition-colors"
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -856,9 +775,7 @@ export default function UserPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${roleStyles[u.role]}`}
-                        >
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-gray-200 bg-gray-50 text-gray-700">
                           {u.role}
                         </span>
                       </td>
@@ -867,22 +784,78 @@ export default function UserPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`flex items-center gap-1.5 text-[12px] font-semibold ${u.status === "Active" ? "text-emerald-600" : "text-red-500"}`}
+                          className={
+                            u.status === "Active"
+                              ? "inline-flex items-center gap-1.5 text-[12px] font-semibold text-emerald-600"
+                              : u.status === "Suspended"
+                                ? "inline-flex items-center gap-1.5 text-[12px] font-semibold text-amber-600"
+                                : "inline-flex items-center gap-1.5 text-[12px] font-semibold text-red-500"
+                          }
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${u.status === "Active" ? "bg-emerald-500" : "bg-red-500"}`}
+                            className={
+                              u.status === "Active"
+                                ? "w-1.5 h-1.5 rounded-full bg-emerald-500"
+                                : u.status === "Suspended"
+                                  ? "w-1.5 h-1.5 rounded-full bg-amber-500"
+                                  : "w-1.5 h-1.5 rounded-full bg-red-500"
+                            }
                           />
                           {u.status}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <ActionMenu
-                          user={u}
-                          onView={() => setViewUser(u)}
-                          onEdit={() => setEditUser(u)}
-                          onDelete={() => setDeleteUser(u)}
-                          onToggleStatus={() => handleToggle(u.id)}
-                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setViewUser(u)}
+                            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600"
+                            title="View"
+                          >
+                            <Eye size={14} />
+                          </button>
+
+                          {u.status === "Deleted" ? (
+                            <button
+                              onClick={() =>
+                                setConfirm({ type: "restore", user: u })
+                              }
+                              className="p-2 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700"
+                              title="Restore"
+                            >
+                              <Shield size={14} />
+                            </button>
+                          ) : u.status === "Active" ? (
+                            <button
+                              onClick={() =>
+                                setConfirm({ type: "ban", user: u })
+                              }
+                              className="p-2 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700"
+                              title="Ban"
+                            >
+                              <ShieldOff size={14} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() =>
+                                setConfirm({ type: "unban", user: u })
+                              }
+                              className="p-2 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
+                              title="Unban"
+                            >
+                              <Shield size={14} />
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() =>
+                              setConfirm({ type: "delete", user: u })
+                            }
+                            className="p-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -891,94 +864,25 @@ export default function UserPage() {
             </table>
           </div>
 
-          {/* Mobile */}
-          <div className="sm:hidden divide-y divide-gray-100">
-            {paginated.map((u) => (
-              <div key={u.id} className="p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-extrabold"
-                      style={{ background: u.avatarBg, color: u.avatarColor }}
-                    >
-                      {u.avatar}
-                    </div>
-                    <div>
-                      <p className="text-[12px] font-bold text-gray-900">
-                        {u.name}
-                      </p>
-                      <p className="text-[10px] text-gray-400">{u.email}</p>
-                    </div>
-                  </div>
-                  <ActionMenu
-                    user={u}
-                    onView={() => setViewUser(u)}
-                    onEdit={() => setEditUser(u)}
-                    onDelete={() => setDeleteUser(u)}
-                    onToggleStatus={() => handleToggle(u.id)}
-                  />
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${roleStyles[u.role]}`}
-                  >
-                    {u.role}
-                  </span>
-                  <span
-                    className={`flex items-center gap-1 text-[11px] font-semibold ${u.status === "Active" ? "text-emerald-600" : "text-red-500"}`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${u.status === "Active" ? "bg-emerald-500" : "bg-red-500"}`}
-                    />
-                    {u.status}
-                  </span>
-                  <span className="text-[10px] text-gray-400 ml-auto">
-                    {u.joinDate}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3.5 border-t border-gray-100">
-            <p className="text-[11px] text-gray-500">
-              Showing{" "}
-              <span className="font-bold text-gray-700">
-                {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–
-                {Math.min(page * PAGE_SIZE, filtered.length)}
-              </span>{" "}
-              of{" "}
-              <span className="font-bold text-gray-700">{filtered.length}</span>{" "}
-              members
+          <div className="px-4 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p className="text-[11px] text-gray-400 font-semibold">
+              Page <span className="text-gray-700">{safePage}</span> of{" "}
+              <span className="text-gray-700">{totalPages}</span>
             </p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={safePage <= 1}
+                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
               >
-                <ChevronLeft size={13} />
+                <ChevronLeft size={16} />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-7 h-7 flex items-center justify-center rounded-lg text-[11px] font-bold transition-colors ${
-                    page === p
-                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
-                      : "border border-gray-200 text-gray-500 hover:bg-gray-50"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={safePage >= totalPages}
+                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
               >
-                <ChevronRight size={13} />
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>

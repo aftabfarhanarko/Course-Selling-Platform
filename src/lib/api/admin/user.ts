@@ -12,6 +12,7 @@ export type AdminCreateUserRequest = {
   country: string;
   password: string;
   photo?: string | null;
+  role?: string;
 };
 
 export const adminUserApi = baseApi.injectEndpoints({
