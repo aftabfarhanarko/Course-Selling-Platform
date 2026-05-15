@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
+  Layers,
   Wallet,
   Banknote,
   ShoppingBag,
@@ -33,6 +34,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { label: "Wallet", href: "/admin/wallet", icon: Wallet },
     { label: "Withdraw Requests", href: "/admin/withdraw", icon: Banknote },
     { label: "Products", href: "/admin/products", icon: ShoppingBag },
+    { label: "Category", href: "/admin/category", icon: Layers },
     {
       label: "Courses",
       href: "/admin/courses",
@@ -154,3 +156,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     </aside>
   );
 }
+
+
+
