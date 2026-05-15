@@ -21,6 +21,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (pathname === "/admin/wallet") {
+    const url = new URL("/admin/wallet-api", request.url);
+    // const url = new URL("/admin/wallet", request.url);
+    return NextResponse.redirect(url);
+  }
+
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!isAdmin(role)) {
       const url = new URL("/login", request.url);
