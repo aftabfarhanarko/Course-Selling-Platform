@@ -1,12 +1,12 @@
-import React from 'react'
-import { WalletDashboard } from '../../../components/student/wallet/walletComponents'
+﻿"use client";
 
-function page() {
+import React from "react";
+import { WalletDashboard } from "./components/walletComponents";
+
+export default function page() {
   return (
     <div>
       <WalletDashboard />
     </div>
-  )
+  );
 }
-
-export default page
