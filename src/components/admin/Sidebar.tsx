@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   Layers,
+  GraduationCap,
   Wallet,
   Banknote,
   ShoppingBag,
@@ -31,6 +32,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const navItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
+    { label: "Instructors", href: "/admin/instructor", icon: GraduationCap },
     { label: "Wallet", href: "/admin/wallet", icon: Wallet },
     { label: "Withdraw Requests", href: "/admin/withdraw", icon: Banknote },
     { label: "Products", href: "/admin/products", icon: ShoppingBag },
@@ -156,6 +158,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     </aside>
   );
 }
+
 
 
 
