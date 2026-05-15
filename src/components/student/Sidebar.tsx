@@ -8,6 +8,7 @@ import {
   HandCoins,
   LayoutDashboard,
   LogOut,
+  Package,
   ShoppingBag,
   Upload,
   Users,
@@ -37,6 +38,11 @@ const menuItems = [
     name: "My Courses",
     href: "/student/courses",
     icon: GraduationCap,
+  },
+  {
+    name: "Products",
+    href: "/student/products",
+    icon: Package,
   },
   {
     name: "Submit Product",
@@ -187,3 +193,6 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     </aside>
   );
 }
+
+
+
