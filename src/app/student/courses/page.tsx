@@ -1,12 +1,12 @@
-import React from 'react'
-import StudentCoursesPage from '../../../components/student/myCourses/myCoursesCompunent'
+﻿"use client";
 
-function page() {
+import React from "react";
+import StudentCoursesManager from "./components/StudentCoursesManager";
+
+export default function page() {
   return (
     <div>
-      <StudentCoursesPage />
+      <StudentCoursesManager />
     </div>
-  )
+  );
 }
-
-export default page
