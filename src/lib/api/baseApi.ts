@@ -1,9 +1,22 @@
 ﻿import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "@/store";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "https://course-selling-api.up.railway.app";
+export function toQueryString(params: Record<string, unknown>): string {
+  const entries = Object.entries(params).filter(([, v]) => {
+    if (v === undefined || v === null) return false;
+    if (typeof v === "string") return v.trim().length > 0;
+    if (typeof v === "number") return Number.isFinite(v);
+    return true;
+  });
+
+  if (entries.length === 0) return "";
+
+  const qs = entries
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+    .join("&");
+
+  return `?${qs}`;
+}
 
 export const baseApi = createApi({
   reducerPath: "baseApi",
@@ -28,6 +41,17 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Auth", "User", "Course", "Payment"],
+  tagTypes: [
+    "Auth",
+    "User",
+    "Course",
+    "Category",
+    "Product",
+    "Payment",
+    "PaymentMethod",
+    "Enrollment",
+    "Instructor",
+    "Percentage",
+  ],
   endpoints: () => ({}),
 });

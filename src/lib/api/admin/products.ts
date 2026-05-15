@@ -1,4 +1,4 @@
-﻿import { baseApi } from "../baseApi";
+﻿import { baseApi, toQueryString } from "../baseApi";
 
 export type ProductListQuery = {
   search?: string;
@@ -12,23 +12,6 @@ export type AdminProductResponse = Record<string, any>;
 
 export type AdminCreateProductRequest = Record<string, any>;
 
-function toQueryString(params: Record<string, unknown>): string {
-  const entries = Object.entries(params).filter(([, v]) => {
-    if (v === undefined || v === null) return false;
-    if (typeof v === "string") return v.trim().length > 0;
-    if (typeof v === "number") return Number.isFinite(v);
-    return true;
-  });
-
-  if (entries.length === 0) return "";
-
-  const qs = entries
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-    .join("&");
-
-  return `?${qs}`;
-}
-
 export const adminProductsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     adminProducts: build.query<AdminProductsResponse, ProductListQuery | void>({
@@ -40,7 +23,7 @@ export const adminProductsApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["Course"],
+      providesTags: ["Product"],
     }),
     adminMyProducts: build.query<AdminProductsResponse, ProductListQuery | void>({
       query: (q) => {
@@ -51,29 +34,32 @@ export const adminProductsApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["Course"],
+      providesTags: ["Product"],
     }),
-    adminCreateProduct: build.mutation<AdminProductResponse, AdminCreateProductRequest>({
+    adminCreateProduct: build.mutation<
+      AdminProductResponse,
+      AdminCreateProductRequest
+    >({
       query: (body) => ({
         url: "/products",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Product"],
     }),
     adminApproveProduct: build.mutation<AdminProductResponse, number | string>({
       query: (id) => ({
         url: `/products/${id}/approve`,
         method: "POST",
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Product"],
     }),
     adminDeleteProduct: build.mutation<AdminProductResponse, number | string>({
       query: (id) => ({
         url: `/products/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Product"],
     }),
   }),
   overrideExisting: false,

@@ -1,4 +1,4 @@
-import { baseApi } from "../baseApi";
+﻿import { baseApi, toQueryString } from "../baseApi";
 
 export type AdminCategory = Record<string, any>;
 
@@ -22,23 +22,6 @@ export type AdminUpdateCategoryRequest = {
   description?: string;
 };
 
-function toQueryString(params: Record<string, unknown>): string {
-  const entries = Object.entries(params).filter(([, v]) => {
-    if (v === undefined || v === null) return false;
-    if (typeof v === "string") return v.trim().length > 0;
-    if (typeof v === "number") return Number.isFinite(v);
-    return true;
-  });
-
-  if (entries.length === 0) return "";
-
-  const qs = entries
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-    .join("&");
-
-  return `?${qs}`;
-}
-
 export const adminCourseApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     adminCategories: build.query<
@@ -53,14 +36,14 @@ export const adminCourseApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["Course"],
+      providesTags: ["Category"],
     }),
     adminCategory: build.query<AdminCategoryResponse, number | string>({
       query: (id) => ({
         url: `/category/${id}`,
         method: "GET",
       }),
-      providesTags: ["Course"],
+      providesTags: ["Category"],
     }),
     adminCreateCategory: build.mutation<
       AdminCategoryResponse,
@@ -71,7 +54,7 @@ export const adminCourseApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Category"],
     }),
     adminUpdateCategory: build.mutation<
       AdminCategoryResponse,
@@ -82,21 +65,21 @@ export const adminCourseApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Category"],
     }),
     adminRestoreCategory: build.mutation<AdminCategoryResponse, number | string>({
       query: (id) => ({
         url: `/category/${id}/restore`,
         method: "PATCH",
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Category"],
     }),
     adminDeleteCategory: build.mutation<AdminCategoryResponse, number | string>({
       query: (id) => ({
         url: `/category/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Category"],
     }),
   }),
   overrideExisting: false,
@@ -112,4 +95,3 @@ export const {
   useAdminRestoreCategoryMutation,
   useAdminDeleteCategoryMutation,
 } = adminCourseApi;
-

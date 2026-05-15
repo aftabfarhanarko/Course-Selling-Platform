@@ -1,4 +1,4 @@
-import { baseApi } from "../baseApi";
+﻿import { baseApi, toQueryString } from "../baseApi";
 
 export type AdminInstructor = Record<string, any>;
 
@@ -12,25 +12,6 @@ export type InstructorListQuery = {
 };
 
 export type AdminCreateInstructorRequest = Record<string, any>;
-
-function toQueryString(params: Record<string, unknown>): string {
-  const entries = Object.entries(params).filter(([, v]) => {
-    if (v === undefined || v === null) return false;
-    if (typeof v === "string") return v.trim().length > 0;
-    if (typeof v === "number") return Number.isFinite(v);
-    return true;
-  });
-
-  if (entries.length === 0) return "";
-
-  const qs = entries
-    .map(
-      ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
-    )
-    .join("&");
-
-  return `?${qs}`;
-}
 
 export const adminInstructorApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -46,14 +27,14 @@ export const adminInstructorApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["User"],
+      providesTags: ["Instructor"],
     }),
     adminInstructor: build.query<AdminInstructorResponse, number | string>({
       query: (id) => ({
         url: `/instructor/${id}`,
         method: "GET",
       }),
-      providesTags: ["User"],
+      providesTags: ["Instructor"],
     }),
     adminCreateInstructor: build.mutation<
       AdminInstructorResponse,
@@ -64,7 +45,7 @@ export const adminInstructorApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["Instructor"],
     }),
     adminDeleteInstructor: build.mutation<
       AdminInstructorResponse,
@@ -74,7 +55,7 @@ export const adminInstructorApi = baseApi.injectEndpoints({
         url: `/instructor/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["Instructor"],
     }),
     adminRestoreInstructor: build.mutation<
       AdminInstructorResponse,
@@ -84,7 +65,7 @@ export const adminInstructorApi = baseApi.injectEndpoints({
         url: `/instructor/${id}/restore`,
         method: "PATCH",
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["Instructor"],
     }),
   }),
   overrideExisting: false,

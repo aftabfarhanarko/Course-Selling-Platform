@@ -1,4 +1,4 @@
-import { baseApi } from "../baseApi";
+﻿import { baseApi, toQueryString } from "../baseApi";
 
 export type PaymentMethodListQuery = {
   search?: string;
@@ -11,26 +11,12 @@ export type PaymentMethodListQuery = {
 export type AdminPaymentMethodsResponse = Record<string, any>;
 export type AdminPaymentMethodResponse = Record<string, any>;
 
-function toQueryString(params: Record<string, unknown>): string {
-  const entries = Object.entries(params).filter(([, v]) => {
-    if (v === undefined || v === null) return false;
-    if (typeof v === "string") return v.trim().length > 0;
-    if (typeof v === "number") return Number.isFinite(v);
-    return true;
-  });
-
-  if (entries.length === 0) return "";
-
-  const qs = entries
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-    .join("&");
-
-  return `?${qs}`;
-}
-
 export const adminWalletApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    adminPaymentMethods: build.query<AdminPaymentMethodsResponse, PaymentMethodListQuery | void>({
+    adminPaymentMethods: build.query<
+      AdminPaymentMethodsResponse,
+      PaymentMethodListQuery | void
+    >({
       query: (q) => {
         const query = q ?? {};
         const qs = toQueryString(query as Record<string, unknown>);
@@ -39,42 +25,51 @@ export const adminWalletApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["Payment"],
+      providesTags: ["PaymentMethod"],
     }),
     adminPaymentMethod: build.query<AdminPaymentMethodResponse, number | string>({
       query: (id) => ({
         url: `/payment-methods/${id}`,
         method: "GET",
       }),
-      providesTags: ["Payment"],
+      providesTags: ["PaymentMethod"],
     }),
     adminMyPaymentMethods: build.query<AdminPaymentMethodsResponse, void>({
       query: () => ({
         url: "/payment-methods/my",
         method: "GET",
       }),
-      providesTags: ["Payment"],
+      providesTags: ["PaymentMethod"],
     }),
-    adminApprovePaymentMethod: build.mutation<AdminPaymentMethodResponse, number | string>({
+    adminApprovePaymentMethod: build.mutation<
+      AdminPaymentMethodResponse,
+      number | string
+    >({
       query: (id) => ({
         url: `/payment-methods/${id}/approve`,
-        method: "PATCH",
+        method: "POST",
       }),
-      invalidatesTags: ["Payment"],
+      invalidatesTags: ["PaymentMethod"],
     }),
-    adminRejectPaymentMethod: build.mutation<AdminPaymentMethodResponse, number | string>({
+    adminRejectPaymentMethod: build.mutation<
+      AdminPaymentMethodResponse,
+      number | string
+    >({
       query: (id) => ({
         url: `/payment-methods/${id}/reject`,
-        method: "PATCH",
+        method: "POST",
       }),
-      invalidatesTags: ["Payment"],
+      invalidatesTags: ["PaymentMethod"],
     }),
-    adminDeletePaymentMethod: build.mutation<AdminPaymentMethodResponse, number | string>({
+    adminDeletePaymentMethod: build.mutation<
+      AdminPaymentMethodResponse,
+      number | string
+    >({
       query: (id) => ({
         url: `/payment-methods/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Payment"],
+      invalidatesTags: ["PaymentMethod"],
     }),
   }),
   overrideExisting: false,
@@ -91,4 +86,3 @@ export const {
   useAdminRejectPaymentMethodMutation,
   useAdminDeletePaymentMethodMutation,
 } = adminWalletApi;
-

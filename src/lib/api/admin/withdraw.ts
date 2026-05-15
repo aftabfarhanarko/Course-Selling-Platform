@@ -1,4 +1,4 @@
-import { baseApi } from "../baseApi";
+﻿import { baseApi, toQueryString } from "../baseApi";
 
 export type EnrollmentListQuery = {
   search?: string;
@@ -11,25 +11,6 @@ export type AdminEnrollmentResponse = Record<string, any>;
 
 export type AdminEnrollmentPayRequest = Record<string, any>;
 export type AdminEnrollmentManualRequest = Record<string, any>;
-
-function toQueryString(params: Record<string, unknown>): string {
-  const entries = Object.entries(params).filter(([, v]) => {
-    if (v === undefined || v === null) return false;
-    if (typeof v === "string") return v.trim().length > 0;
-    if (typeof v === "number") return Number.isFinite(v);
-    return true;
-  });
-
-  if (entries.length === 0) return "";
-
-  const qs = entries
-    .map(
-      ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
-    )
-    .join("&");
-
-  return `?${qs}`;
-}
 
 export const adminWithdrawApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -45,21 +26,21 @@ export const adminWithdrawApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["Payment"],
+      providesTags: ["Enrollment"],
     }),
     adminEnrollment: build.query<AdminEnrollmentResponse, number | string>({
       query: (id) => ({
         url: `/enrollments/${id}`,
         method: "GET",
       }),
-      providesTags: ["Payment"],
+      providesTags: ["Enrollment"],
     }),
     adminEnrollmentsMyCourses: build.query<AdminEnrollmentsResponse, void>({
       query: () => ({
         url: "/enrollments/my-courses",
         method: "GET",
       }),
-      providesTags: ["Payment"],
+      providesTags: ["Enrollment"],
     }),
     adminEnrollmentsPay: build.mutation<
       AdminEnrollmentResponse,
@@ -70,7 +51,7 @@ export const adminWithdrawApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Payment"],
+      invalidatesTags: ["Enrollment"],
     }),
     adminEnrollmentsManual: build.mutation<
       AdminEnrollmentResponse,
@@ -81,7 +62,7 @@ export const adminWithdrawApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Payment"],
+      invalidatesTags: ["Enrollment"],
     }),
   }),
   overrideExisting: false,
