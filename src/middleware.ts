@@ -10,7 +10,14 @@ export function middleware(request: NextRequest) {
   const role = request.cookies.get("role")?.value;
 
   if (pathname === "/admin/users") {
-    const url = new URL("/admin/users-api", request.url);
+    const url = new URL("/admin/users", request.url);
+    // const url = new URL("/admin/users-api", request.url);
+    return NextResponse.redirect(url);
+  }
+
+  if (pathname === "/admin/courses") {
+    const url = new URL("/admin/courses", request.url);
+    // const url = new URL("/admin/courses-api", request.url);
     return NextResponse.redirect(url);
   }
 
