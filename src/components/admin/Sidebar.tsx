@@ -43,7 +43,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       icon: LiaCloudShowersHeavySolid,
     },
     { label: "Coupons", href: "/admin/coupons", icon: Ticket },
-    { label: "Analytics", href: "/admin/analytics", icon: BarChart },
+    { label: "Percentage", href: "/admin/percentage", icon: BarChart },
   ];
 
   return (
