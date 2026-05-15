@@ -13,6 +13,7 @@ import {
   Upload,
   Users,
   Wallet,
+  CreditCard,
   X,
   UserRound,
 } from "lucide-react";
@@ -53,6 +54,11 @@ const menuItems = [
     name: "Wallet",
     href: "/student/wallet",
     icon: Wallet,
+  },
+  {
+    name: "Payment Methods",
+    href: "/student/payment-methods",
+    icon: CreditCard,
   },
   {
     name: "Withdraw",
@@ -193,6 +199,8 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     </aside>
   );
 }
+
+
 
 
 

@@ -3,7 +3,8 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { DollarSign, Landmark } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLandingWithdrawLiveQuery } from "@/lib/api/landing/withdraw-live";
 import Image from "next/image";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -28,6 +29,73 @@ type WithdrawalItem = {
   amount: string;
   avatar: string;
 };
+function extractWithdrawLiveList(payload: unknown): unknown[] {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== "object") return [];
+
+  const obj = payload as Record<string, unknown>;
+  const candidates = [
+    obj.data,
+    obj.items,
+    obj.withdrawals,
+    obj.withdraws,
+    obj.results,
+  ];
+
+  for (const v of candidates) {
+    if (Array.isArray(v)) return v;
+  }
+
+  return [];
+}
+
+function normalizeWithdrawAmount(amount: unknown): string {
+  if (typeof amount === "number" && Number.isFinite(amount)) {
+    return `$${amount.toFixed(2)}`;
+  }
+
+  if (typeof amount === "string") {
+    const trimmed = amount.trim();
+    if (trimmed.length === 0) return "$0.00";
+    if (trimmed.startsWith("$")) return trimmed;
+    return `$${trimmed}`;
+  }
+
+  return "$0.00";
+}
+
+function normalizeWithdrawLiveItem(
+  raw: unknown,
+  idx: number,
+): Omit<WithdrawalItem, "id"> | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const o = raw as Record<string, unknown>;
+  const user = (o.user as Record<string, unknown> | null) ?? null;
+
+  const name =
+    (typeof user?.name === "string" && user.name.trim()) ||
+    (typeof o.name === "string" && o.name.trim()) ||
+    (typeof o.userName === "string" && o.userName.trim()) ||
+    (typeof o.username === "string" && o.username.trim()) ||
+    "Someone";
+
+  const status =
+    (typeof o.status === "string" && o.status.trim()) ||
+    (typeof o.state === "string" && o.state.trim()) ||
+    "Withdrawal Initiated";
+
+  const avatar =
+    (typeof user?.photo === "string" && user.photo.trim()) ||
+    (typeof user?.avatar === "string" && user.avatar.trim()) ||
+    (typeof o.avatar === "string" && o.avatar.trim()) ||
+    (typeof o.photo === "string" && o.photo.trim()) ||
+    `https://i.pravatar.cc/80?img=${(idx % 60) + 1}`;
+
+  const amount = normalizeWithdrawAmount(o.amount);
+
+  return { name, status, amount, avatar };
+}
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -169,7 +237,13 @@ function useConveyorFeed<T extends { id: number }>(initial: T[]) {
     });
   };
 
-  return { rows, offset, push };
+  const reset = (next: T[]) => {
+    setRows(next);
+    setOffset(0);
+    busy.current = false;
+  };
+
+  return { rows, offset, push, reset };
 }
 
 // ─── Row Components ───────────────────────────────────────────────────────────
@@ -269,6 +343,15 @@ function Feed({
 let _idCtr = 100;
 
 const LiveInsight = () => {
+  const withdrawLive = useLandingWithdrawLiveQuery();
+  const apiWithdrawers = useMemo(() => {
+    const list = extractWithdrawLiveList(withdrawLive.data);
+    return list
+      .map((x, idx) => normalizeWithdrawLiveItem(x, idx))
+      .filter((x): x is Omit<WithdrawalItem, "id"> => Boolean(x));
+  }, [withdrawLive.data]);
+  const withdrawersRef = useRef<Omit<WithdrawalItem, "id">[]>(allWithdrawers);
+
   const earningFeed = useConveyorFeed<EarningItem>(
     allEarners.slice(0, VISIBLE).map((d, i) => ({ ...d, id: i + 1 })),
   );
@@ -282,11 +365,27 @@ const LiveInsight = () => {
   const wIdxRef = useRef(VISIBLE);
 
   useEffect(() => {
+    if (apiWithdrawers.length === 0) return;
+    withdrawersRef.current = apiWithdrawers;
+    withdrawalFeed.reset(
+      apiWithdrawers
+        .slice(0, VISIBLE)
+        .map((d, i) => ({ ...d, id: i + 1 })),
+    );
+    wIdxRef.current = VISIBLE;
+  }, [apiWithdrawers]);
+
+  useEffect(() => {
     const t = setInterval(() => {
       const id = ++_idCtr;
       const newE = { ...allEarners[eIdxRef.current % allEarners.length], id };
+      const withdrawers =
+        withdrawersRef.current.length > 0
+          ? withdrawersRef.current
+          : allWithdrawers;
+
       const newW = {
-        ...allWithdrawers[wIdxRef.current % allWithdrawers.length],
+        ...withdrawers[wIdxRef.current % withdrawers.length],
         id: id + 1,
       };
 
