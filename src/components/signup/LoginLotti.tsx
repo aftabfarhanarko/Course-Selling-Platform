@@ -25,7 +25,7 @@ export default function LoginLotti(): React.JSX.Element {
   }, []);
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-xl">
       {animationData ? (
         <Lottie animationData={animationData} loop autoplay />
       ) : (

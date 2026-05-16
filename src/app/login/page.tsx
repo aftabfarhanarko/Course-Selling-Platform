@@ -126,12 +126,12 @@ export default function LoginPage(): React.JSX.Element {
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
                       Password
                     </label>
-                    <button
-                      type="button"
+                    <Link
+                      href="/forget-password"
                       className="text-[11px] font-bold text-[#2563EB] hover:underline"
                     >
                       Forgot Password?
-                    </button>
+                    </Link>
                   </div>
                   <div className="relative">
                     <input
