@@ -22,7 +22,7 @@ import {
   useAdminRestoreCategoryMutation,
   useAdminUpdateCategoryMutation,
   useLazyAdminCategoryQuery,
-} from "@/lib/api/admin/course";
+} from "@/lib/api/admin/category";
 
 type Status = "Active" | "Deleted";
 
