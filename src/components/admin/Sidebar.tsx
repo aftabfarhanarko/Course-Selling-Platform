@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -10,6 +10,8 @@ import {
   GraduationCap,
   Wallet,
   Banknote,
+  ClipboardList,
+  CreditCard,
   ShoppingBag,
   Ticket,
   BarChart,
@@ -31,9 +33,15 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
 
   const navItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { label: "Enrollments", href: "/admin/enrollments", icon: ClipboardList },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Instructors", href: "/admin/instructor", icon: GraduationCap },
     { label: "Wallet", href: "/admin/wallet", icon: Wallet },
+    {
+      label: "Payment Methods",
+      href: "/admin/paymentMethods",
+      icon: CreditCard,
+    },
     { label: "Withdraw Requests", href: "/admin/withdraw", icon: Banknote },
     { label: "Products", href: "/admin/products", icon: ShoppingBag },
     { label: "Category", href: "/admin/category", icon: Layers },
@@ -158,7 +166,3 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     </aside>
   );
 }
-
-
-
-
