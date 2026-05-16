@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { Category, Course, COURSES, EarningTier } from "@/lib/courses";
+import { usePublicCoursesAllQuery } from "@/lib/api/admin/course";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -415,6 +416,7 @@ function FilterPanel(props: FilterProps) {
 let _paginationPage = 8;
 
 function CourseList() {
+  const { data: allCoursesData } = usePublicCoursesAllQuery();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -503,31 +505,47 @@ function CourseList() {
     router.replace("/courses");
   };
 
-  const filtered: Course[] = COURSES.filter((c) => {
-    if (selectedCats.length && !selectedCats.includes(c.category)) return false;
-    if (selectedEarning && c.earnings !== selectedEarning) return false;
-    if (c.price > maxPrice) return false;
-    if (
-      searchQ &&
-      !c.title.toLowerCase().includes(searchQ.toLowerCase()) &&
-      !c.desc.toLowerCase().includes(searchQ.toLowerCase())
-    )
-      return false;
-    return true;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case "price_asc":
-        return a.price - b.price;
-      case "price_desc":
-        return b.price - a.price;
-      case "rating":
-        return b.rating - a.rating;
-      case "commission":
-        return b.commissionVal - a.commissionVal;
-      default:
-        return b.potentialVal - a.potentialVal;
-    }
-  });
+  const sourceCourses = useMemo(() => {
+    const d: any = allCoursesData as any;
+    const list = Array.isArray(d)
+      ? d
+      : Array.isArray(d?.data)
+        ? d.data
+        : Array.isArray(d?.courses)
+          ? d.courses
+          : [];
+
+    return list.length ? (list as Course[]) : COURSES;
+  }, [allCoursesData]);
+
+  const filtered: Course[] = sourceCourses
+    .filter((c) => {
+      if (selectedCats.length && !selectedCats.includes(c.category))
+        return false;
+      if (selectedEarning && c.earnings !== selectedEarning) return false;
+      if (c.price > maxPrice) return false;
+      if (
+        searchQ &&
+        !c.title.toLowerCase().includes(searchQ.toLowerCase()) &&
+        !c.desc.toLowerCase().includes(searchQ.toLowerCase())
+      )
+        return false;
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "price_asc":
+          return a.price - b.price;
+        case "price_desc":
+          return b.price - a.price;
+        case "rating":
+          return b.rating - a.rating;
+        case "commission":
+          return b.commissionVal - a.commissionVal;
+        default:
+          return b.potentialVal - a.potentialVal;
+      }
+    });
 
   const hasActiveFilters =
     selectedCats.length > 0 ||
