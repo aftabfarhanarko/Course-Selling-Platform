@@ -2,8 +2,9 @@ import { AppProviders } from "@/providers";
 import type { Metadata } from "next";
 import { Bai_Jamjuree } from "next/font/google";
 import Header from "@/components/Navbar";
-import "./globals.css";
+import RouteMeta from "@/components/RouteMeta";
 import Footer from "@/components/Footer";
+import "./globals.css";
 
 const baiJamjuree = Bai_Jamjuree({
   variable: "--font-bai-jamjuree",
@@ -12,10 +13,84 @@ const baiJamjuree = Bai_Jamjuree({
   display: "swap",
 });
 
-// ? Metadata
+// ✅ Production Ready Metadata
 export const metadata: Metadata = {
-  title: "Course Selling Platform",
-  description: "A comprehensive platform for selling and learning courses.",
+  metadataBase: new URL("https://your-domain.com"), // পরে live domain add করবা
+
+  title: {
+    default: "Course Selling Platform",
+    template: "%s | Course Selling Platform",
+  },
+
+  description:
+    "A modern course selling platform for buying, selling, and learning premium online courses.",
+
+  keywords: [
+    "Course Selling Platform",
+    "Online Courses",
+    "E-learning",
+    "Learning Platform",
+    "Programming Courses",
+    "Web Development",
+  ],
+
+  authors: [
+    {
+      name: "Course Selling Platform Team",
+    },
+  ],
+
+  creator: "Course Selling Platform",
+  publisher: "Course Selling Platform",
+  applicationName: "Course Selling Platform",
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+      "max-snippet": -1,
+    },
+  },
+
+  alternates: {
+    canonical: "/",
+  },
+
+  openGraph: {
+    title: "Course Selling Platform",
+    description:
+      "A modern platform for buying and learning premium online courses.",
+    url: "/",
+    siteName: "Course Selling Platform",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og-image.png", // public folder এ রাখবা
+        width: 1200,
+        height: 630,
+        alt: "Course Selling Platform",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Course Selling Platform",
+    description:
+      "A modern platform for buying and learning premium online courses.",
+    images: ["/og-image.png"],
+  },
+
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,17 +101,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`  ${baiJamjuree.variable} h-full antialiased`}
+      className={`${baiJamjuree.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="h-full flex flex-col font-bai-jamjuree">
         <AppProviders>
           <Header />
+          <RouteMeta />
+
+          <main className="flex-1">{children}</main>
+
+          <Footer />
         </AppProviders>
-        <main className="flex-1 ">
-          <AppProviders>{children}</AppProviders>
-        </main>
-        <Footer/>
       </body>
     </html>
   );
