@@ -9,7 +9,7 @@ export const studentCoursesApi = baseApi.injectEndpoints({
         url: "/enrollments/my-courses",
         method: "GET",
       }),
-      providesTags: ["Courses"],
+      providesTags: ["Course"],
     }),
   }),
   overrideExisting: false,
