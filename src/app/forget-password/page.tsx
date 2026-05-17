@@ -38,7 +38,7 @@ export default function ForgetPasswordPage(): React.JSX.Element {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-white to-[#F8FAFF] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto mt-15">
         <div className="flex flex-col lg:flex-row items-center justify-center gap-10">
           <div className="hidden md:flex lg:w-1/2 flex-col items-start justify-center px-2 lg:px-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-black text-[#1D4ED8]">
@@ -53,7 +53,7 @@ export default function ForgetPasswordPage(): React.JSX.Element {
               link to help you regain access.
             </p>
 
-            <div className="mt-5 grid gap-2 text-[13px] text-slate-600 font-medium">
+            {/* <div className="mt-5 grid gap-2 text-[13px] text-slate-600 font-medium">
               <div className="flex items-start gap-2">
                 <span className="mt-[2px] inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#EFF6FF] text-[#2563EB] font-black text-[12px]">
                   1
@@ -72,9 +72,9 @@ export default function ForgetPasswordPage(): React.JSX.Element {
                 </span>
                 <span>Open the link and set a new password.</span>
               </div>
-            </div>
+            </div> */}
 
-            <div className="mt-6 w-full flex items-center justify-center">
+            <div className="mt-0 w-full flex items-center justify-center">
               <ForgetLotti />
             </div>
           </div>
