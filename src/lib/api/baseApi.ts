@@ -1,4 +1,4 @@
-﻿import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "@/store";
 
 export function toQueryString(params: Record<string, unknown>): string {
@@ -24,9 +24,7 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl:
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "https://gentle-acceptance-production.up.railway.app",
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "https://course-selling-api.up.railway.app",
 
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;

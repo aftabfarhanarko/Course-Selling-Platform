@@ -149,7 +149,8 @@ export default function AdminUsersApiPage(): React.JSX.Element {
                 User Management
               </h1>
               <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5 font-medium truncate hidden sm:block">
-                  Manage platform users, roles, access permissions and account status.
+                Manage platform users, roles, access permissions and account
+                status.
               </p>
             </div>
           </div>

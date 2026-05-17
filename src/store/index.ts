@@ -1,4 +1,4 @@
-﻿import { configureStore, type Middleware } from "@reduxjs/toolkit";
+import { configureStore, type Middleware } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import axios from "axios";
 import authReducer, { logout, setUser } from "./slices/authSlice";
@@ -41,7 +41,7 @@ async function fetchCurrentUser(
   token: string,
 ): Promise<Record<string, any> | null> {
   try {
-    const res = await axios.get("/api/users/profile", {
+    const res = await axios.get((process.env.NEXT_PUBLIC_API_BASE_URL || "https://course-selling-api.up.railway.app") + "/users/profile", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const candidate =
