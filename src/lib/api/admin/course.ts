@@ -1,4 +1,4 @@
-import { baseApi, toQueryString } from '../baseApi';
+import { baseApi, toQueryString } from "../baseApi";
 
 export type AdminCourse = Record<string, any>;
 
@@ -21,51 +21,59 @@ export const adminCoursesApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     publicCoursesAll: build.query<Record<string, any>, void>({
       query: () => ({
-        url: '/course/all',
-        method: 'GET',
+        url: "/course/all",
+        method: "GET",
       }),
-      providesTags: ['Course'],
+      providesTags: ["Course"],
     }),
-    adminCourses: build.query<AdminCoursesListResponse, CourseListQuery | void>({
-      query: (q) => {
-        const query = q ?? {};
-        const qs = toQueryString(query as Record<string, unknown>);
-        return {
-          url: '/course' + qs,
-          method: 'GET',
-        };
+    adminCourses: build.query<AdminCoursesListResponse, CourseListQuery | void>(
+      {
+        query: (q) => {
+          const query = q ?? {};
+          const qs = toQueryString(query as Record<string, unknown>);
+          return {
+            url: "/course" + qs,
+            method: "GET",
+          };
+        },
+        providesTags: ["Course"],
       },
-      providesTags: ['Course'],
-    }),
+    ),
     adminCourse: build.query<AdminCourseResponse, number | string>({
       query: (id) => ({
-        url: '/course/' + id,
-        method: 'GET',
+        url: "/course/" + id,
+        method: "GET",
       }),
-      providesTags: ['Course'],
+      providesTags: ["Course"],
     }),
-    adminCreateCourse: build.mutation<AdminCourseResponse, AdminCreateCourseRequest>({
+    adminCreateCourse: build.mutation<
+      AdminCourseResponse,
+      AdminCreateCourseRequest
+    >({
       query: (body) => ({
-        url: '/course',
-        method: 'POST',
+        url: "/course",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['Course'],
+      invalidatesTags: ["Course"],
     }),
-    adminUpdateCourse: build.mutation<AdminCourseResponse, AdminUpdateCourseRequest>({
+    adminUpdateCourse: build.mutation<
+      AdminCourseResponse,
+      AdminUpdateCourseRequest
+    >({
       query: ({ id, ...body }) => ({
-        url: '/course/' + id,
-        method: 'PATCH',
+        url: "/course/" + id,
+        method: "PATCH",
         body,
       }),
-      invalidatesTags: ['Course'],
+      invalidatesTags: ["Course"],
     }),
     adminDeleteCourse: build.mutation<AdminCourseResponse, number | string>({
       query: (id) => ({
-        url: '/course/' + id,
-        method: 'DELETE',
+        url: "/course/" + id,
+        method: "DELETE",
       }),
-      invalidatesTags: ['Course'],
+      invalidatesTags: ["Course"],
     }),
   }),
   overrideExisting: false,

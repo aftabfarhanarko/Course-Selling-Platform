@@ -1,3 +1,4 @@
+// app/courses/page.tsx (or your route)
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
@@ -20,8 +21,8 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { Category, Course, COURSES, EarningTier } from "@/lib/courses";
 import { usePublicCoursesAllQuery } from "@/lib/api/admin/course";
+import { useAdminCategoriesQuery } from "@/lib/api/admin/category";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -29,7 +30,23 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+interface Course {
+  id: number | string;
+  title: string;
+  desc: string;
+  image: string;
+  price: number;
+  category: string;
+  potential: string;
+  potentialVal: number;
+  commission: string;
+  commissionVal: number;
+  earnings: string;
+  rating: number;
+  reviews: string;
+}
 
+type EarningTier = string;
 type SortKey =
   | "potential"
   | "price_asc"
@@ -37,41 +54,7 @@ type SortKey =
   | "rating"
   | "commission";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const CATEGORIES: Category[] = [
-  "Digital Design",
-  "Growth Marketing",
-  "Sales Architecture",
-  "AI Automation",
-];
-
-const CATEGORY_META: Record<
-  Category,
-  { icon: React.ReactNode; color: string; bg: string }
-> = {
-  "Digital Design": {
-    icon: <LayoutGrid className="w-3.5 h-3.5" />,
-    color: "text-violet-600",
-    bg: "bg-violet-50 border-violet-200",
-  },
-  "Growth Marketing": {
-    icon: <TrendingUp className="w-3.5 h-3.5" />,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50 border-emerald-200",
-  },
-  "Sales Architecture": {
-    icon: <BadgeDollarSign className="w-3.5 h-3.5" />,
-    color: "text-amber-600",
-    bg: "bg-amber-50 border-amber-200",
-  },
-  "AI Automation": {
-    icon: <Zap className="w-3.5 h-3.5" />,
-    color: "text-blue-600",
-    bg: "bg-blue-50 border-blue-200",
-  },
-};
-
+// ─── Static earning tiers (can remain hard‑coded) ────────────────────────────
 const EARNING_TIERS: { label: EarningTier; badge: string; color: string }[] = [
   {
     label: "$1k - $5k /mo",
@@ -94,7 +77,53 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "commission", label: "Best Commission" },
 ];
 
-// ─── Star Rating ──────────────────────────────────────────────────────────────
+// ─── Dynamic category palette (assigns colours/icons by index) ───────────────
+const CATEGORY_PALETTE = [
+  {
+    icon: <LayoutGrid className="w-3.5 h-3.5" />,
+    color: "text-violet-600",
+    bg: "bg-violet-50 border-violet-200",
+  },
+  {
+    icon: <TrendingUp className="w-3.5 h-3.5" />,
+    color: "text-emerald-600",
+    bg: "bg-emerald-50 border-emerald-200",
+  },
+  {
+    icon: <BadgeDollarSign className="w-3.5 h-3.5" />,
+    color: "text-amber-600",
+    bg: "bg-amber-50 border-amber-200",
+  },
+  {
+    icon: <Zap className="w-3.5 h-3.5" />,
+    color: "text-blue-600",
+    bg: "bg-blue-50 border-blue-200",
+  },
+  {
+    icon: <Sparkles className="w-3.5 h-3.5" />,
+    color: "text-rose-600",
+    bg: "bg-rose-50 border-rose-200",
+  },
+  {
+    icon: <Star className="w-3.5 h-3.5" />,
+    color: "text-cyan-600",
+    bg: "bg-cyan-50 border-cyan-200",
+  },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function extractCategories(payload: any): string[] {
+  if (!payload) return [];
+  let arr: any[] = [];
+  if (Array.isArray(payload)) arr = payload;
+  else if (Array.isArray(payload?.categories)) arr = payload.categories;
+  else if (Array.isArray(payload?.data)) arr = payload.data;
+  else if (Array.isArray(payload?.data?.categories))
+    arr = payload.data.categories;
+  return arr
+    .map((c: any) => String(c?.name ?? c?.title ?? "").trim())
+    .filter(Boolean);
+}
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -108,8 +137,6 @@ function StarRating({ rating }: { rating: number }) {
     </div>
   );
 }
-
-// ─── Filter Tag ───────────────────────────────────────────────────────────────
 
 function FilterTag({
   label,
@@ -131,10 +158,20 @@ function FilterTag({
   );
 }
 
-// ─── Course Card ──────────────────────────────────────────────────────────────
-
-function CourseCard({ course, index }: { course: Course; index: number }) {
-  const catMeta = CATEGORY_META[course.category];
+// ─── Course Card (unchanged) ─────────────────────────────────────────────────
+function CourseCard({
+  course,
+  index,
+  categoryMeta,
+}: {
+  course: Course;
+  index: number;
+  categoryMeta: Record<
+    string,
+    { icon: React.ReactNode; color: string; bg: string }
+  >;
+}) {
+  const meta = categoryMeta[course.category] ?? CATEGORY_PALETTE[0];
 
   return (
     <motion.div
@@ -143,32 +180,26 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
       transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
       className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
     >
-      {/* Image */}
       <div className="relative h-44 overflow-hidden bg-slate-100 flex-shrink-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={course.image}
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-        {/* Dark overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent" />
 
-        {/* Potential badge */}
         <div className="absolute top-3 left-3 flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg shadow-emerald-500/30">
           <Sparkles className="w-2.5 h-2.5" />
           {course.potential}
         </div>
 
-        {/* Category chip */}
         <span
-          className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border backdrop-blur-md bg-white/80 ${catMeta.color} ${catMeta.bg}`}
+          className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border backdrop-blur-md bg-white/80 ${meta.color} ${meta.bg}`}
         >
           {course.category}
         </span>
 
-        {/* Commission pill at bottom of image */}
         <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 border border-white/60">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
           <span className="text-[10px] font-black text-emerald-700 tracking-wide">
@@ -177,7 +208,6 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
         </div>
       </div>
 
-      {/* Body */}
       <div className="p-5 flex flex-col flex-1">
         <div className="flex justify-between items-start gap-2 mb-2">
           <h3 className="text-[14.5px] font-bold text-slate-900 leading-snug flex-1 group-hover:text-blue-600 transition-colors line-clamp-2">
@@ -194,7 +224,6 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
           {course.desc}
         </p>
 
-        {/* Rating row */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-1.5">
             <StarRating rating={course.rating} />
@@ -207,7 +236,6 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
           </div>
         </div>
 
-        {/* CTA */}
         <Link
           href={`/courses/${course.id}`}
           className="group/btn w-full py-2.5 rounded-xl bg-slate-900 hover:bg-blue-600 text-white text-[12.5px] font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-blue-500/30 hover:shadow-lg"
@@ -220,15 +248,19 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
   );
 }
 
-// ─── Filter Panel ─────────────────────────────────────────────────────────────
-
+// ─── Filter Panel (now receives categories & meta) ───────────────────────────
 type FilterProps = {
-  selectedCats: Category[];
+  categoriesList: string[];
+  categoryMeta: Record<
+    string,
+    { icon: React.ReactNode; color: string; bg: string }
+  >;
+  selectedCats: string[];
   selectedEarning: EarningTier | "";
   maxPrice: number;
   hasActiveFilters: boolean;
   searchQ: string;
-  toggleCat: (cat: Category) => void;
+  toggleCat: (cat: string) => void;
   toggleEarning: (tier: EarningTier) => void;
   handlePriceChange: (val: number) => void;
   clearAll: () => void;
@@ -236,6 +268,8 @@ type FilterProps = {
 
 function FilterPanel(props: FilterProps) {
   const {
+    categoriesList,
+    categoryMeta,
     selectedCats,
     selectedEarning,
     maxPrice,
@@ -255,8 +289,8 @@ function FilterPanel(props: FilterProps) {
           <LayoutGrid className="w-3 h-3" /> Category
         </p>
         <div className="space-y-2">
-          {CATEGORIES.map((cat) => {
-            const meta = CATEGORY_META[cat];
+          {categoriesList.map((cat) => {
+            const meta = categoryMeta[cat] ?? CATEGORY_PALETTE[0];
             const active = selectedCats.includes(cat);
             return (
               <button
@@ -279,7 +313,6 @@ function FilterPanel(props: FilterProps) {
         </div>
       </div>
 
-      {/* DIVIDER */}
       <div className="border-t border-slate-100" />
 
       {/* PRICE RANGE */}
@@ -292,8 +325,6 @@ function FilterPanel(props: FilterProps) {
             Up to ${maxPrice.toLocaleString()}
           </span>
         </div>
-
-        {/* Custom track */}
         <div className="relative pt-1 pb-2">
           <div className="relative h-1.5 bg-slate-100 rounded-full">
             <div
@@ -311,14 +342,12 @@ function FilterPanel(props: FilterProps) {
             className="absolute inset-0 w-full opacity-0 cursor-pointer h-6 -top-2"
           />
         </div>
-
         <div className="flex justify-between text-[11px] text-slate-400 font-medium">
           <span>$100</span>
           <span>$2,000</span>
         </div>
       </div>
 
-      {/* DIVIDER */}
       <div className="border-t border-slate-100" />
 
       {/* TARGET EARNINGS */}
@@ -355,7 +384,6 @@ function FilterPanel(props: FilterProps) {
         </div>
       </div>
 
-      {/* ACTIVE TAGS */}
       <AnimatePresence>
         {hasActiveFilters && (
           <motion.div
@@ -399,7 +427,6 @@ function FilterPanel(props: FilterProps) {
         )}
       </AnimatePresence>
 
-      {/* CLEAR ALL */}
       <button
         onClick={clearAll}
         className="w-full py-2.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 text-[12.5px] font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all flex items-center justify-center gap-1.5"
@@ -411,16 +438,16 @@ function FilterPanel(props: FilterProps) {
   );
 }
 
-// ─── Course List (uses useSearchParams) ───────────────────────────────────────
-
+// ─── Course List (uses dynamic categories & courses) ─────────────────────────
 let _paginationPage = 8;
 
 function CourseList() {
   const { data: allCoursesData } = usePublicCoursesAllQuery();
+  const { data: catData } = useAdminCategoriesQuery();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [selectedCats, setSelectedCats] = useState<Category[]>([]);
+  const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [selectedEarning, setSelectedEarning] = useState<EarningTier | "">("");
   const [maxPrice, setMaxPrice] = useState<number>(2000);
   const [searchQ, setSearchQ] = useState<string>("");
@@ -436,8 +463,7 @@ function CourseList() {
   }, [filterSheetOpen]);
 
   useEffect(() => {
-    const cats = (searchParams.get("categories")?.split(",") ??
-      []) as Category[];
+    const cats = (searchParams.get("categories")?.split(",") ?? []) as string[];
     const earn = (searchParams.get("earnings") ?? "") as EarningTier | "";
     const price = parseInt(searchParams.get("price") ?? "2000", 10);
     const sort = (searchParams.get("sort") ?? "potential") as SortKey;
@@ -451,7 +477,7 @@ function CourseList() {
 
   const syncURL = useCallback(
     (
-      cats: Category[],
+      cats: string[],
       earn: EarningTier | "",
       price: number,
       sort: SortKey,
@@ -468,7 +494,22 @@ function CourseList() {
     [router],
   );
 
-  const toggleCat = (cat: Category) => {
+  // Dynamic categories from API
+  const categoriesFromApi = useMemo(
+    () => extractCategories(catData),
+    [catData],
+  );
+
+  // Dynamic category → icon/colour map
+  const categoryMeta = useMemo(() => {
+    const map: Record<string, (typeof CATEGORY_PALETTE)[number]> = {};
+    categoriesFromApi.forEach((cat, idx) => {
+      map[cat] = CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length];
+    });
+    return map;
+  }, [categoriesFromApi]);
+
+  const toggleCat = (cat: string) => {
     const next = selectedCats.includes(cat)
       ? selectedCats.filter((c) => c !== cat)
       : [...selectedCats, cat];
@@ -505,7 +546,8 @@ function CourseList() {
     router.replace("/courses");
   };
 
-  const sourceCourses = useMemo(() => {
+  // Courses solely from API (no hard-coded fallback)
+  const sourceCourses: Course[] = useMemo(() => {
     const d: any = allCoursesData as any;
     const list = Array.isArray(d)
       ? d
@@ -514,8 +556,7 @@ function CourseList() {
         : Array.isArray(d?.courses)
           ? d.courses
           : [];
-
-    return list.length ? (list as Course[]) : COURSES;
+    return list as Course[];
   }, [allCoursesData]);
 
   const filtered: Course[] = sourceCourses
@@ -562,6 +603,8 @@ function CourseList() {
     setCurrentPage((p) => Math.max(1, Math.min(TOTAL_PAGES, p + dir)));
 
   const filterProps: FilterProps = {
+    categoriesList: categoriesFromApi,
+    categoryMeta,
     selectedCats,
     selectedEarning,
     maxPrice,
@@ -578,9 +621,8 @@ function CourseList() {
       className={`${plusJakarta.className} min-h-screen mt-17 md:mt-18 bg-[#f8f9fc]`}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 flex flex-col lg:flex-row gap-6">
-        {/* ─── DESKTOP SIDEBAR ─────────────────────── */}
+        {/* DESKTOP SIDEBAR */}
         <aside className="hidden lg:block w-64 xl:w-[272px] shrink-0 lg:sticky lg:top-[76px] lg:self-start">
-          {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center">
@@ -602,9 +644,9 @@ function CourseList() {
           </div>
         </aside>
 
-        {/* ─── MAIN CONTENT ──────────────────────────── */}
+        {/* MAIN CONTENT */}
         <main className="flex-1 min-w-0">
-          {/* Mobile: Search + Filter button row */}
+          {/* Mobile search + filter button */}
           <div className="lg:hidden flex items-center gap-2 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -690,7 +732,6 @@ function CourseList() {
               </p>
             </div>
 
-            {/* Desktop search + sort */}
             <div className="flex items-center gap-2">
               <div className="relative hidden lg:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
@@ -743,7 +784,12 @@ function CourseList() {
           ) : (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
               {filtered.map((course, i) => (
-                <CourseCard key={course.id} course={course} index={i} />
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  index={i}
+                  categoryMeta={categoryMeta}
+                />
               ))}
             </div>
           )}
@@ -796,7 +842,7 @@ function CourseList() {
         </main>
       </div>
 
-      {/* ─── MOBILE BOTTOM SHEET ─────────────────────── */}
+      {/* MOBILE BOTTOM SHEET */}
       <AnimatePresence>
         {filterSheetOpen && (
           <>
@@ -815,7 +861,6 @@ function CourseList() {
               className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl shadow-[0_-8px_40px_rgba(0,0,0,.18)] lg:hidden flex flex-col"
               style={{ maxHeight: "90vh" }}
             >
-              {/* Handle + header */}
               <div className="flex-shrink-0 px-5 pt-3 pb-4 border-b border-slate-100">
                 <div className="w-10 h-1 rounded-full bg-slate-200 mx-auto mb-4" />
                 <div className="flex items-center justify-between">
@@ -841,12 +886,10 @@ function CourseList() {
                 </div>
               </div>
 
-              {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto px-5 py-5">
                 <FilterPanel {...filterProps} />
               </div>
 
-              {/* Apply button */}
               <div className="flex-shrink-0 px-5 py-4 border-t border-slate-100 bg-white">
                 <button
                   onClick={() => setFilterSheetOpen(false)}
@@ -866,7 +909,6 @@ function CourseList() {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function CoursesPage() {
   return (
     <Suspense
