@@ -15,7 +15,9 @@ export default function StudentLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -56,12 +58,12 @@ export default function StudentLayout({
 
         <footer className="border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900 mt-auto">
           <div className="container mx-auto px-4 text-center text-xs sm:text-sm text-zinc-500">
-            <p>© {new Date().getFullYear()} CoursePlatform. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} CoursePlatform. All rights reserved.
+            </p>
           </div>
         </footer>
       </div>
     </div>
   );
 }
-
-

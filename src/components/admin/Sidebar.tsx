@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -20,16 +20,32 @@ import {
 } from "lucide-react";
 import { LiaCloudShowersHeavySolid } from "react-icons/lia";
 import { useLogoutMutation } from "@/lib/api/authApi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
 import { baseApi } from "@/lib/api/baseApi";
 import { toast } from "sonner";
+import type { RootState } from "@/store";
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
   const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
+
+  const authUser = useSelector((state: RootState) => state.auth.user);
+
+  const displayName =
+    String(authUser?.name ?? authUser?.fullName ?? authUser?.username ?? "").trim() ||
+    "Admin";
+  const email = String(authUser?.email ?? "").trim();
+  const country = String(authUser?.country ?? "").trim();
+
+  const avatarUrlRaw =
+    authUser?.photo ?? authUser?.avatar ?? authUser?.image ?? authUser?.profileImage ?? null;
+  const avatarUrl =
+    typeof avatarUrlRaw === "string" && avatarUrlRaw.trim().length > 0
+      ? avatarUrlRaw.trim()
+      : null;
 
   const navItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -72,8 +88,11 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           <div className="relative flex-shrink-0">
             <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-blue-50 dark:ring-blue-900/30">
               <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"
-                alt="Admin User"
+                src={
+                  avatarUrl ??
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"
+                }
+                alt={displayName}
                 className="w-full h-full object-cover bg-blue-100"
               />
             </div>
@@ -81,10 +100,13 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
           </div>
           <div className="min-w-0">
             <h3 className="text-[12px] font-bold text-slate-800 dark:text-zinc-100 truncate">
-              Admin User
+              {displayName}
             </h3>
+            <p className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mt-0.5 truncate">
+              {email || "Logged in"}
+            </p>
             <p className="text-[9px] font-bold text-blue-600 dark:text-blue-400 tracking-wide uppercase mt-0.5 truncate">
-              Platform Controller
+              {country || ""}
             </p>
           </div>
         </div>
