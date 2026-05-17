@@ -19,10 +19,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useLogoutMutation } from "@/lib/api/authApi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
 import { baseApi } from "@/lib/api/baseApi";
 import { toast } from "sonner";
+import type { RootState } from "@/store";
 
 const menuItems = [
   {
@@ -78,15 +79,22 @@ const menuItems = [
 ];
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
-  const userInfo = [
-    {
-      name: "Alex Rivera",
-      level: "Level 4",
-      badge: "PRO EARNER",
-      userImage:
-        "https://laser360clinic.com/wp-content/uploads/2020/08/user-image.jpg",
-    },
-  ];
+  const authUser = useSelector((state: RootState) => state.auth.user);
+
+  const displayName =
+    String(authUser?.name ?? authUser?.fullName ?? authUser?.username ?? "").trim() ||
+    "Student";
+  const email = String(authUser?.email ?? "").trim();
+
+  const avatarUrlRaw =
+    authUser?.photo ?? authUser?.avatar ?? authUser?.image ?? authUser?.profileImage ?? null;
+  const avatarUrl =
+    typeof avatarUrlRaw === "string" && avatarUrlRaw.trim().length > 0
+      ? avatarUrlRaw.trim()
+      : null;
+
+  const roleRaw = String(authUser?.role ?? "student");
+  const badge = roleRaw.replace(/_/g, " ").toUpperCase();
 
   const pathname = usePathname();
   const router = useRouter();
@@ -107,44 +115,35 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       )}
 
       <div className="mb-8 sm:mb-10">
-        {userInfo.map((info: any, index: number) => {
-          return (
-            <div
-              key={index}
-              className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-3 sm:p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-            >
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-lg font-bold text-white shadow-md shrink-0">
-                {info.userImage ? (
-                  <Image
-                    src={info.userImage}
-                    alt={info.name}
-                    className="h-full w-full rounded-full object-cover"
-                    width={56}
-                    height={56}
-                  />
-                ) : (
-                  <span className="text-lg font-bold text-white">
-                    {info.name.charAt(0)}
-                  </span>
-                )}
-              </div>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-3 sm:p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-lg font-bold text-white shadow-md shrink-0 overflow-hidden">
+            {avatarUrl ? (
+              <Image
+                src={avatarUrl}
+                alt={displayName}
+                className="h-full w-full object-cover"
+                width={56}
+                height={56}
+              />
+            ) : (
+              <span className="text-lg font-bold text-white">{displayName.charAt(0)}</span>
+            )}
+          </div>
 
-              <div className="flex flex-col text-center sm:text-left">
-                <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">
-                  {info.name}
-                </h2>
+          <div className="flex flex-col text-center sm:text-left min-w-0">
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+              {displayName}
+            </h2>
 
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {info.level}
-                </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+              {email || "Logged in"}
+            </p>
 
-                <span className="mt-2 w-fit mx-auto sm:mx-0 rounded-full bg-blue-100 px-2 py-1 text-[10px] font-semibold tracking-wide text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                  {info.badge}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+            <span className="mt-2 w-fit mx-auto sm:mx-0 rounded-full bg-blue-100 px-2 py-1 text-[10px] font-semibold tracking-wide text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+              {badge}
+            </span>
+          </div>
+        </div>
       </div>
 
       <nav className="flex flex-col gap-2">
@@ -199,8 +198,3 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     </aside>
   );
 }
-
-
-
-
-

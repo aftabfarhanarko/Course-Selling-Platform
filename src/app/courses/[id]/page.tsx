@@ -28,13 +28,13 @@ export default function CourseDetailsPage({
   const course = raw
     ? {
         id: raw.id ?? id,
-        title: raw.name ?? raw.title ?? 'Untitled',
-        desc: raw.description ?? raw.desc ?? '',
-        image: raw.image ?? raw.thumbnail ?? '/placeholder.jpg',
+        title: raw.name ?? raw.title ?? "Untitled",
+        desc: raw.description ?? raw.desc ?? "",
+        image: raw.image ?? raw.thumbnail ?? "/placeholder.jpg",
         price: Number(raw.price ?? 0),
-        category: raw.category?.name ?? raw.categoryName ?? 'Uncategorized',
-        potential: raw.potential ?? 'High Potential',
-        commission: raw.commission ?? '0%',
+        category: raw.category?.name ?? raw.categoryName ?? "Uncategorized",
+        potential: raw.potential ?? "High Potential",
+        commission: raw.commission ?? "0%",
         rating: Number(raw.rating ?? 4.5),
         reviews: Number(raw.reviews ?? 0),
       }
@@ -42,10 +42,10 @@ export default function CourseDetailsPage({
 
   if (isLoading) {
     return (
-      <div className='flex items-center justify-center min-h-screen bg-[#f8f9fc]'>
-        <div className='flex flex-col items-center gap-3 text-slate-400'>
-          <div className='w-8 h-8 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin' />
-          <span className='text-sm font-medium'>Loading course...</span>
+      <div className="flex items-center justify-center min-h-screen bg-[#f8f9fc]">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin" />
+          <span className="text-sm font-medium">Loading course...</span>
         </div>
       </div>
     );
@@ -60,8 +60,8 @@ export default function CourseDetailsPage({
     }
 
     return (
-      <div className='min-h-screen flex items-center justify-center bg-slate-50'>
-        <p className='text-red-500 font-semibold'>Failed to load course.</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-red-500 font-semibold">Failed to load course.</p>
       </div>
     );
   }
@@ -117,7 +117,7 @@ export default function CourseDetailsPage({
                   {Array.from({ length: Math.floor(course.rating) }).map(
                     (_, i) => (
                       <Star key={i} size={18} fill="currentColor" />
-                    )
+                    ),
                   )}
                 </div>
                 <span className="font-bold text-[15px]">{course.rating}</span>
@@ -222,7 +222,8 @@ export default function CourseDetailsPage({
               <p>
                 By the end of this course, you won't just have theoretical
                 knowledge; you will have a deployed, functioning system capable
-                of generating {course.potential.toLowerCase().replace(" potential", "")}.
+                of generating{" "}
+                {course.potential.toLowerCase().replace(" potential", "")}.
               </p>
             </div>
           </div>
@@ -264,7 +265,10 @@ export default function CourseDetailsPage({
               <ul className="space-y-4">
                 {[
                   { icon: PlayCircle, text: "14.5 hours on-demand video" },
-                  { icon: Download, text: "22 downloadable resources & templates" },
+                  {
+                    icon: Download,
+                    text: "22 downloadable resources & templates",
+                  },
                   { icon: Infinity, text: "Full lifetime access" },
                   { icon: ShieldCheck, text: "Access on mobile and TV" },
                   { icon: Trophy, text: "Certificate of completion" },
