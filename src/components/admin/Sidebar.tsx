@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -35,13 +35,18 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const authUser = useSelector((state: RootState) => state.auth.user);
 
   const displayName =
-    String(authUser?.name ?? authUser?.fullName ?? authUser?.username ?? "").trim() ||
-    "Admin";
+    String(
+      authUser?.name ?? authUser?.fullName ?? authUser?.username ?? "",
+    ).trim() || "Admin";
   const email = String(authUser?.email ?? "").trim();
   const country = String(authUser?.country ?? "").trim();
 
   const avatarUrlRaw =
-    authUser?.photo ?? authUser?.avatar ?? authUser?.image ?? authUser?.profileImage ?? null;
+    authUser?.photo ??
+    authUser?.avatar ??
+    authUser?.image ??
+    authUser?.profileImage ??
+    null;
   const avatarUrl =
     typeof avatarUrlRaw === "string" && avatarUrlRaw.trim().length > 0
       ? avatarUrlRaw.trim()
@@ -66,7 +71,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       href: "/admin/courses",
       icon: LiaCloudShowersHeavySolid,
     },
-    { label: "Coupons", href: "/admin/coupons", icon: Ticket },
+    // { label: "Coupons", href: "/admin/coupons", icon: Ticket },
     { label: "Percentage", href: "/admin/percentage", icon: BarChart },
   ];
 

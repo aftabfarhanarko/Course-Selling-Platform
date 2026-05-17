@@ -12,7 +12,9 @@ export function toQueryString(params: Record<string, unknown>): string {
   if (entries.length === 0) return "";
 
   const qs = entries
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+    .map(
+      ([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
+    )
     .join("&");
 
   return `?${qs}`;
@@ -20,8 +22,12 @@ export function toQueryString(params: Record<string, unknown>): string {
 
 export const baseApi = createApi({
   reducerPath: "baseApi",
+
   baseQuery: fetchBaseQuery({
-    baseUrl: "/api",
+    baseUrl:
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      "https://gentle-acceptance-production.up.railway.app",
+
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
 
@@ -41,6 +47,7 @@ export const baseApi = createApi({
       return headers;
     },
   }),
+
   tagTypes: [
     "Auth",
     "User",
@@ -54,5 +61,6 @@ export const baseApi = createApi({
     "Percentage",
     "Withdraw",
   ],
+
   endpoints: () => ({}),
 });

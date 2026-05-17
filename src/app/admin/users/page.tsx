@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useMemo, useState } from "react";
 import {
@@ -35,6 +35,17 @@ type UiUser = {
   status: Status;
   joinDate: string;
   phone?: string;
+  country?: string;
+  isActive: boolean;
+  isBanned: boolean;
+  deletedAt: string | null;
+  banReason?: string;
+  referCode?: string;
+  telegram?: string;
+  whatsapp?: string;
+  nidFrontSide?: string;
+  nidBackSide?: string;
+  photoUrl?: string;
   avatar: string;
   avatarBg: string;
   avatarColor: string;
@@ -66,14 +77,28 @@ function pickPalette(name: string) {
 }
 
 function formatDate(value: unknown) {
-  if (!value) return "—";
+  if (!value) return "â€”";
   const d = new Date(String(value));
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "â€”";
   return d.toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
     year: "numeric",
   });
+}
+
+function normalizeUrl(value: unknown): string | null {
+  const v = String(value ?? "").trim();
+  if (!v) return null;
+  const cleaned = v
+    .replace(/^`+/, "")
+    .replace(/`+$/, "")
+    .replace(/^"+/, "")
+    .replace(/"+$/, "")
+    .replace(/^'+/, "")
+    .replace(/'+$/, "")
+    .trim();
+  return cleaned.length ? cleaned : null;
 }
 
 function normalizeRole(value: unknown): Role {
@@ -105,10 +130,13 @@ function normalizeStatus(user: any): Status {
 function extractUsers(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
   if (Array.isArray(payload?.users)) return payload.users;
   if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
   if (Array.isArray(payload?.data?.users)) return payload.data.users;
   if (Array.isArray(payload?.data?.data)) return payload.data.data;
+  if (Array.isArray(payload?.data?.data?.items)) return payload.data.data.items;
   if (Array.isArray(payload?.data?.data?.users)) return payload.data.data.users;
   return [];
 }
@@ -121,13 +149,53 @@ function toUiUser(raw: any): UiUser | null {
 
   const role = normalizeRole(raw?.role);
   const status = normalizeStatus(raw);
-  const joinDate = formatDate(
-    raw?.createdAt ?? raw?.created_at ?? raw?.joinDate,
-  );
+  const joinDate = formatDate(raw?.createdAt ?? raw?.created_at ?? raw?.joinDate);
+
   const phone =
     typeof raw?.phone === "string" && raw.phone.trim().length > 0
       ? raw.phone.trim()
       : undefined;
+
+  const country =
+    typeof raw?.country === "string" && raw.country.trim().length > 0
+      ? raw.country.trim()
+      : undefined;
+
+  const isActive = Boolean(raw?.isActive ?? raw?.active ?? raw?.is_active ?? true);
+  const isBanned = Boolean(raw?.isBanned ?? raw?.banned ?? raw?.is_banned ?? false);
+
+  const deletedAtRaw = raw?.deletedAt ?? raw?.deleted_at ?? null;
+  const deletedAt = deletedAtRaw ? formatDate(deletedAtRaw) : null;
+
+  const banReason =
+    typeof raw?.banReason === "string" && raw.banReason.trim().length > 0
+      ? raw.banReason.trim()
+      : undefined;
+
+  const referCode =
+    typeof raw?.referCode === "string" && raw.referCode.trim().length > 0
+      ? raw.referCode.trim()
+      : undefined;
+
+  const telegram =
+    typeof raw?.telegram === "string" && raw.telegram.trim().length > 0
+      ? raw.telegram.trim()
+      : undefined;
+
+  const whatsapp =
+    typeof raw?.whatsapp === "string" && raw.whatsapp.trim().length > 0
+      ? raw.whatsapp.trim()
+      : undefined;
+
+  const nidFrontSide = normalizeUrl(raw?.nidFrontSide) ?? undefined;
+  const nidBackSide = normalizeUrl(raw?.nidBackSide) ?? undefined;
+
+  const photoUrl =
+    normalizeUrl(raw?.photo) ??
+    normalizeUrl(raw?.photoUrl) ??
+    normalizeUrl(raw?.avatar) ??
+    normalizeUrl(raw?.image) ??
+    undefined;
 
   const avatar = initials(name);
   const palette = pickPalette(name);
@@ -140,6 +208,17 @@ function toUiUser(raw: any): UiUser | null {
     status,
     joinDate,
     phone,
+    country,
+    isActive,
+    isBanned,
+    deletedAt,
+    banReason,
+    referCode,
+    telegram,
+    whatsapp,
+    nidFrontSide,
+    nidBackSide,
+    photoUrl,
     avatar,
     avatarBg: palette.bg,
     avatarColor: palette.color,
@@ -521,7 +600,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
       return (
         u.name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
-        u.role.toLowerCase().includes(q)
+        u.role.toLowerCase().includes(q) || (u.phone ? u.phone.toLowerCase().includes(q) : false) || (u.country ? u.country.toLowerCase().includes(q) : false)
       );
     });
   }, [roleFilter, search, statusFilter, uiUsers]);
@@ -670,7 +749,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search name / email..."
+              placeholder="Search name / email / phone / country..."
               className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none"
             />
           </div>
@@ -709,7 +788,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/70">
-                  {["User", "Role", "Joined", "Status", "Actions"].map((h) => (
+                  {["User", "Phone", "Country", "Role", "Active", "Banned", "Joined", "Deleted", "Ban Reason", "Photo", "Status", "Actions"].map((h) => (
                     <th
                       key={h}
                       className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3"
@@ -722,7 +801,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
               <tbody className="divide-y divide-gray-50">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-10">
+                    <td colSpan={12} className="px-4 py-10">
                       <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold">
                         <Loader2 className="h-4 w-4 animate-spin" /> Loading
                         users...
@@ -732,7 +811,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
                 ) : isError ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={12}
                       className="px-4 py-10 text-center text-[12px] text-red-500 font-semibold"
                     >
                       Failed to load users
@@ -741,7 +820,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
                 ) : paginated.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={12}
                       className="px-4 py-10 text-center text-[12px] text-gray-400"
                     >
                       No users found.
@@ -774,13 +853,61 @@ export default function AdminUsersApiPage(): React.JSX.Element {
                           </div>
                         </div>
                       </td>
+                      <td className="px-4 py-3 text-[12px] text-gray-600">
+                        {u.phone ?? "â€”"}
+                      </td>
+                      <td className="px-4 py-3 text-[12px] text-gray-600">
+                        {u.country ?? "â€”"}
+                      </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-gray-200 bg-gray-50 text-gray-700">
                           {u.role}
                         </span>
                       </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={
+                            u.isActive
+                              ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-gray-200 bg-gray-50 text-gray-600"
+                          }
+                        >
+                          {u.isActive ? "Yes" : "No"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={
+                            u.isBanned
+                              ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-red-200 bg-red-50 text-red-700"
+                              : "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 bg-emerald-50 text-emerald-700"
+                          }
+                        >
+                          {u.isBanned ? "Yes" : "No"}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-[12px] text-gray-500">
                         {u.joinDate}
+                      </td>
+                      <td className="px-4 py-3 text-[12px] text-gray-500">
+                        {u.deletedAt ?? "â€”"}
+                      </td>
+                      <td className="px-4 py-3 text-[12px] text-gray-600">
+                        {u.banReason ?? "â€”"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.photoUrl ? (
+                          <a
+                            href={u.photoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[12px] font-semibold text-indigo-600 hover:underline"
+                          >
+                            Open
+                          </a>
+                        ) : (
+                          <span className="text-[12px] text-gray-400">â€”</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -891,3 +1018,9 @@ export default function AdminUsersApiPage(): React.JSX.Element {
     </>
   );
 }
+
+
+
+
+
+
