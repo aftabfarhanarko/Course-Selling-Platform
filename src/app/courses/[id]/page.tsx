@@ -2,7 +2,7 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { COURSES } from "@/lib/courses";
+import { useAdminCourseQuery } from "@/lib/api/admin/course";
 import {
   Star,
   CheckCircle2,
@@ -20,11 +20,50 @@ export default function CourseDetailsPage({
 }: {
   params: { id: string };
 }) {
-  const courseId = parseInt(params.id, 10);
-  const course = COURSES.find((c) => c.id === courseId);
+  const id = params.id;
+  const { data, isLoading, isError, error } = useAdminCourseQuery(id);
 
-  if (!course) {
-    return notFound();
+  const raw = (data as any)?.data ?? data;
+
+  const course = raw
+    ? {
+        id: raw.id ?? id,
+        title: raw.name ?? raw.title ?? 'Untitled',
+        desc: raw.description ?? raw.desc ?? '',
+        image: raw.image ?? raw.thumbnail ?? '/placeholder.jpg',
+        price: Number(raw.price ?? 0),
+        category: raw.category?.name ?? raw.categoryName ?? 'Uncategorized',
+        potential: raw.potential ?? 'High Potential',
+        commission: raw.commission ?? '0%',
+        rating: Number(raw.rating ?? 4.5),
+        reviews: Number(raw.reviews ?? 0),
+      }
+    : null;
+
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen bg-[#f8f9fc]'>
+        <div className='flex flex-col items-center gap-3 text-slate-400'>
+          <div className='w-8 h-8 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin' />
+          <span className='text-sm font-medium'>Loading course...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !course) {
+    if (
+      (error as any)?.status === 404 ||
+      (error as any)?.originalStatus === 404
+    ) {
+      return notFound();
+    }
+
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-slate-50'>
+        <p className='text-red-500 font-semibold'>Failed to load course.</p>
+      </div>
+    );
   }
 
   return (
@@ -88,8 +127,7 @@ export default function CourseDetailsPage({
               </div>
               <div className="h-5 w-px bg-slate-700 hidden sm:block" />
               <div className="flex items-center gap-2 text-slate-300 text-[14px] font-medium">
-                <Clock size={18} className="text-slate-400" /> 14.5 Hours
-                On-Demand
+                <Clock size={18} className="text-slate-400" /> {course.d}
               </div>
             </div>
           </div>
