@@ -30,7 +30,10 @@ export const baseApi = createApi({
 
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
-      let token = state.auth?.user?.token ?? state.auth?.user?.accessToken ?? state.auth?.user?.access_token;
+      let token =
+        state.auth?.user?.token ??
+        state.auth?.user?.accessToken ??
+        state.auth?.user?.access_token;
       let role = state.auth?.user?.role ?? (state.auth as any)?.role;
 
       if (!token && typeof window !== "undefined") {
@@ -38,7 +41,13 @@ export const baseApi = createApi({
           const raw = localStorage.getItem("course_platform_auth");
           if (raw) {
             const parsed = JSON.parse(raw);
-            token = parsed?.user?.token ?? parsed?.user?.accessToken ?? parsed?.user?.access_token ?? parsed?.token ?? parsed?.accessToken ?? parsed?.access_token;
+            token =
+              parsed?.user?.token ??
+              parsed?.user?.accessToken ??
+              parsed?.user?.access_token ??
+              parsed?.token ??
+              parsed?.accessToken ??
+              parsed?.access_token;
             role = role ?? parsed?.user?.role ?? parsed?.role;
           }
         } catch {}
