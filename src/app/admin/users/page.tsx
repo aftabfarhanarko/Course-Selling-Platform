@@ -1,8 +1,23 @@
-﻿// pages/admin/users.tsx (or wherever you place the main component)
+// pages/admin/users.tsx (or wherever you place the main component)
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Users, UserPlus, Loader2 } from "lucide-react";
+import {
+  Users,
+  UserPlus,
+  Loader2,
+  Eye,
+  Shield,
+  ShieldOff,
+  Trash2,
+  Phone,
+  Globe,
+} from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  DataTable,
+  DataTableColumnHeader,
+} from "@/components/share/Table-Share";
 import {
   useAdminBanUserMutation,
   useAdminCreateUserMutation,
@@ -17,9 +32,10 @@ import { UiUser, Role, Status, PAGE_SIZE } from "./components/types";
 import { extractUsers, toUiUser } from "./components/utils";
 import { StatCards } from "./components/StatCards";
 import { SearchFilters } from "./components/SearchFilters";
-import { UserTableDesktop } from "./components/UserTableDesktop";
+import { Avatar } from "./components/Avatar";
+import { RoleBadge } from "./components/RoleBadge";
+import { StatusBadge } from "./components/StatusBadge";
 import { UserCardsMobile } from "./components/UserCardsMobile";
-import { Pagination } from "./components/Pagination";
 import { CreateModal } from "./components/CreateModal";
 import { ViewModal } from "./components/ViewModal";
 import { ConfirmModal } from "./components/ConfirmModal";
@@ -36,7 +52,6 @@ export default function AdminUsersApiPage(): React.JSX.Element {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"All" | Role>("All");
   const [statusFilter, setStatusFilter] = useState<"All" | Status>("All");
-  const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const [viewUser, setViewUser] = useState<UiUser | null>(null);
   const [confirm, setConfirm] = useState<null | {
@@ -60,14 +75,6 @@ export default function AdminUsersApiPage(): React.JSX.Element {
       );
     });
   }, [uiUsers, roleFilter, statusFilter, search]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
-
   const stats = useMemo(
     () => ({
       total: uiUsers.length,
@@ -81,7 +88,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
   const busy =
     isCreating || isDeleting || isBanning || isUnbanning || isRestoring;
 
-  const handleSearchChange = () => setPage(1);
+  const handleSearchChange = () => {};
 
   const confirmMeta = {
     delete: { title: "Delete User?", text: "Delete", tone: "danger" as const },
@@ -94,6 +101,145 @@ export default function AdminUsersApiPage(): React.JSX.Element {
     },
   };
 
+  const columns = useMemo<ColumnDef<UiUser, unknown>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="User" />
+        ),
+        cell: ({ row }) => {
+          const u = row.original;
+          return (
+            <div className="flex items-center gap-2.5">
+              <Avatar user={u} size="sm" />
+              <div className="min-w-0">
+                <p className="text-[12px] font-bold text-gray-900 whitespace-nowrap">
+                  {u.name}
+                </p>
+                <p className="text-[11px] text-gray-400 truncate max-w-[160px]">
+                  {u.email}
+                </p>
+              </div>
+            </div>
+          );
+        },
+        enableHiding: false,
+      },
+      {
+        accessorKey: "role",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Role" />
+        ),
+        cell: ({ row }) => <RoleBadge role={row.original.role} />,
+      },
+      {
+        accessorKey: "phone",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Phone" />
+        ),
+        cell: ({ row }) =>
+          row.original.phone ? (
+            <span className="flex items-center gap-1 whitespace-nowrap text-[12px] text-gray-600">
+              <Phone size={10} className="text-gray-400" />
+              {row.original.phone}
+            </span>
+          ) : (
+            <span className="text-gray-300">—</span>
+          ),
+      },
+      {
+        accessorKey: "country",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Country" />
+        ),
+        cell: ({ row }) =>
+          row.original.country ? (
+            <span className="flex items-center gap-1 whitespace-nowrap text-[12px] text-gray-600">
+              <Globe size={10} className="text-gray-400" />
+              {row.original.country}
+            </span>
+          ) : (
+            <span className="text-gray-300">—</span>
+          ),
+      },
+      {
+        accessorKey: "joinDate",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Joined" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-[12px] text-gray-500 whitespace-nowrap">
+            {row.original.joinDate}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Status" />
+        ),
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => {
+          const u = row.original;
+          return (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setViewUser(u)}
+                title="View"
+                className="p-2 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 text-gray-500 hover:text-indigo-600 transition-all"
+              >
+                <Eye size={13} />
+              </button>
+              {u.status === "Deleted" ? (
+                <button
+                  onClick={() => setConfirm({ type: "restore", user: u })}
+                  title="Restore"
+                  disabled={busy}
+                  className="p-2 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors disabled:opacity-60"
+                >
+                  <Shield size={13} />
+                </button>
+              ) : u.status === "Active" ? (
+                <button
+                  onClick={() => setConfirm({ type: "ban", user: u })}
+                  title="Ban"
+                  disabled={busy}
+                  className="p-2 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors disabled:opacity-60"
+                >
+                  <ShieldOff size={13} />
+                </button>
+              ) : (
+                <button
+                  onClick={() => setConfirm({ type: "unban", user: u })}
+                  title="Unban"
+                  disabled={busy}
+                  className="p-2 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors disabled:opacity-60"
+                >
+                  <Shield size={13} />
+                </button>
+              )}
+              <button
+                onClick={() => setConfirm({ type: "delete", user: u })}
+                title="Delete"
+                disabled={busy}
+                className="p-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-colors disabled:opacity-60"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    [busy],
+  );
   return (
     <>
       {createOpen && (
@@ -164,14 +310,12 @@ export default function AdminUsersApiPage(): React.JSX.Element {
             <span className="sm:hidden">Add</span>
           </button>
         </div>
-
         <StatCards
           total={stats.total}
           active={stats.active}
           suspended={stats.suspended}
           deleted={stats.deleted}
         />
-
         <SearchFilters
           search={search}
           setSearch={setSearch}
@@ -181,37 +325,48 @@ export default function AdminUsersApiPage(): React.JSX.Element {
           setStatusFilter={setStatusFilter}
           onSearchChange={handleSearchChange}
         />
-
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="hidden lg:block overflow-x-auto">
-            <UserTableDesktop
-              isLoading={isLoading}
-              isError={isError}
-              users={paginated}
-              onView={setViewUser}
-              onBan={(u) => setConfirm({ type: "ban", user: u })}
-              onUnban={(u) => setConfirm({ type: "unban", user: u })}
-              onDelete={(u) => setConfirm({ type: "delete", user: u })}
-              onRestore={(u) => setConfirm({ type: "restore", user: u })}
+        <div className="hidden lg:block">
+          {isLoading ? (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="py-16 text-center">
+                <div className="flex items-center justify-center gap-2 text-[13px] text-gray-400 font-semibold">
+                  <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />{" "}
+                  Loading users...
+                </div>
+              </div>
+            </div>
+          ) : isError ? (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="py-16 text-center text-[13px] text-red-500 font-semibold">
+                Failed to load users.
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="py-16 text-center text-[13px] text-gray-400">
+                No users found.
+              </div>
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={filtered}
+              showColumnsToggle={false}
+              showFooter={false}
+              pageSize={filtered.length || PAGE_SIZE}
             />
-          </div>
-          <div className="lg:hidden">
-            <UserCardsMobile
-              isLoading={isLoading}
-              isError={isError}
-              users={paginated}
-              onView={setViewUser}
-              onBan={(u) => setConfirm({ type: "ban", user: u })}
-              onUnban={(u) => setConfirm({ type: "unban", user: u })}
-              onDelete={(u) => setConfirm({ type: "delete", user: u })}
-              onRestore={(u) => setConfirm({ type: "restore", user: u })}
-            />
-          </div>
-          <Pagination
-            currentPage={safePage}
-            totalPages={totalPages}
-            totalItems={filtered.length}
-            onPageChange={setPage}
+          )}
+        </div>
+        <div className="lg:hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <UserCardsMobile
+            isLoading={isLoading}
+            isError={isError}
+            users={filtered}
+            onView={setViewUser}
+            onBan={(u) => setConfirm({ type: "ban", user: u })}
+            onUnban={(u) => setConfirm({ type: "unban", user: u })}
+            onDelete={(u) => setConfirm({ type: "delete", user: u })}
+            onRestore={(u) => setConfirm({ type: "restore", user: u })}
           />
         </div>
       </div>

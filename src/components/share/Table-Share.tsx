@@ -120,6 +120,7 @@ export type DataTableProps<TData, TValue> = {
   searchKey?: string;
   searchPlaceholder?: string;
   showColumnsToggle?: boolean;
+  showFooter?: boolean;
   pageSize?: number;
   toolbarRight?: React.ReactNode;
   className?: string;
@@ -131,6 +132,7 @@ export function DataTable<TData, TValue>({
   searchKey,
   searchPlaceholder,
   showColumnsToggle = true,
+  showFooter = true,
   pageSize = 10,
   toolbarRight,
   className,
@@ -300,33 +302,35 @@ export function DataTable<TData, TValue>({
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-4">
-        <div className="text-[12px] font-semibold text-zinc-600">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
+      {showFooter ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-4">
+          <div className="text-[12px] font-semibold text-zinc-600">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronLeft className="h-4 w-4" /> Prev
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next <ChevronRight className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeft className="h-4 w-4" /> Prev
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

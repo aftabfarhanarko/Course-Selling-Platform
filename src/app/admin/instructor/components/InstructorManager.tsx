@@ -13,12 +13,19 @@ import {
   Trash2,
   UserPlus,
 } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+
 import {
   useAdminCreateInstructorMutation,
   useAdminDeleteInstructorMutation,
   useAdminInstructorsQuery,
   useAdminRestoreInstructorMutation,
 } from "@/lib/api/admin/instructor";
+
+import {
+  DataTable,
+  DataTableColumnHeader,
+} from "@/components/share/Table-Share";
 
 import { Status, UiInstructor, PAGE_SIZE } from "./types";
 import { extractInstructors, extractTotal, toUiInstructor } from "./utils";
@@ -178,6 +185,146 @@ export default function InstructorManager(): React.JSX.Element {
     },
   ];
 
+  const columns = useMemo<ColumnDef<UiInstructor, unknown>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Instructor" />
+        ),
+        cell: ({ row }) => {
+          const u = row.original;
+          return (
+            <div className="flex items-center gap-2.5">
+              <Avatar name={u.name} photo={u.photo} />
+              <div className="min-w-0">
+                <p className="text-[12px] font-bold text-gray-900 whitespace-nowrap">
+                  {u.name}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5 truncate max-w-[220px]">
+                  {u.email}
+                </p>
+              </div>
+            </div>
+          );
+        },
+        enableHiding: false,
+      },
+      {
+        accessorKey: "designation",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Designation" />
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap">
+            {row.original.designation ?? "—"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "experience",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Experience" />
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap">
+            {row.original.experience ?? "—"}
+          </span>
+        ),
+      },
+      {
+        id: "skills",
+        accessorFn: (u) => (u.skills ?? []).join(", "),
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Skills" />
+        ),
+        cell: ({ row }) => {
+          const u = row.original;
+          return u.skills.length > 0 ? (
+            <SkillTags skills={u.skills} max={2} />
+          ) : (
+            <span className="text-gray-400 text-[12px]">—</span>
+          );
+        },
+      },
+      {
+        accessorKey: "phone",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Phone" />
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap">{row.original.phone ?? "—"}</span>
+        ),
+      },
+      {
+        accessorKey: "country",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Country" />
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap">
+            {row.original.country ?? "—"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Status" />
+        ),
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        accessorKey: "joinDate",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Joined" />
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap text-gray-500">
+            {row.original.joinDate}
+          </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => {
+          const u = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setDetailsId(u.id)}
+                className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors"
+              >
+                <Eye size={14} />
+              </button>
+              {u.status === "Deleted" ? (
+                <button
+                  onClick={() => setRestoreTarget(u)}
+                  disabled={busy || !isAdmin}
+                  className="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold flex items-center gap-1 transition-colors disabled:opacity-60"
+                >
+                  <RefreshCw size={11} /> Restore
+                </button>
+              ) : (
+                <button
+                  onClick={() => setRemoveTarget(u)}
+                  disabled={busy || !isAdmin}
+                  className="p-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [busy, isAdmin],
+  );
   const renderTableBody = () => {
     if (!authChecked)
       return (
@@ -384,115 +531,23 @@ export default function InstructorManager(): React.JSX.Element {
 
         {/* Desktop table */}
         {!isLoading && !isError && filteredInstructors.length > 0 && (
-          <div className="hidden md:block bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[860px]">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/70">
-                    {[
-                      "Instructor",
-                      "Designation",
-                      "Experience",
-                      "Skills",
-                      "Phone",
-                      "Country",
-                      "Status",
-                      "Joined",
-                      "Actions",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3 whitespace-nowrap"
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filteredInstructors.map((u) => (
-                    <tr
-                      key={String(u.id)}
-                      className="hover:bg-indigo-50/20 transition-colors"
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar name={u.name} photo={u.photo} />
-                          <div>
-                            <p className="text-[12px] font-bold text-gray-900 whitespace-nowrap">
-                              {u.name}
-                            </p>
-                            <p className="text-[11px] text-gray-400 mt-0.5">
-                              {u.email}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-600 whitespace-nowrap">
-                        {u.designation ?? "—"}
-                      </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-600 whitespace-nowrap">
-                        {u.experience ?? "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {u.skills.length > 0 ? (
-                          <SkillTags skills={u.skills} max={2} />
-                        ) : (
-                          <span className="text-gray-400 text-[12px]">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-600 whitespace-nowrap">
-                        {u.phone ?? "—"}
-                      </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-600 whitespace-nowrap">
-                        {u.country ?? "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={u.status} />
-                      </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-500 whitespace-nowrap">
-                        {u.joinDate}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setDetailsId(u.id)}
-                            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors"
-                          >
-                            <Eye size={14} />
-                          </button>
-                          {u.status === "Deleted" ? (
-                            <button
-                              onClick={() => setRestoreTarget(u)}
-                              disabled={busy || !isAdmin}
-                              className="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold flex items-center gap-1 transition-colors disabled:opacity-60"
-                            >
-                              <RefreshCw size={11} /> Restore
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setRemoveTarget(u)}
-                              disabled={busy || !isAdmin}
-                              className="p-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-colors"
-                              title="Delete"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="px-4 py-3.5 border-t border-gray-100">
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                onChange={setPage}
-              />
-            </div>
+          <div className="hidden md:block">
+            <DataTable
+              columns={columns}
+              data={filteredInstructors}
+              showColumnsToggle={false}
+              pageSize={PAGE_SIZE}
+            />
+
+            {totalPages > 1 && (
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-3 mt-3">
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  onChange={setPage}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
