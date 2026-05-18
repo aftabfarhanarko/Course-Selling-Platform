@@ -12,6 +12,11 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  DataTable,
+  DataTableColumnHeader,
+} from "@/components/share/Table-Share";
 import {
   useAdminEnrollmentsManualPaymentMutation,
   useAdminEnrollmentsPayBkashPaymentMutation,
@@ -89,17 +94,9 @@ function normalizeEnrollment(raw: any): UiEnrollment | null {
 
   const studentEmail = String(studentObj?.email ?? "").trim() || "—";
   const studentId =
-    studentObj?.id ??
-    studentObj?._id ??
-    raw?.studentId ??
-    raw?.userId ??
-    null;
+    studentObj?.id ?? studentObj?._id ?? raw?.studentId ?? raw?.userId ?? null;
 
-  const courseId =
-    raw?.course?.id ??
-    raw?.course?._id ??
-    raw?.courseId ??
-    null;
+  const courseId = raw?.course?.id ?? raw?.course?._id ?? raw?.courseId ?? null;
 
   const course =
     String(
@@ -138,6 +135,13 @@ function normalizeEnrollment(raw: any): UiEnrollment | null {
   };
 }
 
+function modalIconForTitle(title: string) {
+  const t = title.toLowerCase();
+  if (t.includes("details")) return Eye;
+  if (t.includes("pay") || t.includes("payment")) return Wallet;
+  return AlertTriangle;
+}
+
 function ModalShell({ title, subtitle, loading, onClose, children }: any) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -146,17 +150,31 @@ function ModalShell({ title, subtitle, loading, onClose, children }: any) {
         onClick={onClose}
       />
       <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h2 className="text-[14px] font-extrabold text-gray-900">
-              {title}
-            </h2>
-            <p className="text-[11px] text-gray-400 mt-0.5">{subtitle}</p>
+        <div className="px-6 py-4 border-b border-gray-100 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            {(() => {
+              const Icon = modalIconForTitle(String(title));
+              return (
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 flex-shrink-0">
+                  <Icon size={18} className="text-white" />
+                </div>
+              );
+            })()}
+
+            <div className="min-w-0">
+              <h2 className="text-[15px] sm:text-[16px] font-extrabold text-gray-900 tracking-tight leading-none truncate">
+                {title}
+              </h2>
+              <p className="text-[10px] sm:text-[11px] text-gray-400 mt-1 font-medium truncate">
+                {subtitle}
+              </p>
+            </div>
           </div>
+
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-60"
+            className="w-9 h-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors disabled:opacity-60"
           >
             <X size={15} />
           </button>
@@ -169,18 +187,53 @@ function ModalShell({ title, subtitle, loading, onClose, children }: any) {
 
 /* Keep your existing JsonBodyModal and DetailsModal components (unchanged) */
 function JsonBodyModal({ ...props }: any) {
-  // ... your existing JsonBodyModal code
-  const [text, setText] = useState(JSON.stringify(props.initialBody, null, 2));
-  const [error, setError] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState(
+    props.initialBody?.courseId !== undefined &&
+      props.initialBody?.courseId !== null
+      ? String(props.initialBody.courseId)
+      : "",
+  );
+  const [studentId, setStudentId] = useState(
+    props.initialBody?.studentId !== undefined &&
+      props.initialBody?.studentId !== null
+      ? String(props.initialBody.studentId)
+      : "",
+  );
+  const [error, setError] = useState<null | {
+    courseId?: string;
+    studentId?: string;
+  }>(null);
 
   const submit = () => {
-    try {
-      const parsed = JSON.parse(text);
-      setError(null);
-      props.onSubmit(parsed);
-    } catch {
-      setError("Invalid JSON");
+    const nextError: { courseId?: string; studentId?: string } = {};
+
+    if (!courseId.trim()) nextError.courseId = "Course ID is required";
+    if (!studentId.trim()) nextError.studentId = "Student ID is required";
+
+    const courseIdNum = Number(courseId);
+    const studentIdNum = Number(studentId);
+
+    if (
+      courseId.trim() &&
+      (!Number.isFinite(courseIdNum) || courseIdNum <= 0)
+    ) {
+      nextError.courseId = "Course ID must be a valid number";
     }
+
+    if (
+      studentId.trim() &&
+      (!Number.isFinite(studentIdNum) || studentIdNum <= 0)
+    ) {
+      nextError.studentId = "Student ID must be a valid number";
+    }
+
+    if (Object.keys(nextError).length) {
+      setError(nextError);
+      return;
+    }
+
+    setError(null);
+    props.onSubmit({ courseId: courseIdNum, studentId: studentIdNum });
   };
 
   return (
@@ -191,16 +244,40 @@ function JsonBodyModal({ ...props }: any) {
       onClose={props.onClose}
     >
       <div className="space-y-4">
-        <div>
-          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-            Request Body (JSON)
-          </label>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className={`w-full min-h-[220px] px-3 py-2 text-[12px] border rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300 ${error ? "border-red-400 bg-red-50" : "border-gray-200"}`}
-          />
-          {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+              Course ID
+            </label>
+            <input
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              inputMode="numeric"
+              placeholder="e.g. 12"
+              disabled={props.loading}
+              className={`w-full h-11 px-3 rounded-xl border bg-white text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-300 ${error?.courseId ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+            />
+            {error?.courseId ? (
+              <p className="text-[10px] text-red-500 mt-1">{error.courseId}</p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+              Student ID
+            </label>
+            <input
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              inputMode="numeric"
+              placeholder="e.g. 45"
+              disabled={props.loading}
+              className={`w-full h-11 px-3 rounded-xl border bg-white text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-300 ${error?.studentId ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+            />
+            {error?.studentId ? (
+              <p className="text-[10px] text-red-500 mt-1">{error.studentId}</p>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex gap-2.5">
@@ -245,10 +322,90 @@ function DetailsModal({
     if (open) trigger(id);
   }, [id, open, trigger]);
 
+  const details = useMemo(() => {
+    const root = (data as any)?.data ?? data;
+    const payload = (root as any)?.data ?? root;
+
+    const enrollment = payload ?? {};
+    const student = (payload as any)?.student ?? (payload as any)?.user ?? {};
+    const course = (payload as any)?.course ?? {};
+
+    const enrollmentId =
+      (enrollment as any)?.id ?? (enrollment as any)?._id ?? id;
+
+    const status = String(
+      (enrollment as any)?.status ??
+        (enrollment as any)?.paymentStatus ??
+        ((enrollment as any)?.isPaid ? "paid" : "pending"),
+    );
+
+    const amountRaw =
+      (enrollment as any)?.amount ??
+      (enrollment as any)?.price ??
+      (enrollment as any)?.total ??
+      (enrollment as any)?.payment?.amount ??
+      null;
+    const amount =
+      amountRaw !== null && amountRaw !== undefined ? String(amountRaw) : "?";
+
+    const paymentMethod = String((enrollment as any)?.paymentMethod ?? "?");
+    const transactionId =
+      (enrollment as any)?.transactionId ??
+      (enrollment as any)?.payment?.transactionId ??
+      null;
+    const isManual = Boolean((enrollment as any)?.isManual ?? false);
+
+    const studentName = String(student?.name ?? student?.email ?? "?");
+    const studentEmail = String(student?.email ?? "?");
+    const studentPhone = student?.phone ? String(student.phone) : "?";
+    const studentCountry = student?.country ? String(student.country) : "?";
+
+    const courseTitle = String(course?.title ?? course?.name ?? "?");
+    const coursePrice = course?.price ?? course?.amount ?? null;
+    const courseSlug = course?.slug ? String(course.slug) : "?";
+
+    const createdAt = formatDate((enrollment as any)?.createdAt);
+    const enrolledAt = formatDate((enrollment as any)?.enrolledAt);
+
+    return {
+      enrollmentId,
+      status,
+      amount,
+      paymentMethod,
+      transactionId: transactionId ? String(transactionId) : "?",
+      isManual,
+      createdAt,
+      enrolledAt,
+      studentName,
+      studentEmail,
+      studentPhone,
+      studentCountry,
+      courseTitle,
+      coursePrice:
+        coursePrice !== null && coursePrice !== undefined
+          ? String(coursePrice)
+          : "?",
+      courseSlug,
+    };
+  }, [data, id]);
+
+  const statusLower = details.status.toLowerCase();
+  const paid = ["paid", "active", "completed", "success"].some((k) =>
+    statusLower.includes(k),
+  );
+
+  const failed = ["failed", "cancel", "canceled", "rejected", "error"].some(
+    (k) => statusLower.includes(k),
+  );
+
+  const pending = ["pending", "unpaid", "due"].some((k) =>
+    statusLower.includes(k),
+  );
+
   return (
     <ModalShell
       title="Enrollment Details"
-      subtitle="GET /enrollments/:id"
+      subtitle={`GET /enrollments/${id}`}
       loading={isFetching}
       onClose={onClose}
     >
@@ -261,9 +418,158 @@ function DetailsModal({
           Failed to load details
         </div>
       ) : (
-        <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-4 overflow-auto max-h-[520px] whitespace-pre-wrap">
-          {JSON.stringify(data, null, 2)}
-        </pre>
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[11px] text-gray-400 font-semibold">
+                Enrollment
+              </p>
+              <p className="text-[15px] font-extrabold text-gray-900 truncate">
+                #{details.enrollmentId}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${paid ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
+              >
+                {details.status}
+              </span>
+              {details.isManual ? (
+                <span className="inline-flex px-3 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-700">
+                  Manual
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
+              <p className="text-[11px] font-extrabold tracking-widest uppercase text-gray-500 mb-3">
+                Student
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-gray-500 font-semibold">
+                    Name
+                  </span>
+                  <span className="text-[12px] text-gray-900 font-bold truncate max-w-[60%]">
+                    {details.studentName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-gray-500 font-semibold">
+                    Email
+                  </span>
+                  <span className="text-[12px] text-gray-900 font-semibold truncate max-w-[60%]">
+                    {details.studentEmail}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-gray-500 font-semibold">
+                    Phone
+                  </span>
+                  <span className="text-[12px] text-gray-900 font-semibold truncate max-w-[60%]">
+                    {details.studentPhone}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-gray-500 font-semibold">
+                    Country
+                  </span>
+                  <span className="text-[12px] text-gray-900 font-semibold truncate max-w-[60%]">
+                    {details.studentCountry}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
+              <p className="text-[11px] font-extrabold tracking-widest uppercase text-gray-500 mb-3">
+                Course
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-gray-500 font-semibold">
+                    Title
+                  </span>
+                  <span className="text-[12px] text-gray-900 font-bold truncate max-w-[60%]">
+                    {details.courseTitle}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-gray-500 font-semibold">
+                    Slug
+                  </span>
+                  <span className="text-[12px] text-gray-900 font-semibold truncate max-w-[60%]">
+                    {details.courseSlug}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-gray-500 font-semibold">
+                    Price
+                  </span>
+                  <span className="text-[12px] text-gray-900 font-semibold whitespace-nowrap">
+                    {"\u09F3"}
+                    {details.coursePrice}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-4">
+            <p className="text-[11px] font-extrabold tracking-widest uppercase text-gray-500 mb-3">
+              Payment
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[12px] text-gray-500 font-semibold">
+                  Amount
+                </span>
+                <span
+                  className={`text-[12px] font-extrabold whitespace-nowrap ${paid ? "text-emerald-700" : failed ? "text-red-600" : pending ? "text-amber-700" : "text-gray-900"}`}
+                >
+                  {"\u09F3"}
+                  {details.amount}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[12px] text-gray-500 font-semibold">
+                  Method
+                </span>
+                <span
+                  className={`text-[12px] font-semibold whitespace-nowrap ${paid ? "text-emerald-700" : failed ? "text-red-600" : pending ? "text-amber-700" : "text-gray-900"}`}
+                >
+                  {details.paymentMethod}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[12px] text-gray-500 font-semibold">
+                  TRX
+                </span>
+                <span className="text-[12px] text-gray-900 font-semibold truncate max-w-[60%]">
+                  {details.transactionId}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[12px] text-gray-500 font-semibold">
+                  Created
+                </span>
+                <span className="text-[12px] text-gray-900 font-semibold whitespace-nowrap">
+                  {details.createdAt}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[12px] text-gray-500 font-semibold">
+                  Enrolled
+                </span>
+                <span className="text-[12px] text-gray-900 font-semibold whitespace-nowrap">
+                  {details.enrolledAt}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </ModalShell>
   );
@@ -291,17 +597,164 @@ export default function AdminEnrollmentsPage() {
     1,
     totalFromApi ? Math.ceil(totalFromApi / PAGE_SIZE) : 1,
   );
-const [detailsId, setDetailsId] = useState<number | string | null>(null);
-  const [bkashBody, setBkashBody] = useState<
-    { courseId: number | string | null; studentId: number | string | null } | null
-  >(null);
-  const [manualBody, setManualBody] = useState<
-    { courseId: number | string | null; studentId: number | string | null } | null
-  >(null);
+  const [detailsId, setDetailsId] = useState<number | string | null>(null);
+  const [bkashBody, setBkashBody] = useState<{
+    courseId: number | string | null;
+    studentId: number | string | null;
+  } | null>(null);
+  const [manualBody, setManualBody] = useState<{
+    courseId: number | string | null;
+    studentId: number | string | null;
+  } | null>(null);
   const [payBkash, { isLoading: isPayingBkash }] =
     useAdminEnrollmentsPayBkashPaymentMutation();
   const [manualPayment, { isLoading: isManualPaying }] =
     useAdminEnrollmentsManualPaymentMutation();
+
+  const columns = useMemo<ColumnDef<UiEnrollment, unknown>[]>(
+    () => [
+      {
+        accessorKey: "student",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Student" />
+        ),
+        cell: ({ row }) => {
+          const e = row.original;
+          return (
+            <div className="min-w-0">
+              <p className="text-[12px] font-bold text-gray-900 whitespace-nowrap">
+                {e.student}
+              </p>
+              <p className="text-[11px] text-gray-400 truncate max-w-[220px]">
+                {e.studentEmail}
+              </p>
+              <p className="text-[11px] text-gray-300 whitespace-nowrap">
+                ID: {e.id}
+              </p>
+            </div>
+          );
+        },
+        enableHiding: false,
+      },
+      {
+        accessorKey: "course",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Course" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-medium text-gray-800">
+            {row.original.course}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Amount" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-extrabold text-gray-900 whitespace-nowrap">
+            ৳{row.original.amount}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Status" />
+        ),
+        cell: ({ row }) => {
+          const status = row.original.status;
+          const paid = status === "completed";
+          return (
+            <span
+              className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${paid ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
+            >
+              {status}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "paymentMethod",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Payment" />
+        ),
+        cell: ({ row }) => {
+          const e = row.original;
+          return (
+            <div className="min-w-0">
+              <p className="font-semibold text-gray-800 whitespace-nowrap">
+                {e.paymentMethod}
+              </p>
+              {e.transactionId ? (
+                <p className="text-[11px] text-gray-500 whitespace-nowrap">
+                  TRX: {e.transactionId}
+                </p>
+              ) : null}
+              {e.isManual ? (
+                <span className="text-[10px] text-purple-600 font-bold whitespace-nowrap">
+                  MANUAL
+                </span>
+              ) : null}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "createdAt",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Created" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-[12px] text-gray-500 whitespace-nowrap">
+            {row.original.createdAt}
+          </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        enableSorting: false,
+        enableHiding: false,
+        cell: ({ row }) => {
+          const e = row.original;
+          return (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setDetailsId(e.id)}
+                className="h-9 px-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold flex items-center gap-1"
+              >
+                <Eye size={14} /> Details
+              </button>
+
+              <button
+                onClick={() =>
+                  setBkashBody({ courseId: e.courseId, studentId: e.studentId })
+                }
+                className="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1"
+              >
+                <Wallet size={14} /> Bkash
+              </button>
+
+              <button
+                onClick={() =>
+                  setManualBody({
+                    courseId: e.courseId,
+                    studentId: e.studentId,
+                  })
+                }
+                className="h-9 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1"
+              >
+                <Wallet size={14} /> Manual
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    [],
+  );
 
   return (
     <>
@@ -318,7 +771,7 @@ const [detailsId, setDetailsId] = useState<number | string | null>(null);
             studentId: bkashBody.studentId,
           }}
           onClose={() => setBkashBody(null)}
-          onSubmit={async (body) => {
+          onSubmit={async (body: Record<string, unknown>) => {
             const payload: any = { ...body };
             delete payload.enrollmentId;
             if (payload.courseId !== undefined && payload.courseId !== null) {
@@ -343,7 +796,7 @@ const [detailsId, setDetailsId] = useState<number | string | null>(null);
             studentId: manualBody.studentId,
           }}
           onClose={() => setManualBody(null)}
-          onSubmit={async (body) => {
+          onSubmit={async (body: Record<string, unknown>) => {
             const payload: any = { ...body };
             delete payload.enrollmentId;
             if (payload.courseId !== undefined && payload.courseId !== null) {
@@ -358,19 +811,23 @@ const [detailsId, setDetailsId] = useState<number | string | null>(null);
           }}
         />
       )}
-      <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
-          <div>
-            <h1 className="text-[18px] font-extrabold text-gray-900 tracking-tight">
-              Enrollments
-            </h1>
-            <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
-              GET /enrollments · GET /enrollments/:id · POST
-              /enrollments/pay · POST /enrollments/manual
-            </p>
+      <div className="min-h-screen bg-slate-50 p-3 sm:p-5 lg:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 flex-shrink-0">
+              <Wallet size={20} className="text-white" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-[17px] sm:text-[20px] font-extrabold text-gray-900 tracking-tight leading-none">
+                Enrollments
+              </h1>
+              <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5 font-medium truncate hidden sm:block">
+                Manage enrollments and payments.
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
@@ -380,7 +837,7 @@ const [detailsId, setDetailsId] = useState<number | string | null>(null);
                   setPage(1);
                 }}
                 placeholder="Search student or course..."
-                className="w-[280px] h-10 pl-10 pr-3 rounded-xl border border-gray-200 bg-white text-[13px] font-semibold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                className="w-full sm:w-[320px] h-10 pl-10 pr-3 rounded-xl border border-gray-200 bg-white text-[13px] font-semibold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               />
             </div>
             <button
@@ -392,152 +849,54 @@ const [detailsId, setDetailsId] = useState<number | string | null>(null);
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/70">
-                  {[
-                    "Student",
-                    "Course",
-                    "Amount",
-                    "Status",
-                    "Payment",
-                    "Created",
-                    "Actions",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left px-4 py-3 text-[11px] font-extrabold tracking-widest uppercase text-gray-500"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {list.isLoading ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center">
-                      <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                    </td>
-                  </tr>
-                ) : list.isError ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="px-4 py-12 text-center text-red-600"
-                    >
-                      Failed to load enrollments
-                    </td>
-                  </tr>
-                ) : enrollments.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="px-4 py-12 text-center text-gray-500"
-                    >
-                      No enrollments found
-                    </td>
-                  </tr>
-                ) : (
-                  enrollments.map((e) => (
-                    <tr
-                      key={String(e.id)}
-                      className="border-b border-gray-100 hover:bg-gray-50/50"
-                    >
-                      <td className="px-4 py-4">
-                        <p className="font-bold text-gray-900">{e.student}</p>
-                        <p className="text-[11px] text-gray-500">
-                          {e.studentEmail}
-                        </p>
-                        <p className="text-[11px] text-gray-400">ID: {e.id}</p>
-                      </td>
-                      <td className="px-4 py-4 font-medium text-gray-800">
-                        {e.course}
-                      </td>
-                      <td className="px-4 py-4 font-extrabold text-gray-900">
-                        ৳{e.amount}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${e.status === "completed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
-                        >
-                          {e.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="text-sm">
-                          <p className="font-semibold">{e.paymentMethod}</p>
-                          {e.transactionId && (
-                            <p className="text-[11px] text-gray-500">
-                              TRX: {e.transactionId}
-                            </p>
-                          )}
-                          {e.isManual && (
-                            <span className="text-[10px] text-purple-600 font-bold">
-                              MANUAL
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-[12px] text-gray-600">
-                        {e.createdAt}
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => setDetailsId(e.id)}
-                            className="h-9 px-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold flex items-center gap-1"
-                          >
-                            <Eye size={14} /> Details
-                          </button>
-
-                          <button
-                            onClick={() => setBkashBody({ courseId: e.courseId, studentId: e.studentId })}
-                            className="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1"
-                          >
-                            <Wallet size={14} /> Bkash
-                          </button>
-
-                          <button
-                            onClick={() => setManualBody({ courseId: e.courseId, studentId: e.studentId })}
-                            className="h-9 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1"
-                          >
-                            <Wallet size={14} /> Manual
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100">
-            <p className="text-sm text-gray-500 font-medium">
-              Page {page} of {totalPages}
-            </p>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="h-9 px-4 rounded-xl border flex items-center gap-1 disabled:opacity-50"
-              >
-                <ChevronLeft size={16} /> Prev
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="h-9 px-4 rounded-xl border flex items-center gap-1 disabled:opacity-50"
-              >
-                Next <ChevronRight size={16} />
-              </button>
+        {list.isLoading ? (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="py-16 text-center">
+              <div className="flex items-center justify-center gap-2 text-[13px] text-gray-400 font-semibold">
+                <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />{" "}
+                Loading enrollments...
+              </div>
             </div>
           </div>
-        </div>
+        ) : list.isError ? (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="py-16 text-center text-[13px] text-red-500 font-semibold">
+              Failed to load enrollments
+            </div>
+          </div>
+        ) : (
+          <>
+            <DataTable
+              columns={columns}
+              data={enrollments}
+              showFooter={false}
+              pageSize={PAGE_SIZE}
+            />
+
+            <div className="mt-3 flex items-center justify-between px-5 py-4 rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <p className="text-sm text-gray-500 font-medium">
+                Page {page} of {totalPages}
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="h-9 px-4 rounded-xl border flex items-center gap-1 disabled:opacity-50"
+                >
+                  <ChevronLeft size={16} /> Prev
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="h-9 px-4 rounded-xl border flex items-center gap-1 disabled:opacity-50"
+                >
+                  Next <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );
