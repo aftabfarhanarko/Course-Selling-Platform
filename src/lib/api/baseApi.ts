@@ -30,12 +30,27 @@ export const baseApi = createApi({
 
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
+      const authAny = state.auth as unknown as
+        | {
+            user?: {
+              token?: string;
+              accessToken?: string;
+              access_token?: string;
+            };
+            token?: string;
+            accessToken?: string;
+            access_token?: string;
+          }
+        | null
+        | undefined;
 
       const token =
-        state.auth?.user?.token ??
-        state.auth?.user?.accessToken ??
-        (state.auth as unknown as { token?: string } | undefined)?.token;
-
+        authAny?.user?.token ??
+        authAny?.user?.accessToken ??
+        authAny?.user?.access_token ??
+        authAny?.token ??
+        authAny?.accessToken ??
+        authAny?.access_token;
       if (token && !headers.has("authorization")) {
         headers.set("Authorization", `Bearer ${token}`);
       }

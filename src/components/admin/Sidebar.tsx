@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -13,10 +13,11 @@ import {
   ClipboardList,
   CreditCard,
   ShoppingBag,
-  Ticket,
   BarChart,
   LogOut,
   X,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { LiaCloudShowersHeavySolid } from "react-icons/lia";
 import { useLogoutMutation } from "@/lib/api/authApi";
@@ -26,11 +27,54 @@ import { baseApi } from "@/lib/api/baseApi";
 import { toast } from "sonner";
 import type { RootState } from "@/store";
 
+const navGroups = [
+  {
+    label: "Overview",
+    items: [
+      { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+      { label: "Enrollments", href: "/admin/enrollments", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { label: "Users", href: "/admin/users", icon: Users },
+      { label: "Instructors", href: "/admin/instructor", icon: GraduationCap },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { label: "Wallet", href: "/admin/wallet", icon: Wallet },
+      {
+        label: "Payment Methods",
+        href: "/admin/paymentMethods",
+        icon: CreditCard,
+      },
+      { label: "Withdrawals", href: "/admin/withdraw", icon: Banknote },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { label: "Products", href: "/admin/products", icon: ShoppingBag },
+      { label: "Category", href: "/admin/category", icon: Layers },
+      {
+        label: "Courses",
+        href: "/admin/courses",
+        icon: LiaCloudShowersHeavySolid,
+      },
+      { label: "Percentage", href: "/admin/percentage", icon: BarChart },
+    ],
+  },
+];
+
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
   const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
 
   const authUser = useSelector((state: RootState) => state.auth.user);
 
@@ -52,143 +96,201 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       ? avatarUrlRaw.trim()
       : null;
 
-  const navItems = [
-    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { label: "Enrollments", href: "/admin/enrollments", icon: ClipboardList },
-    { label: "Users", href: "/admin/users", icon: Users },
-    { label: "Instructors", href: "/admin/instructor", icon: GraduationCap },
-    { label: "Wallet", href: "/admin/wallet", icon: Wallet },
-    {
-      label: "Payment Methods",
-      href: "/admin/paymentMethods",
-      icon: CreditCard,
-    },
-    { label: "Withdraw Requests", href: "/admin/withdraw", icon: Banknote },
-    { label: "Products", href: "/admin/products", icon: ShoppingBag },
-    { label: "Category", href: "/admin/category", icon: Layers },
-    {
-      label: "Courses",
-      href: "/admin/courses",
-      icon: LiaCloudShowersHeavySolid,
-    },
-    // { label: "Coupons", href: "/admin/coupons", icon: Ticket },
-    { label: "Percentage", href: "/admin/percentage", icon: BarChart },
-  ];
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    const toastId = toast.loading("Signing out...");
+    try {
+      await logoutApi().unwrap();
+    } catch {
+    } finally {
+      dispatch(logout());
+      dispatch(baseApi.util.resetApiState());
+      toast.success("Signed out", { id: toastId });
+      onClose?.();
+      router.replace("/");
+    }
+  };
 
   return (
-    <aside className="h-full w-56 border-r border-zinc-200/80 bg-white/80 backdrop-blur-2xl dark:border-zinc-800/80 dark:bg-zinc-950/80 shadow-[8px_0_30px_rgba(0,0,0,0.03)] flex flex-col z-50 overflow-y-auto">
-      <div className="flex flex-col h-full p-4">
+    <aside
+      className="
+        relative z-50 flex h-full w-[220px] flex-col overflow-x-hidden overflow-y-auto
+        border-r border-slate-200 bg-white shadow-sm
+        [scrollbar-width:thin] [scrollbar-color:rgba(0,0,0,0.08)_transparent]
+        [&::-webkit-scrollbar]:w-[3px]
+        [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:rounded-full
+        [&::-webkit-scrollbar-thumb]:bg-slate-200
+      "
+    >
+      {/* Subtle top blue tint */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[180px] bg-[radial-gradient(ellipse_at_50%_-10%,rgba(79,142,247,0.06)_0%,transparent_70%)]" />
+
+      <div className="relative flex h-full flex-col px-3 py-4">
+        {/* Close button — mobile only */}
         {onClose && (
-          <div className="flex justify-end mb-1 lg:hidden">
+          <div className="mb-2 flex justify-end lg:hidden">
             <button
               onClick={onClose}
-              className="p-1.5 text-zinc-400 hover:bg-zinc-100/80 hover:text-zinc-700 rounded-lg dark:text-zinc-500 dark:hover:bg-zinc-800/80 dark:hover:text-zinc-300 transition-all duration-300"
+              className="flex cursor-pointer items-center justify-center rounded-lg border-none bg-slate-100 p-1.5 text-slate-400 transition-all duration-200 hover:bg-slate-200 hover:text-slate-600"
             >
-              <X size={16} strokeWidth={2.5} />
+              <X size={15} />
             </button>
           </div>
         )}
 
-        <div className="flex items-center gap-2.5 mb-7 bg-white dark:bg-zinc-900 p-2.5 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none border border-slate-100 dark:border-zinc-800">
-          <div className="relative flex-shrink-0">
-            <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-blue-50 dark:ring-blue-900/30">
-              <img
-                src={
-                  avatarUrl ??
-                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"
-                }
-                alt={displayName}
-                className="w-full h-full object-cover bg-blue-100"
-              />
+        {/* User Profile Card */}
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-[#4f8ef7] via-[#7b5cfa] to-[#34d399] p-[2px]">
+                <img
+                  src={avatarUrl || "https://i.ibb.co.com/pjRGYLkQ/image.png"}
+                  alt={displayName}
+                  className="h-full w-full rounded-full bg-white object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      "https://i.ibb.co.com/pjRGYLkQ/image.png";
+                  }}
+                />
+              </div>
+
+              {/* Online Status */}
+              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
             </div>
-            <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border-2 border-white dark:border-zinc-900 rounded-full" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-[12px] font-bold text-slate-800 dark:text-zinc-100 truncate">
-              {displayName}
-            </h3>
-            <p className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mt-0.5 truncate">
-              {email || "Logged in"}
-            </p>
-            <p className="text-[9px] font-bold text-blue-600 dark:text-blue-400 tracking-wide uppercase mt-0.5 truncate">
-              {country || ""}
-            </p>
+
+            {/* User Info */}
+            <div className="min-w-0 flex-1 overflow-hidden">
+              {/* Name */}
+              <h3 className="truncate text-[13px] font-semibold text-slate-800">
+                {displayName}
+              </h3>
+
+              {/* Role */}
+              <p className="truncate text-[10px] font-medium capitalize text-[#4f8ef7]">
+                {String(authUser?.role ?? "Administrator")
+                  .replace(/_/g, " ")
+                  .toLowerCase()}
+              </p>
+
+              {/* Email */}
+              <p className="truncate text-[10px] text-slate-400">
+                {email || "admin@panel.io"}
+              </p>
+            </div>
           </div>
         </div>
-
-        <nav className="flex-1 space-y-1">
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href || pathname?.startsWith(item.href + "/");
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={`group flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ${
-                  isActive
-                    ? "bg-[#2563EB] text-white shadow-[0_6px_14px_rgba(37,99,235,0.2)]"
-                    : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-50 dark:hover:bg-zinc-800/50"
-                }`}
-              >
-                <span
-                  className={`flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-200 ${
-                    isActive
-                      ? "bg-white/20 text-white"
-                      : "bg-slate-100 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 dark:bg-zinc-800 dark:text-zinc-500 dark:group-hover:bg-blue-900/30 dark:group-hover:text-blue-400"
-                  }`}
-                >
-                  <Icon className="h-[14px] w-[14px]" />
+        {/* Navigation */}
+        <nav className="flex-1">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              {/* Group label */}
+              <div className="mb-1 mt-[18px] flex items-center gap-1.5 px-2.5">
+                <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-black">
+                  {group.label}
                 </span>
+                <div className="h-px flex-1 bg-slate-100" />
+              </div>
 
-                <span
-                  className={`text-[12px] font-medium tracking-tight leading-none ${
-                    isActive ? "text-white font-semibold" : ""
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
+              {/* Items */}
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    pathname?.startsWith(item.href + "/");
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      onMouseEnter={() => setHoveredHref(item.href)}
+                      onMouseLeave={() => setHoveredHref(null)}
+                      className={`
+                        group relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 no-underline
+                        transition-all duration-[180ms] ease-[cubic-bezier(.4,0,.2,1)]
+                        ${
+                          isActive
+                            ? "bg-blue-50 text-slate-800"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                        }
+                      `}
+                    >
+                      {/* Active left bar */}
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 h-[60%] w-[3px] -translate-y-1/2 rounded-r-[3px] bg-[#4f8ef7] shadow-[0_0_8px_rgba(79,142,247,0.4)]" />
+                      )}
+
+                      {/* Icon wrapper */}
+                      <span
+                        className={`
+                          flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-lg
+                          transition-all duration-[180ms]
+                          ${
+                            isActive
+                              ? "bg-blue-100 text-[#4f8ef7]"
+                              : "bg-slate-100 text-slate-400 group-hover:bg-blue-50 group-hover:text-[#4f8ef7]"
+                          }
+                        `}
+                      >
+                        <Icon size={14} />
+                      </span>
+
+                      {/* Label */}
+                      <span
+                        className={`text-[12px] leading-none ${isActive ? "font-semibold" : "font-medium"}`}
+                      >
+                        {item.label}
+                      </span>
+
+                      {/* Chevron */}
+                      <ChevronRight
+                        size={11}
+                        className={`
+                          ml-auto text-[#4f8ef7] transition-all duration-[180ms]
+                          ${
+                            isActive || hoveredHref === item.href
+                              ? "translate-x-0 opacity-100"
+                              : "-translate-x-1 opacity-0"
+                          }
+                        `}
+                      />
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-zinc-800/80">
-          <button
-            onClick={async () => {
-              if (isLoggingOut) return;
-              const toastId = toast.loading("Signing out...");
+        {/* Divider */}
+        <div className="my-4 h-px bg-slate-100" />
 
-              try {
-                await logoutApi().unwrap();
-              } catch {
-              } finally {
-                dispatch(logout());
-                dispatch(baseApi.util.resetApiState());
-                toast.success("Signed out", { id: toastId });
-                onClose?.();
-                router.replace("/");
-              }
-            }}
-            disabled={isLoggingOut}
-            className="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50/80 dark:text-red-400 dark:hover:bg-red-500/10 transition-all duration-300 disabled:opacity-70 disabled:pointer-events-none"
-          >
-            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 group-hover:bg-red-100 dark:bg-red-500/10 dark:group-hover:bg-red-500/20 transition-colors">
-              <LogOut className="h-[14px] w-[14px]" />
-            </span>
-            <span className="truncate text-[12px]">
-              {isLoggingOut ? "Signing out..." : "Sign Out"}
-            </span>
-          </button>
-        </div>
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={`
+            group flex w-full cursor-pointer items-center gap-2.5 rounded-xl border-none
+            bg-transparent px-2.5 py-2.5 text-red-400
+            transition-all duration-[180ms] hover:bg-red-50 hover:text-red-500
+            ${isLoggingOut ? "opacity-60" : "opacity-100"}
+          `}
+        >
+          <span className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-lg bg-red-50 transition-all duration-[180ms] group-hover:bg-red-100">
+            <LogOut size={13} />
+          </span>
+          <span className="text-[12px] font-semibold">
+            {isLoggingOut ? "Signing out…" : "Sign Out"}
+          </span>
+        </button>
 
-        <div className="mt-3">
-          <p className="text-[9px] text-slate-400 dark:text-zinc-500 text-center font-semibold tracking-widest uppercase">
-            Admin Panel Â· v2.0
-          </p>
-        </div>
+        {/* Footer */}
+        <p className="mt-3.5 text-center text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-300">
+          Admin Panel · v2.0
+        </p>
       </div>
     </aside>
   );

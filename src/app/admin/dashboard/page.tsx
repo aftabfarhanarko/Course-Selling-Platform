@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users,
   DollarSign,
@@ -143,57 +143,237 @@ const reportTypes = [
   },
 ];
 
-/* ─────────────────────── mini bar chart ───────────────────── */
+/* ─────────────────────── Smooth Line Chart ───────────────────────── */
 
-const BarChart = ({ data }: { data: { day: string; value: number }[] }) => {
+const LineChart = ({ data, animated }) => {
+  const [progress, setProgress] = useState(animated ? 0 : 1);
+
+  useEffect(() => {
+    setProgress(0);
+    const start = performance.now();
+    const duration = 900;
+    const raf = requestAnimationFrame(function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      // ease out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      setProgress(eased);
+      if (t < 1) requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [data]);
+
+  const W = 560;
+  const H = 180;
+  const PAD = { top: 16, right: 16, bottom: 32, left: 42 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+
   const max = Math.max(...data.map((d) => d.value));
+  const min = Math.min(...data.map((d) => d.value));
+  const range = max - min || 1;
+
+  const pts = data.map((d, i) => ({
+    x: PAD.left + (i / (data.length - 1)) * innerW,
+    y: PAD.top + (1 - (d.value - min) / range) * innerH,
+    ...d,
+  }));
+
+  // Catmull-Rom to smooth bezier
+  const smooth = (points) => {
+    if (points.length < 2) return "";
+    let d = `M ${points[0].x},${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(i - 1, 0)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(i + 2, points.length - 1)];
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+    return d;
+  };
+
+  const linePath = smooth(pts);
+
+  // Area path (close below)
+  const areaPath =
+    linePath +
+    ` L ${pts[pts.length - 1].x},${PAD.top + innerH} L ${pts[0].x},${PAD.top + innerH} Z`;
+
+  // Y-axis grid lines (4 levels)
+  const gridLines = [0, 0.33, 0.66, 1].map((t) => ({
+    y: PAD.top + t * innerH,
+    label: Math.round(max - t * range),
+  }));
+
+  const [hovered, setHovered] = useState(null);
+
   return (
-    <div className="flex items-end gap-1.5 h-44 w-full pt-2">
-      {data.map((d, i) => {
-        const height = (d.value / max) * 100;
-        const isLast = i === data.length - 1;
-        return (
-          <div
-            key={i}
-            className="flex flex-col items-center gap-1 flex-1 min-w-0 group cursor-pointer"
-          >
-            <div
-              className="w-full flex flex-col justify-end"
-              style={{ height: "148px" }}
+    <div style={{ width: "100%", position: "relative" }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        style={{ width: "100%", height: "auto", overflow: "visible" }}
+      >
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#6366F1" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="#6366F1" stopOpacity="0.01" />
+          </linearGradient>
+          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#818CF8" />
+            <stop offset="100%" stopColor="#4F46E5" />
+          </linearGradient>
+          <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          {/* Clip for animation reveal */}
+          <clipPath id="revealClip">
+            <rect x={PAD.left} y={0} width={innerW * progress} height={H} />
+          </clipPath>
+        </defs>
+
+        {/* Grid lines */}
+        {gridLines.map((g, i) => (
+          <g key={i}>
+            <line
+              x1={PAD.left}
+              y1={g.y}
+              x2={PAD.left + innerW}
+              y2={g.y}
+              stroke="#E5E7EB"
+              strokeWidth="1"
+              strokeDasharray={i === 0 ? "none" : "4 4"}
+            />
+            <text
+              x={PAD.left - 8}
+              y={g.y + 4}
+              textAnchor="end"
+              fontSize="9"
+              fill="#9CA3AF"
+              fontFamily="system-ui"
             >
-              <div
-                className="w-full rounded-t-md transition-all duration-500 group-hover:opacity-90"
-                style={{
-                  height: `${height}%`,
-                  background: isLast
-                    ? "linear-gradient(180deg,#6366F1,#4F46E5)"
-                    : i % 2 === 0
-                      ? "#C7D2FE"
-                      : "#A5B4FC",
-                  minHeight: "6px",
-                  boxShadow: isLast
-                    ? "0 4px 12px rgba(99,102,241,.35)"
-                    : "none",
-                }}
+              {g.label}
+            </text>
+          </g>
+        ))}
+
+        {/* X-axis labels */}
+        {pts.map((p, i) => (
+          <text
+            key={i}
+            x={p.x}
+            y={H - 4}
+            textAnchor="middle"
+            fontSize="9"
+            fill="#9CA3AF"
+            fontFamily="system-ui"
+          >
+            {p.day}
+          </text>
+        ))}
+
+        {/* Area fill (clipped) */}
+        <path d={areaPath} fill="url(#areaGrad)" clipPath="url(#revealClip)" />
+
+        {/* Main line (clipped) */}
+        <path
+          d={linePath}
+          fill="none"
+          stroke="url(#lineGrad)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          filter="url(#glowFilter)"
+          clipPath="url(#revealClip)"
+        />
+
+        {/* Data points & hover targets */}
+        {pts.map((p, i) => {
+          const isHov = hovered === i;
+          const visible = p.x <= PAD.left + innerW * progress;
+          if (!visible) return null;
+          return (
+            <g key={i}>
+              {/* hover area */}
+              <rect
+                x={p.x - 18}
+                y={PAD.top}
+                width={36}
+                height={innerH}
+                fill="transparent"
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                style={{ cursor: "crosshair" }}
               />
-            </div>
-            <span className="text-[9px] text-gray-400 font-medium tracking-wide whitespace-nowrap">
-              {data.length > 5 ? d.day : d.day}
-            </span>
-          </div>
-        );
-      })}
+              {/* vertical line on hover */}
+              {isHov && (
+                <line
+                  x1={p.x}
+                  y1={PAD.top}
+                  x2={p.x}
+                  y2={PAD.top + innerH}
+                  stroke="#6366F1"
+                  strokeWidth="1"
+                  strokeDasharray="3 3"
+                  opacity="0.5"
+                />
+              )}
+              {/* dot */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={isHov ? 6 : 4}
+                fill={isHov ? "#4F46E5" : "#fff"}
+                stroke={isHov ? "#4F46E5" : "#6366F1"}
+                strokeWidth={isHov ? 0 : 2}
+                style={{ transition: "r 0.15s, fill 0.15s" }}
+              />
+              {/* tooltip */}
+              {isHov && (
+                <g>
+                  <rect
+                    x={p.x - 28}
+                    y={p.y - 34}
+                    width={56}
+                    height={22}
+                    rx={6}
+                    fill="#4F46E5"
+                  />
+                  <text
+                    x={p.x}
+                    y={p.y - 19}
+                    textAnchor="middle"
+                    fontSize="10"
+                    fontWeight="700"
+                    fill="#fff"
+                    fontFamily="system-ui"
+                  >
+                    {p.value}
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 };
 
 /* ──────────────────── Create Report Modal ──────────────────── */
 
-function CreateReportModal({ onClose }: { onClose: () => void }) {
-  const [selected, setSelected] = useState<string>("revenue");
+function CreateReportModal({ onClose }) {
+  const [selected, setSelected] = useState("revenue");
   const [dateFrom, setDateFrom] = useState("2024-01-01");
   const [dateTo, setDateTo] = useState("2024-10-31");
-  const [format, setFormat] = useState<"PDF" | "CSV" | "Excel">("PDF");
+  const [format, setFormat] = useState("PDF");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -207,15 +387,11 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-
-      {/* Panel */}
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-white">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
@@ -240,7 +416,6 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
 
         {!done ? (
           <div className="px-6 py-5 space-y-5">
-            {/* Report Type */}
             <div>
               <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2.5">
                 Report Type
@@ -276,7 +451,6 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-            {/* Date Range */}
             <div>
               <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2.5">
                 Date Range
@@ -312,13 +486,12 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-            {/* Format */}
             <div>
               <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2.5">
                 Export Format
               </label>
               <div className="flex gap-2">
-                {(["PDF", "CSV", "Excel"] as const).map((f) => (
+                {["PDF", "CSV", "Excel"].map((f) => (
                   <button
                     key={f}
                     onClick={() => setFormat(f)}
@@ -334,7 +507,6 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-            {/* Footer Actions */}
             <div className="flex items-center gap-2.5 pt-1">
               <button
                 onClick={onClose}
@@ -360,7 +532,6 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         ) : (
-          /* Success state */
           <div className="px-6 py-10 flex flex-col items-center text-center gap-3">
             <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-1">
               <CheckCircle2 size={36} className="text-emerald-500" />
@@ -404,15 +575,19 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
 /* ─────────────────────── Dashboard Page ───────────────────── */
 
 export default function Dashboard() {
-  const [chartView, setChartView] = useState<"Daily" | "Weekly">("Weekly");
+  const [chartView, setChartView] = useState("Weekly");
   const [searchTx, setSearchTx] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<
-    "All" | "Success" | "Failed"
-  >("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [chartKey, setChartKey] = useState(0);
 
   const chartData = chartView === "Daily" ? dailyData : weeklyData;
+
+  const handleChartView = (v) => {
+    setChartView(v);
+    setChartKey((k) => k + 1);
+  };
 
   const filtered = transactions.filter((t) => {
     const matchSearch =
@@ -428,7 +603,7 @@ export default function Dashboard() {
       {showModal && <CreateReportModal onClose={() => setShowModal(false)} />}
 
       <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
-        {/* ── Page Header ── */}
+        {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
           <div>
             <h1 className="text-[18px] font-extrabold text-gray-900 tracking-tight leading-tight">
@@ -447,7 +622,7 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* ── Stat Cards ── */}
+        {/* Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
           {[
             {
@@ -502,11 +677,11 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* ── Chart + Activity ── */}
+        {/* Chart + Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-5">
-          {/* Chart */}
+          {/* Chart Card */}
           <div className="lg:col-span-2 bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-1">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
               <div>
                 <h2 className="text-[13px] font-bold text-gray-900">
                   Daily Performance
@@ -516,10 +691,10 @@ export default function Dashboard() {
                 </p>
               </div>
               <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
-                {(["Daily", "Weekly"] as const).map((v) => (
+                {["Daily", "Weekly"].map((v) => (
                   <button
                     key={v}
-                    onClick={() => setChartView(v)}
+                    onClick={() => handleChartView(v)}
                     className={`text-[11px] font-semibold px-3 py-1 rounded-md transition-all ${
                       chartView === v
                         ? "bg-indigo-600 text-white shadow-sm"
@@ -531,7 +706,47 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <BarChart data={chartData} />
+
+            {/* Summary row */}
+            <div className="flex items-center gap-4 mb-3 px-1">
+              <div>
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">
+                  Peak
+                </p>
+                <p className="text-[15px] font-extrabold text-gray-900">
+                  {Math.max(...chartData.map((d) => d.value))}
+                </p>
+              </div>
+              <div className="w-px h-8 bg-gray-100" />
+              <div>
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">
+                  Avg
+                </p>
+                <p className="text-[15px] font-extrabold text-gray-900">
+                  {Math.round(
+                    chartData.reduce((s, d) => s + d.value, 0) /
+                      chartData.length,
+                  )}
+                </p>
+              </div>
+              <div className="w-px h-8 bg-gray-100" />
+              <div>
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">
+                  Low
+                </p>
+                <p className="text-[15px] font-extrabold text-gray-900">
+                  {Math.min(...chartData.map((d) => d.value))}
+                </p>
+              </div>
+              <div className="ml-auto flex items-center gap-1.5">
+                <span className="w-3 h-0.5 rounded-full bg-indigo-500 inline-block" />
+                <span className="text-[10px] text-gray-400 font-medium">
+                  Revenue
+                </span>
+              </div>
+            </div>
+
+            <LineChart key={chartKey} data={chartData} animated />
           </div>
 
           {/* Recent Activity */}
@@ -568,15 +783,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Transactions Table ── */}
+        {/* Transactions Table */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          {/* Table Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3.5 border-b border-gray-100">
             <h2 className="text-[13px] font-bold text-gray-900">
               Recent High-Value Transactions
             </h2>
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Search */}
               <div className="relative">
                 <Search
                   size={12}
@@ -591,7 +804,6 @@ export default function Dashboard() {
                 />
               </div>
 
-              {/* Filter toggle */}
               <div className="relative">
                 <button
                   onClick={() => setFilterOpen(!filterOpen)}
@@ -608,7 +820,7 @@ export default function Dashboard() {
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-1.5">
                       Status
                     </p>
-                    {(["All", "Success", "Failed"] as const).map((s) => (
+                    {["All", "Success", "Failed"].map((s) => (
                       <button
                         key={s}
                         onClick={() => {
@@ -628,7 +840,6 @@ export default function Dashboard() {
                 )}
               </div>
 
-              {/* Export */}
               <button
                 onClick={() => setShowModal(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors active:scale-95"
