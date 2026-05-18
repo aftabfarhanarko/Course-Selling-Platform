@@ -15,11 +15,7 @@ export function CreateInstructorModal({
   onSubmit: (payload: CreatePayload) => void;
 }) {
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    country: "",
+    userId: "",
     designation: "",
     experience: "",
     bio: "",
@@ -37,9 +33,12 @@ export function CreateInstructorModal({
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    if (!form.password.trim()) e.password = "Password is required";
+
+    const userIdNum = Number(form.userId);
+    if (!form.userId.trim()) e.userId = "User ID is required";
+    else if (!Number.isFinite(userIdNum) || userIdNum <= 0)
+      e.userId = "User ID must be a valid number";
+
     return e;
   };
 
@@ -47,16 +46,14 @@ export function CreateInstructorModal({
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length > 0) return;
+
     const skillsArr = form.skills
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
+
     onSubmit({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      password: form.password.trim(),
-      phone: form.phone.trim() || undefined,
-      country: form.country.trim() || undefined,
+      userId: Number(form.userId),
       designation: form.designation.trim() || undefined,
       experience: form.experience.trim() || undefined,
       bio: form.bio.trim() || undefined,
@@ -80,55 +77,16 @@ export function CreateInstructorModal({
       wide
     >
       <div className="space-y-3.5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FormField label="Name" error={errors.name}>
-            <input
-              value={form.name}
-              onChange={set("name")}
-              className={inputCls(errors.name)}
-              placeholder="Full name"
-            />
-          </FormField>
-          <FormField label="Email" error={errors.email}>
-            <input
-              type="email"
-              value={form.email}
-              onChange={set("email")}
-              className={inputCls(errors.email)}
-              placeholder="email@example.com"
-            />
-          </FormField>
-        </div>
+        <FormField label="User ID" error={errors.userId}>
+          <input
+            value={form.userId}
+            onChange={set("userId")}
+            className={inputCls(errors.userId)}
+            placeholder="e.g. 2"
+          />
+        </FormField>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FormField label="Password" error={errors.password}>
-            <input
-              type="password"
-              value={form.password}
-              onChange={set("password")}
-              className={inputCls(errors.password)}
-              placeholder="Min. 8 characters"
-            />
-          </FormField>
-          <FormField label="Phone" optional>
-            <input
-              value={form.phone}
-              onChange={set("phone")}
-              className={inputCls()}
-              placeholder="+880..."
-            />
-          </FormField>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FormField label="Country" optional>
-            <input
-              value={form.country}
-              onChange={set("country")}
-              className={inputCls()}
-              placeholder="Bangladesh"
-            />
-          </FormField>
           <FormField label="Designation" optional>
             <input
               value={form.designation}
@@ -137,9 +95,6 @@ export function CreateInstructorModal({
               placeholder="Senior Engineer"
             />
           </FormField>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label="Experience" optional>
             <input
               value={form.experience}
@@ -148,6 +103,9 @@ export function CreateInstructorModal({
               placeholder="e.g. 5 Years"
             />
           </FormField>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label="Website" optional>
             <input
               value={form.website}
@@ -156,16 +114,15 @@ export function CreateInstructorModal({
               placeholder="https://..."
             />
           </FormField>
+          <FormField label="Skills" optional>
+            <input
+              value={form.skills}
+              onChange={set("skills")}
+              className={inputCls()}
+              placeholder="Node.js, React, NestJS"
+            />
+          </FormField>
         </div>
-
-        <FormField label="Skills" optional>
-          <input
-            value={form.skills}
-            onChange={set("skills")}
-            className={inputCls()}
-            placeholder="Node.js, React, NestJS (comma-separated)"
-          />
-        </FormField>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label="GitHub" optional>

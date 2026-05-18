@@ -44,15 +44,87 @@ export const baseApi = createApi({
         | null
         | undefined;
 
-      const token =
+      const decodeJwtRole = (rawToken: string): string | undefined => {
+        try {
+          const payload = rawToken.split(".")[1];
+          if (!payload) return undefined;
+
+          const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+          const padded = normalized + "===".slice((normalized.length + 3) % 4);
+
+          const decoded =
+            typeof atob === "function"
+              ? atob(padded)
+              : Buffer.from(padded, "base64").toString("binary");
+
+          const parsed = JSON.parse(decoded) as { role?: unknown };
+          return typeof parsed.role === "string" ? parsed.role : undefined;
+        } catch {
+          return undefined;
+        }
+      };
+      let token =
         authAny?.user?.token ??
         authAny?.user?.accessToken ??
         authAny?.user?.access_token ??
         authAny?.token ??
         authAny?.accessToken ??
         authAny?.access_token;
-      if (token && !headers.has("authorization")) {
-        headers.set("Authorization", `Bearer ${token}`);
+
+      let roleFromState =
+        (authAny as any)?.user?.role ?? (authAny as any)?.role ?? undefined;
+
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("course_platform_auth");
+          if (raw) {
+            const parsed = JSON.parse(raw) as any;
+
+            const tokenFromStorage =
+              parsed?.user?.token ??
+              parsed?.user?.accessToken ??
+              parsed?.user?.access_token ??
+              parsed?.token ??
+              parsed?.accessToken ??
+              parsed?.access_token;
+
+            if (!token && typeof tokenFromStorage === "string") {
+              token = tokenFromStorage;
+            }
+
+            const roleFromStorage = parsed?.user?.role ?? parsed?.role;
+            if (!roleFromState && typeof roleFromStorage === "string") {
+              roleFromState = roleFromStorage;
+            }
+          }
+        } catch {
+        }
+      }
+      const role =
+        (typeof roleFromState === "string" && roleFromState.trim().length > 0
+          ? roleFromState
+          : token
+            ? decodeJwtRole(token)
+            : undefined) ?? undefined;
+      if (role) {
+        if (!headers.has("x-role")) {
+          headers.set("x-role", role);
+        }
+        if (!headers.has("role")) {
+          headers.set("role", role);
+        }
+      }
+
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+
+        if (!headers.has("access_token")) {
+          headers.set("access_token", token);
+        }
+
+        if (!headers.has("x-access-token")) {
+          headers.set("x-access-token", token);
+        }
       }
 
       if (!headers.has("accept")) {

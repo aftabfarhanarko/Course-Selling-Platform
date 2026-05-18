@@ -21,11 +21,18 @@ import {
 
 type UiEnrollment = {
   id: number | string;
-  user: string;
+  studentId: number | string | null;
+  courseId: number | string | null;
+  student: string;
+  studentEmail: string;
   course: string;
   amount: string;
   status: string;
+  paymentMethod: string;
+  transactionId?: string;
+  isManual: boolean;
   createdAt: string;
+  enrolledAt: string;
 };
 
 const PAGE_SIZE = 10;
@@ -51,8 +58,6 @@ function extractEnrollments(payload: any): any[] {
   if (Array.isArray(payload?.data?.enrollments))
     return payload.data.enrollments;
   if (Array.isArray(payload?.data?.data)) return payload.data.data;
-  if (Array.isArray(payload?.data?.data?.enrollments))
-    return payload.data.data.enrollments;
   return [];
 }
 
@@ -73,13 +78,28 @@ function extractTotal(payload: any): number | null {
 }
 
 function normalizeEnrollment(raw: any): UiEnrollment | null {
-  const id = raw?.id ?? raw?._id ?? raw?.enrollmentId ?? null;
+  const id = raw?.id ?? raw?._id ?? null;
   if (!id) return null;
 
-  const user =
+  const studentObj = raw?.student ?? raw?.user;
+  const studentName =
     String(
-      raw?.user?.name ?? raw?.user?.email ?? raw?.userName ?? raw?.email ?? "",
+      studentObj?.name ?? studentObj?.email ?? raw?.userName ?? "",
     ).trim() || "—";
+
+  const studentEmail = String(studentObj?.email ?? "").trim() || "—";
+  const studentId =
+    studentObj?.id ??
+    studentObj?._id ??
+    raw?.studentId ??
+    raw?.userId ??
+    null;
+
+  const courseId =
+    raw?.course?.id ??
+    raw?.course?._id ??
+    raw?.courseId ??
+    null;
 
   const course =
     String(
@@ -90,46 +110,35 @@ function normalizeEnrollment(raw: any): UiEnrollment | null {
         "",
     ).trim() || "—";
 
-  const amountRaw =
-    raw?.amount ??
-    raw?.price ??
-    raw?.total ??
-    raw?.payment?.amount ??
-    raw?.paymentAmount ??
-    null;
-
   const amount =
-    amountRaw === null || amountRaw === undefined || amountRaw === ""
-      ? "—"
-      : String(amountRaw);
+    raw?.amount ?? raw?.price ?? raw?.total ?? raw?.payment?.amount ?? "—";
 
-  const status =
-    String(
-      raw?.status ??
-        raw?.paymentStatus ??
-        raw?.state ??
-        (raw?.isPaid ? "paid" : undefined) ??
-        "",
-    ).trim() || "—";
+  const status = String(
+    raw?.status ?? raw?.paymentStatus ?? (raw?.isPaid ? "paid" : "pending"),
+  ).trim();
 
-  const createdAt = formatDate(raw?.createdAt ?? raw?.created_at);
+  const paymentMethod = String(raw?.paymentMethod ?? "—");
+  const transactionId = raw?.transactionId ?? undefined;
+  const isManual = Boolean(raw?.isManual);
 
-  return { id, user, course, amount, status, createdAt };
+  return {
+    id,
+    studentId,
+    courseId,
+    student: studentName,
+    studentEmail,
+    course,
+    amount: String(amount),
+    status: status || "—",
+    paymentMethod,
+    transactionId,
+    isManual,
+    createdAt: formatDate(raw?.createdAt),
+    enrolledAt: formatDate(raw?.enrolledAt),
+  };
 }
 
-function ModalShell({
-  title,
-  subtitle,
-  loading,
-  onClose,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  loading?: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
+function ModalShell({ title, subtitle, loading, onClose, children }: any) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
@@ -147,7 +156,7 @@ function ModalShell({
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-60"
           >
             <X size={15} />
           </button>
@@ -158,29 +167,17 @@ function ModalShell({
   );
 }
 
-function JsonBodyModal({
-  title,
-  subtitle,
-  loading,
-  initialBody,
-  onClose,
-  onSubmit,
-}: {
-  title: string;
-  subtitle: string;
-  loading: boolean;
-  initialBody: Record<string, any>;
-  onClose: () => void;
-  onSubmit: (body: Record<string, any>) => void;
-}) {
-  const [text, setText] = useState(JSON.stringify(initialBody, null, 2));
+/* Keep your existing JsonBodyModal and DetailsModal components (unchanged) */
+function JsonBodyModal({ ...props }: any) {
+  // ... your existing JsonBodyModal code
+  const [text, setText] = useState(JSON.stringify(props.initialBody, null, 2));
   const [error, setError] = useState<string | null>(null);
 
   const submit = () => {
     try {
       const parsed = JSON.parse(text);
       setError(null);
-      onSubmit(parsed);
+      props.onSubmit(parsed);
     } catch {
       setError("Invalid JSON");
     }
@@ -188,10 +185,10 @@ function JsonBodyModal({
 
   return (
     <ModalShell
-      title={title}
-      subtitle={subtitle}
-      loading={loading}
-      onClose={onClose}
+      title={props.title}
+      subtitle={props.subtitle}
+      loading={props.loading}
+      onClose={props.onClose}
     >
       <div className="space-y-4">
         <div>
@@ -203,25 +200,23 @@ function JsonBodyModal({
             onChange={(e) => setText(e.target.value)}
             className={`w-full min-h-[220px] px-3 py-2 text-[12px] border rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300 ${error ? "border-red-400 bg-red-50" : "border-gray-200"}`}
           />
-          {error ? (
-            <p className="text-[10px] text-red-500 mt-1">{error}</p>
-          ) : null}
+          {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
         </div>
 
         <div className="flex gap-2.5">
           <button
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            onClick={props.onClose}
+            disabled={props.loading}
+            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-600 hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             onClick={submit}
-            disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-200 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            disabled={props.loading}
+            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5"
           >
-            {loading ? (
+            {props.loading ? (
               <Loader2 size={14} className="animate-spin" />
             ) : (
               <Check size={13} />
@@ -247,8 +242,7 @@ function DetailsModal({
     useLazyAdminEnrollmentQuery();
 
   React.useEffect(() => {
-    if (!open) return;
-    trigger(id);
+    if (open) trigger(id);
   }, [id, open, trigger]);
 
   return (
@@ -263,19 +257,19 @@ function DetailsModal({
           <Loader2 className="h-4 w-4 animate-spin" /> Loading...
         </div>
       ) : isError ? (
-        <div className="text-[12px] text-red-600 font-semibold py-4">
+        <div className="text-red-600 font-semibold py-4">
           Failed to load details
         </div>
       ) : (
-        <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto max-h-[520px]">
-          {JSON.stringify(data ?? null, null, 2)}
+        <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-4 overflow-auto max-h-[520px] whitespace-pre-wrap">
+          {JSON.stringify(data, null, 2)}
         </pre>
       )}
     </ModalShell>
   );
 }
 
-export default function AdminEnrollmentsPage(): React.JSX.Element {
+export default function AdminEnrollmentsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -297,11 +291,13 @@ export default function AdminEnrollmentsPage(): React.JSX.Element {
     1,
     totalFromApi ? Math.ceil(totalFromApi / PAGE_SIZE) : 1,
   );
-
-  const [detailsId, setDetailsId] = useState<number | string | null>(null);
-  const [bkashId, setBkashId] = useState<number | string | null>(null);
-  const [manualId, setManualId] = useState<number | string | null>(null);
-
+const [detailsId, setDetailsId] = useState<number | string | null>(null);
+  const [bkashBody, setBkashBody] = useState<
+    { courseId: number | string | null; studentId: number | string | null } | null
+  >(null);
+  const [manualBody, setManualBody] = useState<
+    { courseId: number | string | null; studentId: number | string | null } | null
+  >(null);
   const [payBkash, { isLoading: isPayingBkash }] =
     useAdminEnrollmentsPayBkashPaymentMutation();
   const [manualPayment, { isLoading: isManualPaying }] =
@@ -309,42 +305,59 @@ export default function AdminEnrollmentsPage(): React.JSX.Element {
 
   return (
     <>
-      {detailsId !== null ? (
-        <DetailsModal
-          id={detailsId}
-          open={detailsId !== null}
-          onClose={() => setDetailsId(null)}
-        />
-      ) : null}
-
-      {bkashId !== null ? (
+      {detailsId !== null && (
+        <DetailsModal id={detailsId} open onClose={() => setDetailsId(null)} />
+      )}
+      {bkashBody !== null && (
         <JsonBodyModal
           title="Pay (Bkash)"
           subtitle="POST /enrollments/pay"
           loading={isPayingBkash}
-          initialBody={{ enrollmentId: bkashId }}
-          onClose={() => setBkashId(null)}
+          initialBody={{
+            courseId: bkashBody.courseId,
+            studentId: bkashBody.studentId,
+          }}
+          onClose={() => setBkashBody(null)}
           onSubmit={async (body) => {
-            await payBkash(body).unwrap();
-            setBkashId(null);
+            const payload: any = { ...body };
+            delete payload.enrollmentId;
+            if (payload.courseId !== undefined && payload.courseId !== null) {
+              payload.courseId = Number(payload.courseId);
+            }
+            if (payload.studentId !== undefined && payload.studentId !== null) {
+              payload.studentId = Number(payload.studentId);
+            }
+            await payBkash(payload).unwrap();
+            setBkashBody(null);
+            list.refetch();
           }}
         />
-      ) : null}
-
-      {manualId !== null ? (
+      )}
+      {manualBody !== null && (
         <JsonBodyModal
           title="Manual Payment"
           subtitle="POST /enrollments/manual"
           loading={isManualPaying}
-          initialBody={{ enrollmentId: manualId }}
-          onClose={() => setManualId(null)}
+          initialBody={{
+            courseId: manualBody.courseId,
+            studentId: manualBody.studentId,
+          }}
+          onClose={() => setManualBody(null)}
           onSubmit={async (body) => {
-            await manualPayment(body).unwrap();
-            setManualId(null);
+            const payload: any = { ...body };
+            delete payload.enrollmentId;
+            if (payload.courseId !== undefined && payload.courseId !== null) {
+              payload.courseId = Number(payload.courseId);
+            }
+            if (payload.studentId !== undefined && payload.studentId !== null) {
+              payload.studentId = Number(payload.studentId);
+            }
+            await manualPayment(payload).unwrap();
+            setManualBody(null);
+            list.refetch();
           }}
         />
-      ) : null}
-
+      )}
       <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
           <div>
@@ -353,7 +366,7 @@ export default function AdminEnrollmentsPage(): React.JSX.Element {
             </h1>
             <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
               GET /enrollments · GET /enrollments/:id · POST
-              /enrollments/pay-bkash-payment · POST /enrollments/manual-payment
+              /enrollments/pay · POST /enrollments/manual
             </p>
           </div>
 
@@ -366,11 +379,10 @@ export default function AdminEnrollmentsPage(): React.JSX.Element {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                placeholder="Search user/course..."
-                className="w-[260px] max-w-full h-10 pl-10 pr-3 rounded-xl border border-gray-200 bg-white text-[13px] font-semibold text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                placeholder="Search student or course..."
+                className="w-[280px] h-10 pl-10 pr-3 rounded-xl border border-gray-200 bg-white text-[13px] font-semibold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
               />
             </div>
-
             <button
               onClick={() => list.refetch()}
               className="h-10 px-4 rounded-xl bg-white border border-gray-200 text-[13px] font-bold text-gray-700 hover:bg-gray-50"
@@ -386,10 +398,11 @@ export default function AdminEnrollmentsPage(): React.JSX.Element {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/70">
                   {[
-                    "User",
+                    "Student",
                     "Course",
                     "Amount",
                     "Status",
+                    "Payment",
                     "Created",
                     "Actions",
                   ].map((h) => (
@@ -402,86 +415,94 @@ export default function AdminEnrollmentsPage(): React.JSX.Element {
                   ))}
                 </tr>
               </thead>
-
               <tbody>
                 {list.isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10">
-                      <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-                      </div>
+                    <td colSpan={7} className="px-4 py-12 text-center">
+                      <Loader2 className="h-5 w-5 animate-spin mx-auto" />
                     </td>
                   </tr>
                 ) : list.isError ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8">
-                      <div className="flex items-center justify-center gap-2 text-[12px] text-red-600 font-semibold">
-                        <AlertTriangle className="h-4 w-4" /> Failed to load
-                        enrollments
-                      </div>
+                    <td
+                      colSpan={7}
+                      className="px-4 py-12 text-center text-red-600"
+                    >
+                      Failed to load enrollments
                     </td>
                   </tr>
                 ) : enrollments.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10">
-                      <div className="text-center text-[12px] text-gray-500 font-semibold">
-                        No enrollments found
-                      </div>
+                    <td
+                      colSpan={7}
+                      className="px-4 py-12 text-center text-gray-500"
+                    >
+                      No enrollments found
                     </td>
                   </tr>
                 ) : (
                   enrollments.map((e) => (
                     <tr
                       key={String(e.id)}
-                      className="border-b border-gray-100 hover:bg-gray-50/40"
+                      className="border-b border-gray-100 hover:bg-gray-50/50"
                     >
-                      <td className="px-4 py-3">
-                        <p className="text-[13px] font-bold text-gray-900">
-                          {e.user}
+                      <td className="px-4 py-4">
+                        <p className="font-bold text-gray-900">{e.student}</p>
+                        <p className="text-[11px] text-gray-500">
+                          {e.studentEmail}
                         </p>
-                        <p className="text-[11px] text-gray-400 font-semibold">
-                          ID: {String(e.id)}
-                        </p>
+                        <p className="text-[11px] text-gray-400">ID: {e.id}</p>
                       </td>
-                      <td className="px-4 py-3">
-                        <p className="text-[13px] font-semibold text-gray-800">
-                          {e.course}
-                        </p>
+                      <td className="px-4 py-4 font-medium text-gray-800">
+                        {e.course}
                       </td>
-                      <td className="px-4 py-3">
-                        <p className="text-[13px] font-extrabold text-gray-900">
-                          {e.amount}
-                        </p>
+                      <td className="px-4 py-4 font-extrabold text-gray-900">
+                        ৳{e.amount}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-indigo-50 text-indigo-700">
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold ${e.status === "completed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}
+                        >
                           {e.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <p className="text-[12px] text-gray-600 font-semibold">
-                          {e.createdAt}
-                        </p>
+                      <td className="px-4 py-4">
+                        <div className="text-sm">
+                          <p className="font-semibold">{e.paymentMethod}</p>
+                          {e.transactionId && (
+                            <p className="text-[11px] text-gray-500">
+                              TRX: {e.transactionId}
+                            </p>
+                          )}
+                          {e.isManual && (
+                            <span className="text-[10px] text-purple-600 font-bold">
+                              MANUAL
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                      <td className="px-4 py-4 text-[12px] text-gray-600">
+                        {e.createdAt}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => setDetailsId(e.id)}
-                            className="h-9 px-3 rounded-xl bg-white border border-gray-200 text-[12px] font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5"
+                            className="h-9 px-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-bold flex items-center gap-1"
                           >
                             <Eye size={14} /> Details
                           </button>
 
                           <button
-                            onClick={() => setBkashId(e.id)}
-                            className="h-9 px-3 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold hover:bg-emerald-700 flex items-center gap-1.5 shadow-sm"
+                            onClick={() => setBkashBody({ courseId: e.courseId, studentId: e.studentId })}
+                            className="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1"
                           >
                             <Wallet size={14} /> Bkash
                           </button>
 
                           <button
-                            onClick={() => setManualId(e.id)}
-                            className="h-9 px-3 rounded-xl bg-indigo-600 text-white text-[12px] font-extrabold hover:bg-indigo-700 flex items-center gap-1.5 shadow-sm"
+                            onClick={() => setManualBody({ courseId: e.courseId, studentId: e.studentId })}
+                            className="h-9 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1"
                           >
                             <Wallet size={14} /> Manual
                           </button>
@@ -494,25 +515,25 @@ export default function AdminEnrollmentsPage(): React.JSX.Element {
             </table>
           </div>
 
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-white">
-            <p className="text-[12px] text-gray-500 font-semibold">
+          <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100">
+            <p className="text-sm text-gray-500 font-medium">
               Page {page} of {totalPages}
             </p>
 
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-[12px] font-bold hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1"
+                className="h-9 px-4 rounded-xl border flex items-center gap-1 disabled:opacity-50"
               >
-                <ChevronLeft size={15} /> Prev
+                <ChevronLeft size={16} /> Prev
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
-                className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-[12px] font-bold hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1"
+                className="h-9 px-4 rounded-xl border flex items-center gap-1 disabled:opacity-50"
               >
-                Next <ChevronRight size={15} />
+                Next <ChevronRight size={16} />
               </button>
             </div>
           </div>

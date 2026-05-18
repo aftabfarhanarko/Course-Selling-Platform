@@ -44,9 +44,46 @@ async function fetchCurrentUser(
   token: string,
 ): Promise<Record<string, any> | null> {
   try {
-    const res = await axios.get((process.env.NEXT_PUBLIC_API_BASE_URL || "https://course-selling-api.up.railway.app") + "/users/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const decodeJwtRole = (rawToken: string): string | undefined => {
+      try {
+        const payload = rawToken.split(".")[1];
+        if (!payload) return undefined;
+
+        const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+        const padded = normalized + "===".slice((normalized.length + 3) % 4);
+
+        const decoded =
+          typeof atob === "function"
+            ? atob(padded)
+            : Buffer.from(padded, "base64").toString("binary");
+
+        const parsed = JSON.parse(decoded) as { role?: unknown };
+        return typeof parsed.role === "string" ? parsed.role : undefined;
+      } catch {
+        return undefined;
+      }
+    };
+
+    const role = decodeJwtRole(token);
+
+    const headers: Record<string, string> = {
+      authorization: `Bearer ${token}`,
+      access_token: token,
+      "x-access-token": token,
+    };
+
+    if (role) {
+      headers.role = role;
+      headers["x-role"] = role;
+    }
+
+    const res = await axios.get(
+      (process.env.NEXT_PUBLIC_API_BASE_URL ||
+        "https://course-selling-api.up.railway.app") + "/users/profile",
+      {
+        headers,
+      },
+    );
     const candidate =
       res.data?.user ?? res.data?.data?.user ?? res.data?.data ?? res.data;
     return candidate && typeof candidate === "object" ? candidate : null;

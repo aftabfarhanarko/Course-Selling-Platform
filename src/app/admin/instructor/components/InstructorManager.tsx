@@ -1,7 +1,10 @@
 // InstructorManagerPage.tsx
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 import {
   Eye,
   Loader2,
@@ -29,15 +32,80 @@ import { InstructorCard } from "./InstructorCard";
 import { Pagination } from "./Pagination";
 
 export default function InstructorManager(): React.JSX.Element {
+  const router = useRouter();
+  const authUser = useSelector((state: RootState) => state.auth.user);
+
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const tokenFromState =
+      authUser?.token ??
+      authUser?.accessToken ??
+      authUser?.access_token ??
+      null;
+    const roleFromState = authUser?.role ?? null;
+
+    let token: string | null =
+      typeof tokenFromState === "string" ? tokenFromState : null;
+    let role: string | null =
+      typeof roleFromState === "string" ? roleFromState : null;
+
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("course_platform_auth");
+        if (raw) {
+          const parsed = JSON.parse(raw) as any;
+          const tokenFromStorage =
+            parsed?.user?.token ??
+            parsed?.user?.accessToken ??
+            parsed?.user?.access_token ??
+            parsed?.token ??
+            parsed?.accessToken ??
+            parsed?.access_token ??
+            null;
+
+          if (!token && typeof tokenFromStorage === "string") {
+            token = tokenFromStorage;
+          }
+
+          const roleFromStorage = parsed?.user?.role ?? parsed?.role ?? null;
+          if (!role && typeof roleFromStorage === "string") {
+            role = roleFromStorage;
+          }
+        }
+      } catch {}
+    }
+
+    const roleNorm = String(role ?? "")
+      .trim()
+      .toLowerCase();
+    const allowed =
+      !!token &&
+      (roleNorm === "admin" ||
+        roleNorm === "superadmin" ||
+        roleNorm === "super_admin");
+
+    setIsAdmin(allowed);
+    setAuthChecked(true);
+
+    if (!allowed) {
+      router.replace("/login");
+    }
+  }, [authUser, router]);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"" | Status>("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError } = useAdminInstructorsQuery({
-    search: search || undefined,
-    page,
-    limit: PAGE_SIZE,
-  });
+  const { data, isLoading, isError } = useAdminInstructorsQuery(
+    {
+      search: search || undefined,
+      page,
+      limit: PAGE_SIZE,
+    },
+    { skip: !isAdmin },
+  );
 
   const [createInstructor, { isLoading: isCreating }] =
     useAdminCreateInstructorMutation();
@@ -111,6 +179,20 @@ export default function InstructorManager(): React.JSX.Element {
   ];
 
   const renderTableBody = () => {
+    if (!authChecked)
+      return (
+        <div className="flex items-center justify-center gap-2 py-16 text-[12px] text-gray-500 font-semibold">
+          <Loader2 className="h-4 w-4 animate-spin" /> Checking session...
+        </div>
+      );
+
+    if (!isAdmin)
+      return (
+        <div className="text-center py-16 text-[12px] text-red-500 font-semibold">
+          Unauthorized.
+        </div>
+      );
+
     if (isLoading)
       return (
         <div className="flex items-center justify-center gap-2 py-16 text-[12px] text-gray-500 font-semibold">
@@ -210,8 +292,8 @@ export default function InstructorManager(): React.JSX.Element {
             </div>
           </div>
           <button
-            onClick={() => setCreateOpen(true)}
-            disabled={isCreating}
+            onClick={() => (isAdmin ? setCreateOpen(true) : null)}
+            disabled={isCreating || !isAdmin}
             className="inline-flex items-center gap-1.5 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-[12px] sm:text-[13px] font-semibold px-3 sm:px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-70 disabled:pointer-events-none flex-shrink-0"
           >
             <UserPlus size={14} />
@@ -382,7 +464,7 @@ export default function InstructorManager(): React.JSX.Element {
                           {u.status === "Deleted" ? (
                             <button
                               onClick={() => setRestoreTarget(u)}
-                              disabled={busy}
+                              disabled={busy || !isAdmin}
                               className="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold flex items-center gap-1 transition-colors disabled:opacity-60"
                             >
                               <RefreshCw size={11} /> Restore
@@ -390,7 +472,7 @@ export default function InstructorManager(): React.JSX.Element {
                           ) : (
                             <button
                               onClick={() => setRemoveTarget(u)}
-                              disabled={busy}
+                              disabled={busy || !isAdmin}
                               className="p-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-colors"
                               title="Delete"
                             >

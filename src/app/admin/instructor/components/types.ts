@@ -23,11 +23,7 @@ export interface UiInstructor {
 }
 
 export interface CreatePayload {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-  country?: string;
+  userId: number;
   designation?: string;
   experience?: string;
   bio?: string;
