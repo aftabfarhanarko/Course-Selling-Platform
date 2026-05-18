@@ -7,6 +7,14 @@ import TopNavbar from "@/components/admin/TopNavbar";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { Bai_Jamjuree } from "next/font/google";
+
+const baiJamjuree = Bai_Jamjuree({
+  variable: "--font-bai-jamjuree",
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700"],
+  display: "swap",
+});
 
 export default function AdminLayout({
   children,
@@ -15,15 +23,25 @@ export default function AdminLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.replace("/login");
       return;
     }
+
     const role = String(user?.role ?? "").toLowerCase();
-    if (role && role !== "superadmin" && role !== "super_admin" && role !== "admin") {
+
+    if (
+      role &&
+      role !== "superadmin" &&
+      role !== "super_admin" &&
+      role !== "admin"
+    ) {
       router.replace("/student");
     }
   }, [isAuthenticated, router, user]);
@@ -31,7 +49,9 @@ export default function AdminLayout({
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
+    <div
+      className={`${baiJamjuree.className} flex min-h-screen bg-zinc-50 dark:bg-zinc-950`}
+    >
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden backdrop-blur-sm"
@@ -57,5 +77,3 @@ export default function AdminLayout({
     </div>
   );
 }
-
-
