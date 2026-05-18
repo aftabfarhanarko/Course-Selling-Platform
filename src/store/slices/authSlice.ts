@@ -1,4 +1,4 @@
-﻿import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface AuthState {
   user: any | null;
@@ -25,11 +25,28 @@ function getInitialAuth(): { user: any | null; token: string | null } {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) return { user: null, token: null };
 
-    const parsed = JSON.parse(raw) as { user?: any; token?: unknown };
+    const parsed = JSON.parse(raw) as {
+      user?: any;
+      token?: unknown;
+      accessToken?: unknown;
+      access_token?: unknown;
+    };
     const tokenFromRoot =
-      typeof parsed.token === "string" ? parsed.token : null;
+      typeof parsed.token === "string"
+        ? parsed.token
+        : typeof parsed.accessToken === "string"
+          ? parsed.accessToken
+          : typeof parsed.access_token === "string"
+            ? parsed.access_token
+            : null;
     const tokenFromUser =
-      typeof parsed.user?.token === "string" ? parsed.user.token : null;
+      typeof parsed.user?.token === "string"
+        ? parsed.user.token
+        : typeof parsed.user?.accessToken === "string"
+          ? parsed.user.accessToken
+          : typeof parsed.user?.access_token === "string"
+            ? parsed.user.access_token
+            : null;
     const token = tokenFromUser ?? tokenFromRoot;
 
     const user = parsed.user ?? (token ? { token } : null);

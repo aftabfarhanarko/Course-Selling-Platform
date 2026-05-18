@@ -22,10 +22,13 @@ function extractToken(payload: unknown): string | null {
   return (
     p.token ??
     p.accessToken ??
+    p.access_token ??
     p.data?.token ??
     p.data?.accessToken ??
+    p.data?.access_token ??
     p.user?.token ??
     p.user?.accessToken ??
+    p.user?.access_token ??
     null
   );
 }

@@ -3,12 +3,15 @@
 import React, { useMemo, useState } from "react";
 import {
   AlertTriangle,
+  BookOpen,
   Check,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
   Eye,
   Loader2,
   Search,
+  Users,
   Wallet,
   X,
 } from "lucide-react";
@@ -20,6 +23,7 @@ import {
   useLazyAdminEnrollmentQuery,
 } from "@/lib/api/admin/withdraw";
 
+/* ─── Types ────────────────────────────────────────────────────── */
 type Tab = "all" | "my-courses";
 
 type UiEnrollment = {
@@ -33,6 +37,7 @@ type UiEnrollment = {
 
 const PAGE_SIZE = 10;
 
+/* ─── Helpers ───────────────────────────────────────────────────── */
 function formatDate(value: unknown): string {
   if (!value) return "—";
   const d = new Date(String(value));
@@ -78,7 +83,6 @@ function extractTotal(payload: any): number | null {
 function normalizeEnrollment(raw: any): UiEnrollment | null {
   const id = raw?.id ?? raw?._id ?? raw?.enrollmentId ?? null;
   if (!id) return null;
-
   const user =
     String(
       raw?.user?.name ?? raw?.user?.email ?? raw?.userName ?? raw?.email ?? "",
@@ -91,7 +95,6 @@ function normalizeEnrollment(raw: any): UiEnrollment | null {
         raw?.title ??
         "",
     ).trim() || "—";
-
   const amountRaw =
     raw?.amount ??
     raw?.price ??
@@ -103,7 +106,6 @@ function normalizeEnrollment(raw: any): UiEnrollment | null {
     amountRaw === null || amountRaw === undefined || amountRaw === ""
       ? "—"
       : String(amountRaw);
-
   const status =
     String(
       raw?.status ??
@@ -112,12 +114,105 @@ function normalizeEnrollment(raw: any): UiEnrollment | null {
         (raw?.isPaid ? "paid" : undefined) ??
         "",
     ).trim() || "—";
-
   const createdAt = formatDate(raw?.createdAt ?? raw?.created_at);
-
   return { id, user, course, amount, status, createdAt };
 }
 
+/* ─── Status Badge ──────────────────────────────────────────────── */
+function StatusBadge({ status }: { status: string }) {
+  const s = status.toLowerCase();
+  const config: Record<string, { bg: string; text: string; dot: string }> = {
+    paid: {
+      bg: "bg-emerald-50",
+      text: "text-emerald-700",
+      dot: "bg-emerald-500",
+    },
+    active: {
+      bg: "bg-emerald-50",
+      text: "text-emerald-700",
+      dot: "bg-emerald-500",
+    },
+    pending: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
+    failed: { bg: "bg-red-50", text: "text-red-600", dot: "bg-red-500" },
+    rejected: { bg: "bg-red-50", text: "text-red-600", dot: "bg-red-500" },
+    cancelled: { bg: "bg-gray-100", text: "text-gray-500", dot: "bg-gray-400" },
+  };
+  const { bg, text, dot } = config[s] ?? {
+    bg: "bg-gray-100",
+    text: "text-gray-500",
+    dot: "bg-gray-400",
+  };
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${bg} ${text}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+}
+
+/* ─── Stat Card ─────────────────────────────────────────────────── */
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: number | string;
+  accent?: "primary" | "success" | "warning" | "danger";
+}) {
+  const styles = {
+    primary: {
+      card: "bg-violet-600 border-violet-500",
+      icon: "bg-violet-500 text-white",
+      label: "text-violet-200",
+      value: "text-white",
+    },
+    success: {
+      card: "bg-white border-gray-200",
+      icon: "bg-emerald-50 text-emerald-600",
+      label: "text-gray-400",
+      value: "text-gray-900",
+    },
+    warning: {
+      card: "bg-white border-gray-200",
+      icon: "bg-amber-50 text-amber-500",
+      label: "text-gray-400",
+      value: "text-gray-900",
+    },
+    danger: {
+      card: "bg-white border-gray-200",
+      icon: "bg-red-50 text-red-500",
+      label: "text-gray-400",
+      value: "text-gray-900",
+    },
+  };
+  const s = styles[accent ?? "success"];
+  return (
+    <div className={`flex items-center gap-4 p-5 rounded-2xl border ${s.card}`}>
+      <div
+        className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${s.icon}`}
+      >
+        <Icon size={20} />
+      </div>
+      <div>
+        <p
+          className={`text-[11px] font-semibold uppercase tracking-widest ${s.label}`}
+        >
+          {label}
+        </p>
+        <p className={`text-2xl font-extrabold mt-0.5 leading-none ${s.value}`}>
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Modal Shell ───────────────────────────────────────────────── */
 function ModalShell({
   title,
   subtitle,
@@ -134,21 +229,23 @@ function ModalShell({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl shadow-gray-200 overflow-hidden border border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
-            <h2 className="text-[14px] font-extrabold text-gray-900">
+            <h2 className="text-[13px] font-extrabold text-gray-900">
               {title}
             </h2>
-            <p className="text-[11px] text-gray-400 mt-0.5">{subtitle}</p>
+            <code className="text-[10px] text-violet-500 font-mono mt-0.5 block">
+              {subtitle}
+            </code>
           </div>
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors disabled:opacity-40"
           >
             <X size={15} />
           </button>
@@ -159,6 +256,7 @@ function ModalShell({
   );
 }
 
+/* ─── JSON Body Modal ───────────────────────────────────────────── */
 function JsonBodyModal({
   title,
   subtitle,
@@ -183,7 +281,7 @@ function JsonBodyModal({
       setError(null);
       onSubmit(parsed);
     } catch {
-      setError("Invalid JSON");
+      setError("Invalid JSON — please fix the syntax and try again.");
     }
   };
 
@@ -196,38 +294,43 @@ function JsonBodyModal({
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-            Request Body (JSON)
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+            Request Body
           </label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className={`w-full min-h-[220px] px-3 py-2 text-[12px] border rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300 ${error ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+            className={`w-full min-h-[200px] px-3.5 py-2.5 text-[12px] border rounded-xl font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-violet-300 resize-none transition-colors ${
+              error
+                ? "border-red-300 bg-red-50/50 text-red-700"
+                : "border-gray-200 bg-gray-50/50 text-gray-700"
+            }`}
           />
-          {error ? (
-            <p className="text-[10px] text-red-500 mt-1">{error}</p>
-          ) : null}
+          {error && (
+            <p className="text-[11px] text-red-500 mt-1.5 font-medium">
+              {error}
+            </p>
+          )}
         </div>
-
-        <div className="flex gap-2.5">
+        <div className="flex gap-2.5 pt-1">
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={submit}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-200 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-[12px] font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
           >
             {loading ? (
               <Loader2 size={14} className="animate-spin" />
             ) : (
               <Check size={13} />
             )}
-            Submit
+            {loading ? "Submitting..." : "Submit"}
           </button>
         </div>
       </div>
@@ -235,6 +338,7 @@ function JsonBodyModal({
   );
 }
 
+/* ─── Details Modal ─────────────────────────────────────────────── */
 function DetailsModal({
   id,
   open,
@@ -260,15 +364,16 @@ function DetailsModal({
       onClose={onClose}
     >
       {isFetching ? (
-        <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold py-8">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+        <div className="flex items-center justify-center gap-2 text-[12px] text-gray-400 py-10">
+          <Loader2 className="h-4 w-4 animate-spin text-violet-500" /> Loading
+          details…
         </div>
       ) : isError ? (
-        <div className="text-[12px] text-red-500 font-semibold py-4">
-          Failed to load details
+        <div className="flex items-center gap-2 text-[12px] text-red-500 font-semibold py-6 bg-red-50 rounded-xl px-4">
+          <AlertTriangle size={15} /> Failed to load enrollment details.
         </div>
       ) : (
-        <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto max-h-[420px]">
+        <pre className="text-[11px] text-gray-600 bg-gray-50 border border-gray-200 rounded-xl p-3.5 overflow-auto max-h-[420px] leading-relaxed font-mono">
           {JSON.stringify(data ?? null, null, 2)}
         </pre>
       )}
@@ -276,6 +381,7 @@ function DetailsModal({
   );
 }
 
+/* ─── Main Component ─────────────────────────────────────────────── */
 export default function WithdrawManager(): React.JSX.Element {
   const [tab, setTab] = useState<Tab>("all");
   const [search, setSearch] = useState("");
@@ -295,8 +401,7 @@ export default function WithdrawManager(): React.JSX.Element {
   const listError = tab === "my-courses" ? my.isError : all.isError;
 
   const enrollments = useMemo(() => {
-    const list = extractEnrollments(listPayload);
-    return list
+    return extractEnrollments(listPayload)
       .map(normalizeEnrollment)
       .filter((x): x is UiEnrollment => Boolean(x));
   }, [listPayload]);
@@ -306,6 +411,18 @@ export default function WithdrawManager(): React.JSX.Element {
     1,
     totalFromApi ? Math.ceil(totalFromApi / PAGE_SIZE) : 1,
   );
+
+  /* summary counts */
+  const totalCount = totalFromApi ?? 0;
+  const activeCount = enrollments.filter((e) =>
+    ["paid", "active"].includes(e.status.toLowerCase()),
+  ).length;
+  const pendingCount = enrollments.filter(
+    (e) => e.status.toLowerCase() === "pending",
+  ).length;
+  const failedCount = enrollments.filter((e) =>
+    ["failed", "rejected"].includes(e.status.toLowerCase()),
+  ).length;
 
   const [detailsId, setDetailsId] = useState<number | string | null>(null);
   const [payOpen, setPayOpen] = useState(false);
@@ -317,15 +434,11 @@ export default function WithdrawManager(): React.JSX.Element {
 
   return (
     <>
-      {detailsId !== null ? (
-        <DetailsModal
-          id={detailsId}
-          open={detailsId !== null}
-          onClose={() => setDetailsId(null)}
-        />
-      ) : null}
-
-      {payOpen ? (
+      {/* Modals */}
+      {detailsId !== null && (
+        <DetailsModal id={detailsId} open onClose={() => setDetailsId(null)} />
+      )}
+      {payOpen && (
         <JsonBodyModal
           title="Pay Enrollment"
           subtitle="POST /enrollments/pay"
@@ -337,9 +450,8 @@ export default function WithdrawManager(): React.JSX.Element {
             setPayOpen(false);
           }}
         />
-      ) : null}
-
-      {manualOpen ? (
+      )}
+      {manualOpen && (
         <JsonBodyModal
           title="Manual Enrollment"
           subtitle="POST /enrollments/manual"
@@ -351,81 +463,131 @@ export default function WithdrawManager(): React.JSX.Element {
             setManualOpen(false);
           }}
         />
-      ) : null}
+      )}
 
-      <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-[18px] font-extrabold text-gray-900 tracking-tight">
-              Enrollments
-            </h1>
-            <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
-              POST /enrollments/pay · POST /enrollments/manual · GET
-              /enrollments/my-courses · GET /enrollments · GET /enrollments/:id
-            </p>
+      <div className="min-h-screen bg-gray-50/70 p-4 lg:p-6">
+        {/* ── Header ── */}
+        <div className="flex items-start justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-200">
+              <CreditCard size={20} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-[17px] font-extrabold text-gray-900 tracking-tight">
+                Enrollments
+              </h1>
+              <p className="text-[10px] text-gray-400 font-mono mt-0.5">
+                /enrollments · /enrollments/pay · /enrollments/manual ·
+                /enrollments/my-courses
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => setManualOpen(true)}
-              className="inline-flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 text-[12px] font-semibold px-4 py-2.5 rounded-xl transition-all"
+              className="inline-flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-[12px] font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm"
             >
-              <Wallet size={14} /> Manual
+              <Wallet size={14} />
+              Manual
             </button>
             <button
               onClick={() => setPayOpen(true)}
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-[12px] font-semibold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200"
+              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-[12px] font-semibold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-violet-200"
             >
-              <Check size={14} /> Pay
+              <Check size={14} />
+              Pay
             </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-2 mb-4 flex items-center gap-2 w-fit">
-          <button
-            onClick={() => setTab("all")}
-            className={`px-4 py-2 rounded-xl text-[12px] font-bold ${
-              tab === "all"
-                ? "bg-indigo-600 text-white"
-                : "text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            All Enrollments
-          </button>
-          <button
-            onClick={() => setTab("my-courses")}
-            className={`px-4 py-2 rounded-xl text-[12px] font-bold ${
-              tab === "my-courses"
-                ? "bg-indigo-600 text-white"
-                : "text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            My Courses
-          </button>
+        {/* ── Stat Cards ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <StatCard
+            icon={CreditCard}
+            label="Total Methods"
+            value={totalCount}
+            accent="primary"
+          />
+          <StatCard
+            icon={Users}
+            label="Active"
+            value={activeCount}
+            accent="success"
+          />
+          <StatCard
+            icon={BookOpen}
+            label="Pending"
+            value={pendingCount}
+            accent="warning"
+          />
+          <StatCard
+            icon={X}
+            label="Failed"
+            value={failedCount}
+            accent="danger"
+          />
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 w-full sm:w-[420px]">
-            <Search size={16} className="text-gray-400" />
+        {/* ── Toolbar ── */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          {/* Tab switcher */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+            {(["all", "my-courses"] as Tab[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  setTab(t);
+                  setPage(1);
+                }}
+                className={`px-4 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
+                  tab === t
+                    ? "bg-violet-600 text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {t === "all" ? "All Enrollments" : "My Courses"}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div
+            className={`flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 w-full sm:w-72 transition-opacity ${tab !== "all" ? "opacity-40 pointer-events-none" : ""}`}
+          >
+            <Search size={14} className="text-gray-400 flex-shrink-0" />
             <input
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search..."
-              className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none"
+              placeholder="Search enrollments…"
               disabled={tab !== "all"}
+              className="w-full text-[12px] font-medium text-gray-700 placeholder:text-gray-400 bg-transparent outline-none"
             />
+            {search && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setPage(1);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={13} />
+              </button>
+            )}
           </div>
         </div>
 
+        {/* ── Table ── */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/70">
+                <tr className="border-b border-gray-100">
                   {[
-                    "User",
+                    "Owner",
                     "Course",
                     "Amount",
                     "Status",
@@ -434,7 +596,7 @@ export default function WithdrawManager(): React.JSX.Element {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3"
+                      className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-5 py-3.5 bg-gray-50/60"
                     >
                       {h}
                     </th>
@@ -444,63 +606,86 @@ export default function WithdrawManager(): React.JSX.Element {
               <tbody className="divide-y divide-gray-50">
                 {listLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10">
-                      <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+                    <td colSpan={6} className="px-5 py-14">
+                      <div className="flex flex-col items-center gap-2 text-gray-400">
+                        <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+                        <span className="text-[12px] font-semibold">
+                          Loading enrollments…
+                        </span>
                       </div>
                     </td>
                   </tr>
                 ) : listError ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-10 text-center text-[12px] text-red-500 font-semibold"
-                    >
-                      Failed to load enrollments
+                    <td colSpan={6} className="px-5 py-10">
+                      <div className="flex items-center justify-center gap-2 text-[12px] text-red-500 font-semibold">
+                        <AlertTriangle size={16} /> Failed to load enrollments
+                      </div>
                     </td>
                   </tr>
                 ) : enrollments.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-10 text-center text-[12px] text-gray-400"
-                    >
-                      No enrollments found.
+                    <td colSpan={6} className="px-5 py-14 text-center">
+                      <div className="flex flex-col items-center gap-2 text-gray-400">
+                        <BookOpen size={28} className="opacity-40" />
+                        <span className="text-[12px] font-semibold">
+                          No enrollments found
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   enrollments.map((e) => (
                     <tr
                       key={String(e.id)}
-                      className="hover:bg-indigo-50/20 transition-colors"
+                      className="hover:bg-violet-50/20 transition-colors group"
                     >
-                      <td className="px-4 py-3">
-                        <p className="text-[12px] font-bold text-gray-900">
-                          {e.user}
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 text-[11px] font-extrabold flex items-center justify-center flex-shrink-0">
+                            {e.user !== "—"
+                              ? e.user.slice(0, 2).toUpperCase()
+                              : "—"}
+                          </div>
+                          <div>
+                            <p className="text-[12px] font-bold text-gray-900 leading-tight">
+                              {e.user}
+                            </p>
+                            <p className="text-[10px] text-gray-400 font-mono mt-0.5">
+                              #{String(e.id)}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <p
+                          className="text-[12px] text-gray-700 font-medium max-w-[180px] truncate"
+                          title={e.course}
+                        >
+                          {e.course}
                         </p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">
-                          {String(e.id)}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <p className="text-[12px] text-gray-800 font-bold tabular-nums">
+                          {e.amount}
                         </p>
                       </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-700">
-                        {e.course}
+                      <td className="px-5 py-3.5">
+                        <StatusBadge status={e.status} />
                       </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-700 font-semibold">
-                        {e.amount}
+                      <td className="px-5 py-3.5">
+                        <p className="text-[11px] text-gray-400">
+                          {e.createdAt}
+                        </p>
                       </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-600 font-semibold">
-                        {e.status}
-                      </td>
-                      <td className="px-4 py-3 text-[12px] text-gray-500">
-                        {e.createdAt}
-                      </td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3.5">
                         <button
                           onClick={() => setDetailsId(e.id)}
-                          className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600"
-                          title="Details"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[11px] font-semibold text-gray-500 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-all"
+                          title="View details"
                         >
-                          <Eye size={14} />
+                          <Eye size={13} />
+                          View
                         </button>
                       </td>
                     </tr>
@@ -510,35 +695,45 @@ export default function WithdrawManager(): React.JSX.Element {
             </table>
           </div>
 
-          {tab === "all" ? (
-            <div className="px-4 py-4 border-t border-gray-100 flex items-center justify-between">
-              <p className="text-[11px] text-gray-400 font-semibold">
-                Page <span className="text-gray-700">{page}</span> of{" "}
-                <span className="text-gray-700">{totalPages}</span>
+          {/* ── Pagination ── */}
+          <div className="px-5 py-3.5 border-t border-gray-100 flex items-center justify-between bg-gray-50/40">
+            {tab === "all" ? (
+              <>
+                <p className="text-[11px] text-gray-400 font-medium">
+                  Page <span className="text-gray-700 font-bold">{page}</span>{" "}
+                  of{" "}
+                  <span className="text-gray-700 font-bold">{totalPages}</span>
+                  {totalFromApi !== null && (
+                    <span className="ml-2 text-gray-400">
+                      · {totalFromApi} total
+                    </span>
+                  )}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    className="h-8 w-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-white hover:border-gray-300 disabled:opacity-40 disabled:pointer-events-none transition-all"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="h-8 w-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-white hover:border-gray-300 disabled:opacity-40 disabled:pointer-events-none transition-all"
+                  >
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="text-[11px] text-amber-600 font-semibold flex items-center gap-1.5">
+                <AlertTriangle size={13} />
+                Pagination unavailable — depends on /enrollments/my-courses
+                backend response
               </p>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                  className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                  className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="px-4 py-4 border-t border-gray-100 text-[11px] text-gray-400 font-semibold flex items-center gap-2">
-              <AlertTriangle size={14} /> Pagination/search depends on backend
-              response for /enrollments/my-courses
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </>
