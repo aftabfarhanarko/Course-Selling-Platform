@@ -116,6 +116,10 @@ function persistAuth(payload: {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(payload));
+    if (payload.token) {
+      localStorage.setItem("token", payload.token);
+      localStorage.setItem("access_token", payload.token);
+    }
     if (payload.user?.role) {
       persistRoleCookie(String(payload.user.role));
     }
@@ -128,6 +132,8 @@ function clearPersistedAuth() {
   if (typeof window === "undefined") return;
   try {
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
     clearRoleCookie();
   } catch {
     return;
