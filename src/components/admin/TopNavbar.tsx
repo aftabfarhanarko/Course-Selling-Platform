@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Bell,
   Plus,
@@ -8,37 +8,99 @@ import {
   Search,
   Sun,
   Moon,
-  MessageSquare,
+  MessageCircle,
   Maximize,
   Minimize,
+  Settings,
+  LayoutDashboard,
+  ChevronRight,
+  Command,
+  LogOut,
+  User,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { useLogoutMutation } from "@/lib/api/authApi";
+import { logout } from "@/store/slices/authSlice";
+import { baseApi } from "@/lib/api/baseApi";
+import { RootState } from "@/store";
+import { toast } from "sonner";
 
 export default function TopNavbar({
   onMenuClick,
+  onClose,
 }: {
   onMenuClick?: () => void;
+  onClose?: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+
   const [isDark, setIsDark] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
+
+  const authUser = useSelector((state: RootState) => state.auth.user);
+
+  const displayName =
+    String(
+      authUser?.name ?? authUser?.fullName ?? authUser?.username ?? "",
+    ).trim() || "Admin";
+  const email = String(authUser?.email ?? "").trim();
+  const country = String(authUser?.country ?? "").trim();
+
+  const avatarUrlRaw =
+    authUser?.photo ??
+    authUser?.avatar ??
+    authUser?.image ??
+    authUser?.profileImage ??
+    null;
+  const avatarUrl =
+    typeof avatarUrlRaw === "string" && avatarUrlRaw.trim().length > 0
+      ? avatarUrlRaw.trim()
+      : null;
+
+  // Initials fallback
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
   }, []);
 
   useEffect(() => {
-    const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handleFsChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    setIsDark((prev) => !prev);
     document.documentElement.classList.toggle("dark");
   };
 
@@ -50,160 +112,173 @@ export default function TopNavbar({
     }
   };
 
-  const getPageTitle = () => {
-    if (!pathname) return "Dashboard";
-    const parts = pathname.split("/").filter(Boolean);
-    const lastPart = parts[parts.length - 1];
-    if (!lastPart || lastPart === "admin") return "Dashboard";
-    return (
-      lastPart.charAt(0).toUpperCase() + lastPart.slice(1).replace(/-/g, " ")
-    );
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    const toastId = toast.loading("Signing out...");
+    try {
+      await logoutApi().unwrap();
+    } catch {
+      // ignore API errors — still log out locally
+    } finally {
+      dispatch(logout());
+      dispatch(baseApi.util.resetApiState());
+      toast.success("Signed out", { id: toastId });
+      setDropdownOpen(false);
+      onClose?.();
+      router.replace("/");
+    }
   };
 
-  const getBreadcrumb = () => {
-    if (!pathname) return [];
-    return pathname
-      .split("/")
+  // Readable current page name from pathname
+  const currentPage =
+    pathname
+      ?.split("/")
       .filter(Boolean)
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, " "));
-  };
-
-  const breadcrumbs = getBreadcrumb();
+      .pop()
+      ?.replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase()) ?? "Overview";
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-100 bg-white/90 px-4 sm:px-6 lg:px-8 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/90">
-      {/* Left — Title + Breadcrumb */}
-      <div className="flex items-center gap-3 min-w-0">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-100 bg-white px-4 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950">
+      {/* ── Left: Brand + Breadcrumb ── */}
+      <div className="flex items-center gap-4 min-w-0">
         <button
           onClick={onMenuClick}
           className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           aria-label="Open sidebar"
         >
-          <Menu className="w-4 h-4 text-slate-700 dark:text-zinc-300" />
+          <Menu className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
         </button>
-        <div className="hidden sm:flex flex-col justify-center min-w-0">
-          <h1 className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 leading-tight truncate">
-            {getPageTitle()}
-          </h1>
-          {breadcrumbs.length > 1 && (
-            <div className="hidden sm:flex items-center gap-1 mt-0.5">
-              {breadcrumbs.map((crumb, i) => (
-                <React.Fragment key={i}>
-                  {i > 0 && (
-                    <span className="text-[10px] text-slate-300 dark:text-zinc-600">
-                      /
-                    </span>
-                  )}
-                  <span
-                    className={`text-[10px] ${
-                      i === breadcrumbs.length - 1
-                        ? "text-blue-500 font-semibold"
-                        : "text-slate-400 dark:text-zinc-500"
-                    }`}
-                  >
-                    {crumb}
-                  </span>
-                </React.Fragment>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* Center - Search Bar */}
-      <div className="hidden md:flex items-center flex-1 max-w-sm mx-6">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 dark:text-zinc-500" />
-          <input
-            type="text"
-            placeholder="Search anything..."
-            className="w-full h-8 pl-8 pr-4 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-[12px] text-slate-700 dark:text-zinc-300 transition-all placeholder:text-slate-400"
-          />
-        </div>
-      </div>
+      {/* ── Right: Actions ── */}
+      <div className="flex items-center gap-1">
+        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1.5" />
 
-      {/* Right — Actions */}
-      <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-        {/* Create Report button */}
-        <Button
-          size="sm"
-          className="hidden lg:flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded-lg px-3 h-8 shadow-sm shadow-blue-200 dark:shadow-blue-900/30 transition-all mr-1.5"
-        >
-          <Plus className="h-3 w-3" />
-          <span>Create Report</span>
-        </Button>
-
-        {/* Search (Mobile Only) */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="md:hidden relative h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0 flex items-center justify-center"
-        >
-          <Search className="h-3.5 w-3.5" />
-        </Button>
-
-        {/* Theme Toggle */}
+        {/* Theme */}
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleTheme}
           title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          className="relative h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0 flex items-center justify-center"
+          className="h-8 w-8 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0"
         >
-          {isDark ? (
-            <Sun className="h-3.5 w-3.5" />
-          ) : (
-            <Moon className="h-3.5 w-3.5" />
-          )}
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
-        {/* Messages */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="relative h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0 hidden sm:flex items-center justify-center"
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-          <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-white dark:ring-zinc-950" />
-        </Button>
-
-        {/* Fullscreen Toggle */}
+        {/* Fullscreen */}
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleFullScreen}
           title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          className="relative h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0 hidden lg:flex items-center justify-center"
+          className="hidden lg:flex h-8 w-8 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0 items-center justify-center"
         >
           {isFullscreen ? (
-            <Minimize className="h-3.5 w-3.5" />
+            <Minimize className="h-4 w-4" />
           ) : (
-            <Maximize className="h-3.5 w-3.5" />
+            <Maximize className="h-4 w-4" />
           )}
         </Button>
 
-        {/* Bell / Notifications */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="relative h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0 flex items-center justify-center"
-        >
-          <Bell className="h-3.5 w-3.5" />
-          <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-zinc-950" />
-        </Button>
+        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1.5" />
 
-        <div className="w-px h-4 bg-slate-200 dark:bg-zinc-800 mx-1 hidden sm:block" />
+        {/* ── Avatar Dropdown ── */}
+        <div className="relative ml-0.5" ref={dropdownRef}>
+          <button
+            onClick={() => setDropdownOpen((prev) => !prev)}
+            className="flex items-center gap-2 rounded-lg pl-0.5 pr-2 py-0.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
+            aria-label="Account menu"
+            aria-expanded={dropdownOpen}
+          >
+            {/* Avatar image or initials */}
+            <div className="relative h-7 w-7 flex-shrink-0">
+              <div className="h-7 w-7 rounded-[8px] overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-700 group-hover:ring-blue-400 transition-all">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-[11px] font-medium">
+                    {initials}
+                  </div>
+                )}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 border-2 border-white dark:border-zinc-950 rounded-full" />
+            </div>
 
-        {/* Avatar */}
-        <div className="relative ml-0.5">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden ring-2 ring-blue-100 dark:ring-blue-900/50 cursor-pointer hover:ring-4 transition-all">
-            <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin"
-              alt="Admin"
-              className="w-full h-full object-cover bg-blue-50"
-            />
-          </div>
-          <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 border-2 border-white dark:border-zinc-950 rounded-full" />
+            {/* Name + chevron (desktop only) */}
+            <div className="hidden lg:flex items-center gap-1">
+              <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200 max-w-[100px] truncate">
+                {displayName}
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
+                  dropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </div>
+          </button>
+
+          {/* Dropdown panel */}
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900 overflow-hidden z-50">
+              {/* User info header */}
+              <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+                <p className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                  {displayName}
+                </p>
+                {email && (
+                  <p className="text-[12px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                    {email}
+                  </p>
+                )}
+                {country && (
+                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                    {country}
+                  </p>
+                )}
+              </div>
+
+              {/* Menu items */}
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    router.push("/dashboard/profile");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <User className="w-4 h-4 text-zinc-400" />
+                  Profile
+                </button>
+
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    router.push("/dashboard/settings");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <Settings className="w-4 h-4 text-zinc-400" />
+                  Settings
+                </button>
+              </div>
+
+              <div className="border-t border-zinc-100 dark:border-zinc-800 py-1">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {isLoggingOut ? "Signing out…" : "Sign out"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
