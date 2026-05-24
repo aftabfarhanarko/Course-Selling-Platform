@@ -7,7 +7,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { UiCourse } from "../types";
+import { UiCourse } from "./types";
 
 type Props = {
   isLoading: boolean;

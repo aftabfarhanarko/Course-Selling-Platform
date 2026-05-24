@@ -20,15 +20,45 @@ import {
   useAdminUpdatePercentageMutation,
 } from "@/lib/api/admin/percentage";
 
-type UiPercentage = {
-  id: number | string;
-  name: string;
-  percentage: number | null;
+// ─── API response shape ───────────────────────────────────────────────────────
+// {
+//   success: true,
+//   statusCode: 200,
+//   message: "Request successful",
+//   data: [
+//     { id: 2, type: "student", percentage: "10.00",
+//       createdAt: "2026-05-15T19:00:54.675Z",
+//       updatedAt: "2026-05-15T19:00:54.675Z" }
+//   ]
+// }
+
+type ApiPercentage = {
+  id: number;
+  type: string;
+  percentage: string; // comes as a string e.g. "10.00"
   createdAt: string;
-  raw: any;
+  updatedAt: string;
+};
+
+type ApiResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: ApiPercentage[];
+};
+
+type UiPercentage = {
+  id: number;
+  type: string;
+  percentage: number | null; // parsed float
+  createdAt: string;
+  updatedAt: string;
+  raw: ApiPercentage;
 };
 
 const PAGE_SIZE = 10;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatDate(value: unknown): string {
   if (!value) return "—";
@@ -43,27 +73,25 @@ function formatDate(value: unknown): string {
   });
 }
 
-function extractList(payload: any): any[] {
+/** Destructure the exact API envelope: { success, statusCode, message, data: [...] } */
+function extractList(payload: any): ApiPercentage[] {
   if (!payload) return [];
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.percentage)) return payload.percentage;
-  if (Array.isArray(payload?.percentages)) return payload.percentages;
+  // Primary shape: { data: [...] }
   if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.data?.percentage)) return payload.data.percentage;
-  if (Array.isArray(payload?.data?.percentages))
-    return payload.data.percentages;
-  if (Array.isArray(payload?.data?.data)) return payload.data.data;
+  // Fallback: bare array
+  if (Array.isArray(payload)) return payload;
   return [];
 }
 
+/** Pull total count for pagination — tries common envelope locations */
 function extractTotal(payload: any): number | null {
   const candidates = [
-    payload?.meta?.total,
     payload?.data?.meta?.total,
-    payload?.pagination?.total,
+    payload?.meta?.total,
     payload?.data?.pagination?.total,
-    payload?.total,
+    payload?.pagination?.total,
     payload?.data?.total,
+    payload?.total,
   ];
   for (const v of candidates) {
     const n = Number(v);
@@ -72,31 +100,20 @@ function extractTotal(payload: any): number | null {
   return null;
 }
 
-function toUi(raw: any): UiPercentage | null {
-  const id = raw?.id ?? raw?._id ?? raw?.percentageId ?? null;
-  if (!id) return null;
-
-  const name =
-    String(raw?.name ?? raw?.title ?? raw?.label ?? "—").trim() || "—";
-
-  const pctRaw = raw?.percentage ?? raw?.percent ?? raw?.rate ?? raw?.value;
-  const percentage =
-    pctRaw === undefined || pctRaw === null || pctRaw === ""
-      ? null
-      : Number(pctRaw);
-
-  const createdAt = formatDate(raw?.createdAt ?? raw?.created_at);
-
+/** Map raw API row → UI-friendly shape */
+function toUi(raw: ApiPercentage): UiPercentage {
+  const pct = parseFloat(raw.percentage);
   return {
-    id,
-    name,
-    percentage: Number.isFinite(percentage as number)
-      ? (percentage as number)
-      : null,
-    createdAt,
+    id: raw.id,
+    type: raw.type ?? "—",
+    percentage: Number.isFinite(pct) ? pct : null,
+    createdAt: formatDate(raw.createdAt),
+    updatedAt: formatDate(raw.updatedAt),
     raw,
   };
 }
+
+// ─── Modal shell ──────────────────────────────────────────────────────────────
 
 function ModalShell({
   title,
@@ -139,32 +156,47 @@ function ModalShell({
   );
 }
 
-function JsonBodyModal({
+// ─── Create / Edit modal (structured fields instead of raw JSON) ──────────────
+
+function PercentageFormModal({
   title,
   subtitle,
   loading,
-  initialBody,
+  initialType,
+  initialPercentage,
   onClose,
   onSubmit,
 }: {
   title: string;
   subtitle: string;
   loading: boolean;
-  initialBody: Record<string, any>;
+  initialType: string;
+  initialPercentage: string;
   onClose: () => void;
-  onSubmit: (body: Record<string, any>) => void;
+  onSubmit: (body: { type: string; percentage: string }) => void;
 }) {
-  const [text, setText] = useState(JSON.stringify(initialBody, null, 2));
-  const [error, setError] = useState<string | null>(null);
+  const [type, setType] = useState(initialType);
+  const [percentage, setPercentage] = useState(initialPercentage);
+  const [errors, setErrors] = useState<{ type?: string; percentage?: string }>(
+    {},
+  );
+
+  const validate = () => {
+    const e: typeof errors = {};
+    if (!type.trim()) e.type = "Type is required";
+    const n = parseFloat(percentage);
+    if (isNaN(n) || n < 0 || n > 100)
+      e.percentage = "Must be a number between 0 and 100";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const submit = () => {
-    try {
-      const parsed = JSON.parse(text);
-      setError(null);
-      onSubmit(parsed);
-    } catch {
-      setError("Invalid JSON");
-    }
+    if (!validate()) return;
+    onSubmit({
+      type: type.trim(),
+      percentage: parseFloat(percentage).toFixed(2),
+    });
   };
 
   return (
@@ -175,13 +207,48 @@ function JsonBodyModal({
       onClose={onClose}
     >
       <div className="space-y-4">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className={`w-full min-h-[220px] px-3 py-2 text-[12px] border rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300 ${error ? "border-red-400 bg-red-50" : "border-gray-200"}`}
-        />
-        {error ? <p className="text-[10px] text-red-500">{error}</p> : null}
-        <div className="flex gap-2.5">
+        {/* Type field */}
+        <div>
+          <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+            Type
+          </label>
+          <input
+            type="text"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            placeholder="e.g. student, teacher, admin"
+            className={`w-full px-3 py-2.5 text-[13px] border rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 ${
+              errors.type ? "border-red-400 bg-red-50" : "border-gray-200"
+            }`}
+          />
+          {errors.type && (
+            <p className="text-[10px] text-red-500 mt-1">{errors.type}</p>
+          )}
+        </div>
+
+        {/* Percentage field */}
+        <div>
+          <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+            Percentage (%)
+          </label>
+          <input
+            type="number"
+            value={percentage}
+            onChange={(e) => setPercentage(e.target.value)}
+            placeholder="e.g. 10.00"
+            min={0}
+            max={100}
+            step={0.01}
+            className={`w-full px-3 py-2.5 text-[13px] border rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 ${
+              errors.percentage ? "border-red-400 bg-red-50" : "border-gray-200"
+            }`}
+          />
+          {errors.percentage && (
+            <p className="text-[10px] text-red-500 mt-1">{errors.percentage}</p>
+          )}
+        </div>
+
+        <div className="flex gap-2.5 pt-1">
           <button
             onClick={onClose}
             disabled={loading}
@@ -194,7 +261,7 @@ function JsonBodyModal({
             disabled={loading}
             className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2.5 text-[12px] font-bold text-white hover:bg-indigo-700 disabled:opacity-60"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Submit
           </button>
         </div>
@@ -202,6 +269,8 @@ function JsonBodyModal({
     </ModalShell>
   );
 }
+
+// ─── Delete confirm modal ──────────────────────────────────────────────────────
 
 function ConfirmModal({
   title,
@@ -227,7 +296,7 @@ function ConfirmModal({
     >
       <div className="space-y-4">
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800 font-semibold">
-          This action can’t be undone.
+          This action can't be undone.
         </div>
         <div className="flex gap-2.5">
           <button
@@ -242,7 +311,7 @@ function ConfirmModal({
             disabled={loading}
             className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2.5 text-[12px] font-bold text-white hover:bg-red-700 disabled:opacity-60"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {confirmText}
           </button>
         </div>
@@ -251,51 +320,94 @@ function ConfirmModal({
   );
 }
 
-function DetailsModal({
-  id,
-  onClose,
-}: {
-  id: number | string;
-  onClose: () => void;
-}) {
-  const { data, isFetching, isError } = useAdminPercentageQuery(id);
+// ─── Details modal ────────────────────────────────────────────────────────────
+
+function DetailsModal({ id, onClose }: { id: number; onClose: () => void }) {
+  const {
+    data: apiResponse,
+    isFetching,
+    isError,
+  } = useAdminPercentageQuery(id);
+
+  // The single-item query likely returns the same envelope: { data: {...} }
+  const detail: ApiPercentage | null = apiResponse?.data ?? apiResponse ?? null;
 
   return (
     <ModalShell
       title="Percentage Details"
-      subtitle="GET /percentage/:id"
+      subtitle={`GET /percentage/${id}`}
       loading={isFetching}
       onClose={onClose}
     >
       {isFetching ? (
         <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold py-10">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
       ) : isError ? (
         <div className="text-[12px] text-red-500 font-semibold py-4">
           Failed to load details
         </div>
-      ) : (
-        <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto max-h-[420px]">
-          {JSON.stringify(data ?? null, null, 2)}
-        </pre>
-      )}
+      ) : detail ? (
+        <div className="space-y-3">
+          {/* Structured display */}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: "ID", value: detail.id },
+              { label: "Type", value: detail.type },
+              {
+                label: "Percentage",
+                value: `${parseFloat(detail.percentage).toFixed(2)}%`,
+              },
+              { label: "Created", value: formatDate(detail.createdAt) },
+              { label: "Updated", value: formatDate(detail.updatedAt) },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5"
+              >
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">
+                  {label}
+                </p>
+                <p className="text-[13px] font-semibold text-gray-800">
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+          {/* Raw JSON */}
+          <details className="group">
+            <summary className="text-[11px] text-indigo-600 font-semibold cursor-pointer select-none">
+              Raw JSON
+            </summary>
+            <pre className="mt-2 text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto max-h-[200px]">
+              {JSON.stringify(detail, null, 2)}
+            </pre>
+          </details>
+        </div>
+      ) : null}
     </ModalShell>
   );
 }
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function PercentageManager() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [modal, setModal] = useState<
     | { type: "none" }
-    | { type: "details"; id: number | string }
+    | { type: "details"; id: number }
     | { type: "create" }
     | { type: "edit"; item: UiPercentage }
     | { type: "delete"; item: UiPercentage }
   >({ type: "none" });
 
-  const { data, isFetching, isError } = useAdminPercentagesQuery({
+  // ── Data fetching ──────────────────────────────────────────────────────────
+  const {
+    data: apiResponse,
+    isFetching,
+    isError,
+  } = useAdminPercentagesQuery({
     search: search || undefined,
     page,
     limit: PAGE_SIZE,
@@ -305,12 +417,14 @@ export default function PercentageManager() {
   const [updatePercentage, updateState] = useAdminUpdatePercentageMutation();
   const [deletePercentage, deleteState] = useAdminDeletePercentageMutation();
 
-  const items = useMemo(() => {
-    const rawList = extractList(data);
-    return rawList.map(toUi).filter(Boolean) as UiPercentage[];
-  }, [data]);
+  // ── Destructure API response ───────────────────────────────────────────────
+  // Shape: { success, statusCode, message, data: ApiPercentage[] }
+  const items = useMemo<UiPercentage[]>(() => {
+    const rawList = extractList(apiResponse); // pulls apiResponse.data
+    return rawList.map(toUi);
+  }, [apiResponse]);
 
-  const total = extractTotal(data);
+  const total = extractTotal(apiResponse);
   const totalPages =
     total === null
       ? Math.max(1, page)
@@ -318,14 +432,16 @@ export default function PercentageManager() {
 
   const canPrev = page > 1;
   const canNext = page < totalPages;
-
   const anyLoading =
     createState.isLoading || updateState.isLoading || deleteState.isLoading;
+
+  const closeModal = () => setModal({ type: "none" });
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">
               Admin
@@ -337,7 +453,6 @@ export default function PercentageManager() {
               Create, edit, and manage commission percentages.
             </p>
           </div>
-
           <button
             onClick={() => setModal({ type: "create" })}
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-[12px] font-black text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-[0.98] transition-all"
@@ -347,7 +462,9 @@ export default function PercentageManager() {
           </button>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        {/* Table card */}
+        <div className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          {/* Toolbar */}
           <div className="p-4 sm:p-5 border-b border-gray-100">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 w-full sm:w-[380px]">
@@ -358,40 +475,45 @@ export default function PercentageManager() {
                     setSearch(e.target.value);
                     setPage(1);
                   }}
-                  placeholder="Search..."
+                  placeholder="Search by type…"
                   className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none"
                 />
               </div>
-
               <div className="flex items-center justify-between sm:justify-end gap-2">
                 <button
                   onClick={() => canPrev && setPage((p) => p - 1)}
                   disabled={!canPrev}
                   className="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  Prev
+                  <ChevronLeft className="h-4 w-4" /> Prev
                 </button>
-                <div className="text-[12px] font-bold text-gray-700">
+                <span className="text-[12px] font-bold text-gray-700">
                   Page {page} / {totalPages}
-                </div>
+                </span>
                 <button
                   onClick={() => canNext && setPage((p) => p + 1)}
                   disabled={!canNext}
                   className="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
+                  Next <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             </div>
           </div>
 
+          {/* Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
                 <tr>
-                  {["ID", "Name", "Percentage", "Created", ""].map((h) => (
+                  {[
+                    "ID",
+                    "Type",
+                    "Percentage",
+                    "Created At",
+                    "Updated At",
+                    "",
+                  ].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-3 text-left text-[11px] font-black uppercase tracking-wider text-gray-500 whitespace-nowrap"
@@ -404,16 +526,16 @@ export default function PercentageManager() {
               <tbody className="divide-y divide-gray-50 bg-white">
                 {isFetching ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-14 text-center">
+                    <td colSpan={6} className="px-4 py-14 text-center">
                       <div className="inline-flex items-center gap-2 text-[12px] font-semibold text-gray-500">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+                        <Loader2 className="h-4 w-4 animate-spin" /> Loading…
                       </div>
                     </td>
                   </tr>
                 ) : isError ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-4 py-14 text-center text-[12px] font-semibold text-red-600"
                     >
                       Failed to load percentages
@@ -422,7 +544,7 @@ export default function PercentageManager() {
                 ) : items.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-4 py-14 text-center text-[12px] font-semibold text-gray-500"
                     >
                       No percentages found
@@ -431,20 +553,27 @@ export default function PercentageManager() {
                 ) : (
                   items.map((p) => (
                     <tr
-                      key={String(p.id)}
+                      key={p.id}
                       className="hover:bg-gray-50/60 transition-colors"
                     >
                       <td className="px-4 py-3 text-[12px] font-bold text-gray-700 whitespace-nowrap">
                         {p.id}
                       </td>
-                      <td className="px-4 py-3 text-[12px] font-semibold text-gray-800 whitespace-nowrap">
-                        {p.name}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700 capitalize">
+                          {p.type}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-[12px] font-bold text-indigo-700 whitespace-nowrap">
-                        {p.percentage === null ? "—" : `${p.percentage}%`}
+                        {p.percentage === null
+                          ? "—"
+                          : `${p.percentage.toFixed(2)}%`}
                       </td>
                       <td className="px-4 py-3 text-[12px] font-semibold text-gray-600 whitespace-nowrap">
                         {p.createdAt}
+                      </td>
+                      <td className="px-4 py-3 text-[12px] font-semibold text-gray-600 whitespace-nowrap">
+                        {p.updatedAt}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
@@ -484,65 +613,64 @@ export default function PercentageManager() {
         </div>
       </div>
 
-      {modal.type === "details" ? (
-        <DetailsModal
-          id={modal.id}
-          onClose={() => setModal({ type: "none" })}
-        />
-      ) : null}
+      {/* ── Modals ── */}
 
-      {modal.type === "create" ? (
-        <JsonBodyModal
+      {modal.type === "details" && (
+        <DetailsModal id={modal.id} onClose={closeModal} />
+      )}
+
+      {modal.type === "create" && (
+        <PercentageFormModal
           title="Create Percentage"
           subtitle="POST /percentage"
           loading={createState.isLoading}
-          initialBody={{ name: "Commission", percentage: 10 }}
-          onClose={() => setModal({ type: "none" })}
+          initialType=""
+          initialPercentage=""
+          onClose={closeModal}
           onSubmit={async (body) => {
-            await createPercentage(body as any).unwrap();
-            setModal({ type: "none" });
+            await createPercentage(body).unwrap();
+            closeModal();
           }}
         />
-      ) : null}
+      )}
 
-      {modal.type === "edit" ? (
-        <JsonBodyModal
+      {modal.type === "edit" && (
+        <PercentageFormModal
           title="Edit Percentage"
           subtitle={`PATCH /percentage/${modal.item.id}`}
           loading={updateState.isLoading}
-          initialBody={{
-            name: modal.item.name,
-            percentage: modal.item.percentage ?? 0,
-          }}
-          onClose={() => setModal({ type: "none" })}
+          initialType={modal.item.type}
+          initialPercentage={String(modal.item.percentage ?? "")}
+          onClose={closeModal}
           onSubmit={async (body) => {
             await updatePercentage({ id: modal.item.id, body }).unwrap();
-            setModal({ type: "none" });
+            closeModal();
           }}
         />
-      ) : null}
+      )}
 
-      {modal.type === "delete" ? (
+      {modal.type === "delete" && (
         <ConfirmModal
           title="Delete Percentage"
           description={`DELETE /percentage/${modal.item.id}`}
           confirmText="Delete"
           loading={deleteState.isLoading}
-          onClose={() => setModal({ type: "none" })}
+          onClose={closeModal}
           onConfirm={async () => {
             await deletePercentage(modal.item.id).unwrap();
-            setModal({ type: "none" });
+            closeModal();
           }}
         />
-      ) : null}
+      )}
 
-      {anyLoading ? (
+      {/* Global loading toast */}
+      {anyLoading && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60]">
           <div className="rounded-2xl bg-gray-900 text-white px-4 py-2.5 text-[12px] font-semibold shadow-xl">
-            Processing...
+            Processing…
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
