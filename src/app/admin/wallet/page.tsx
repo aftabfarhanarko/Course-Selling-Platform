@@ -29,46 +29,107 @@ import {
 type MethodType = "bkash" | "nagad" | "bank" | "binance";
 type MethodStatus = "pending" | "approved" | "rejected";
 
+// ─── Exact API shapes ──────────────────────────────────────────────────────────
+//
+// GET /payment-methods  →  {
+//   success: true, statusCode: 200, message: "...",
+//   data: {
+//     items: [
+//       {
+//         id: 3, type: "binance", status: "pending",
+//         rejectReason: null,
+//         accountNumber: null,    accountHolderName: null,
+//         bankName: null,         branchName: null,
+//         binanceId: "87654321",
+//         isDefault: false,
+//         createdAt: "...", updatedAt: "...", deletedAt: null,
+//         user: { id: 2, name: "ovi", email: "...", role: "admin", phone: "..." }
+//       }, ...
+//     ],
+//     meta: { total: 2, page: 1, limit: 10, totalPages: 1 }
+//   }
+// }
+
+type ApiUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+};
+
+type ApiPaymentMethod = {
+  id: number;
+  type: string;
+  status: string;
+  rejectReason: string | null;
+  accountNumber: string | null;
+  accountHolderName: string | null;
+  bankName: string | null;
+  branchName: string | null;
+  binanceId: string | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  user: ApiUser;
+};
+
+type ApiMeta = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+type ApiResponse = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    items: ApiPaymentMethod[];
+    meta: ApiMeta;
+  };
+};
+
+// ─── UI shape ─────────────────────────────────────────────────────────────────
+
 type UiPaymentMethod = {
-  id: number | string;
+  id: number;
   type: MethodType | "unknown";
   status: MethodStatus | "unknown";
+  /** human-readable method label  */
   label: string;
+  /** primary account identifier (account number, binance ID, etc.) */
   account: string;
+  /** owner name from nested user object */
   owner: string;
+  ownerEmail: string;
+  ownerPhone: string;
+  rejectReason: string | null;
+  bankName: string | null;
+  branchName: string | null;
+  isDefault: boolean;
   createdAt: string;
+  updatedAt: string;
+  raw: ApiPaymentMethod;
 };
 
 const PAGE_SIZE = 10;
 
-/* ─── Data helpers ─── */
-function extractList(payload: any): any[] {
-  if (!payload) return [];
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.paymentMethods)) return payload.paymentMethods;
-  if (Array.isArray(payload?.methods)) return payload.methods;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.data?.paymentMethods))
-    return payload.data.paymentMethods;
-  if (Array.isArray(payload?.data?.methods)) return payload.data.methods;
-  if (Array.isArray(payload?.data?.data)) return payload.data.data;
-  return [];
-}
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function extractTotal(payload: any): number | null {
-  const candidates = [
-    payload?.meta?.total,
-    payload?.data?.meta?.total,
-    payload?.pagination?.total,
-    payload?.data?.pagination?.total,
-    payload?.total,
-    payload?.data?.total,
-  ];
-  for (const v of candidates) {
-    const n = Number(v);
-    if (Number.isFinite(n) && n >= 0) return n;
-  }
-  return null;
+function formatDate(value: unknown): string {
+  if (!value) return "—";
+  const d = new Date(String(value));
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function normalizeType(value: unknown): UiPaymentMethod["type"] {
@@ -92,50 +153,60 @@ function normalizeStatus(value: unknown): UiPaymentMethod["status"] {
   return "unknown";
 }
 
-function formatDate(value: unknown): string {
-  if (!value) return "—";
-  const d = new Date(String(value));
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+/** Resolve the best account identifier based on method type */
+function resolveAccount(raw: ApiPaymentMethod): string {
+  if (raw.type === "binance" && raw.binanceId) return raw.binanceId;
+  if (raw.accountNumber) return raw.accountNumber;
+  if (raw.binanceId) return raw.binanceId;
+  return "—";
 }
 
-function toUi(raw: any): UiPaymentMethod | null {
-  const id = raw?.id ?? raw?._id ?? raw?.paymentMethodId ?? null;
-  if (!id) return null;
-  const type = normalizeType(raw?.type ?? raw?.method ?? raw?.provider);
-  const status = normalizeStatus(raw?.status);
-  const label =
-    String(raw?.label ?? raw?.name ?? raw?.title ?? type).trim() ||
-    String(type).toUpperCase();
-  const account =
-    String(
-      raw?.accountNumber ??
-        raw?.account ??
-        raw?.phone ??
-        raw?.walletNumber ??
-        raw?.number ??
-        "",
-    ).trim() || "—";
-  const owner =
-    String(
-      raw?.user?.name ??
-        raw?.user?.email ??
-        raw?.owner?.name ??
-        raw?.owner ??
-        raw?.nameOnAccount ??
-        "",
-    ).trim() || "—";
-  const createdAt = formatDate(raw?.createdAt ?? raw?.created_at);
-  return { id, type, status, label, account, owner, createdAt };
+/** Resolve display label for the method */
+function resolveLabel(raw: ApiPaymentMethod): string {
+  if (raw.type === "bank" && raw.bankName) return raw.bankName;
+  return raw.type?.toUpperCase() ?? "—";
 }
 
-/* ─── Stat Card ─── */
+/** Map one API item → UI shape */
+function toUi(raw: ApiPaymentMethod): UiPaymentMethod {
+  return {
+    id: raw.id,
+    type: normalizeType(raw.type),
+    status: normalizeStatus(raw.status),
+    label: resolveLabel(raw),
+    account: resolveAccount(raw),
+    owner: raw.user?.name ?? "—",
+    ownerEmail: raw.user?.email ?? "—",
+    ownerPhone: raw.user?.phone ?? "—",
+    rejectReason: raw.rejectReason,
+    bankName: raw.bankName,
+    branchName: raw.branchName,
+    isDefault: raw.isDefault ?? false,
+    createdAt: formatDate(raw.createdAt),
+    updatedAt: formatDate(raw.updatedAt),
+    raw,
+  };
+}
+
+/** Destructure the API envelope → items array */
+function extractItems(payload: ApiResponse | any): ApiPaymentMethod[] {
+  // Primary shape: { data: { items: [...] } }
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
+  // Fallback shapes
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload)) return payload;
+  return [];
+}
+
+/** Destructure the API envelope → meta */
+function extractMeta(payload: ApiResponse | any): ApiMeta | null {
+  if (payload?.data?.meta) return payload.data.meta;
+  if (payload?.meta) return payload.meta;
+  return null;
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
 function StatCard({
   label,
   value,
@@ -199,7 +270,6 @@ function StatCard({
   );
 }
 
-/* ─── Status Pill ─── */
 function StatusPill({ status }: { status: UiPaymentMethod["status"] }) {
   const map: Record<string, { cls: string; dot: string; label: string }> = {
     approved: {
@@ -234,7 +304,6 @@ function StatusPill({ status }: { status: UiPaymentMethod["status"] }) {
   );
 }
 
-/* ─── Type Pill ─── */
 function TypePill({ type }: { type: UiPaymentMethod["type"] }) {
   const map: Record<string, string> = {
     bkash: "bg-pink-50 text-pink-700 border-pink-200",
@@ -245,14 +314,13 @@ function TypePill({ type }: { type: UiPaymentMethod["type"] }) {
   };
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border ${map[type] ?? map.unknown}`}
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border capitalize ${map[type] ?? map.unknown}`}
     >
       {type}
     </span>
   );
 }
 
-/* ─── Avatar ─── */
 function Avatar({ name }: { name: string }) {
   const initials = name
     .split(" ")
@@ -266,7 +334,7 @@ function Avatar({ name }: { name: string }) {
     "bg-pink-100 text-pink-700",
     "bg-amber-100 text-amber-700",
   ];
-  const idx = name.charCodeAt(0) % colors.length;
+  const idx = (name.charCodeAt(0) ?? 0) % colors.length;
   return (
     <div
       className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-extrabold flex-shrink-0 ${colors[idx]}`}
@@ -276,15 +344,21 @@ function Avatar({ name }: { name: string }) {
   );
 }
 
-/* ─── Details Modal ─── */
-function DetailsModal({
-  id,
-  onClose,
-}: {
-  id: number | string;
-  onClose: () => void;
-}) {
-  const { data, isFetching, isError } = useAdminPaymentMethodQuery(id);
+// ─── Details Modal ────────────────────────────────────────────────────────────
+
+function DetailsModal({ id, onClose }: { id: number; onClose: () => void }) {
+  const {
+    data: apiResponse,
+    isFetching,
+    isError,
+  } = useAdminPaymentMethodQuery(id);
+
+  // Single-item response: same envelope → data.items[0] or data directly
+  const detail: ApiPaymentMethod | null =
+    apiResponse?.data?.items?.[0] ?? apiResponse?.data ?? apiResponse ?? null;
+
+  const ui = detail ? toUi(detail) : null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div
@@ -297,7 +371,7 @@ function DetailsModal({
             <h2 className="text-[14px] font-extrabold text-gray-900">
               Payment Method Details
             </h2>
-            <p className="text-[11px] text-gray-400 mt-0.5">ID: {String(id)}</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">ID: {id}</p>
           </div>
           <button
             onClick={onClose}
@@ -315,18 +389,75 @@ function DetailsModal({
             <div className="text-[12px] text-red-500 font-semibold py-4">
               Failed to load details
             </div>
-          ) : (
-            <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto">
-              {JSON.stringify(data ?? null, null, 2)}
-            </pre>
-          )}
+          ) : ui ? (
+            <div className="space-y-4">
+              {/* Owner */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                  Owner
+                </p>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                  <Avatar name={ui.owner} />
+                  <div>
+                    <p className="text-[13px] font-bold text-gray-900">
+                      {ui.owner}
+                    </p>
+                    <p className="text-[11px] text-gray-500">{ui.ownerEmail}</p>
+                    <p className="text-[11px] text-gray-500">{ui.ownerPhone}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Method fields */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                  Method
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "ID", value: ui.id },
+                    { label: "Type", value: <TypePill type={ui.type} /> },
+                    {
+                      label: "Status",
+                      value: <StatusPill status={ui.status} />,
+                    },
+                    { label: "Account / ID", value: ui.account },
+                    { label: "Bank Name", value: ui.bankName ?? "—" },
+                    { label: "Branch", value: ui.branchName ?? "—" },
+                    { label: "Default", value: ui.isDefault ? "Yes" : "No" },
+                    { label: "Reject Reason", value: ui.rejectReason ?? "—" },
+                    { label: "Created", value: ui.createdAt },
+                    { label: "Updated", value: ui.updatedAt },
+                  ].map(({ label, value }) => (
+                    <div
+                      key={label}
+                      className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5"
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">
+                        {label}
+                      </p>
+                      {typeof value === "string" ||
+                      typeof value === "number" ? (
+                        <p className="text-[12px] font-semibold text-gray-800">
+                          {value}
+                        </p>
+                      ) : (
+                        <div className="mt-0.5">{value}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
   );
 }
 
-/* ─── Confirm Modal ─── */
+// ─── Confirm Modal ────────────────────────────────────────────────────────────
+
 function ConfirmModal({
   title,
   description,
@@ -384,7 +515,8 @@ function ConfirmModal({
   );
 }
 
-/* ─── Mobile Card ─── */
+// ─── Mobile Card ──────────────────────────────────────────────────────────────
+
 function MobileCard({
   m,
   busy,
@@ -410,13 +542,12 @@ function MobileCard({
               {m.owner}
             </p>
             <p className="text-[10px] text-gray-400 mt-0.5 truncate">
-              {String(m.id)}
+              {m.ownerEmail}
             </p>
           </div>
         </div>
         <StatusPill status={m.status} />
       </div>
-
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <TypePill type={m.type} />
@@ -428,9 +559,12 @@ function MobileCard({
           {m.account}
         </span>
       </div>
-
+      {m.isDefault && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
+          Default
+        </span>
+      )}
       <p className="text-[11px] text-gray-400">{m.createdAt}</p>
-
       <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
         <button
           onClick={onDetails}
@@ -468,20 +602,25 @@ function MobileCard({
   );
 }
 
-/* ══════════════════════════════════════════
-   MAIN PAGE
-══════════════════════════════════════════ */
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN PAGE
+// ═══════════════════════════════════════════════════════════════════════════════
+
 export default function AdminPaymentMethodsPage(): React.JSX.Element {
   const [search, setSearch] = useState("");
-  const [type, setType] = useState<"" | MethodType>("");
-  const [status, setStatus] = useState<"" | MethodStatus>("");
+  const [typeFilter, setTypeFilter] = useState<"" | MethodType>("");
+  const [statusFilter, setStatusFilter] = useState<"" | MethodStatus>("");
   const [page, setPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const { data, isLoading, isError } = useAdminPaymentMethodsQuery({
-    search,
-    type: type || undefined,
-    status: status || undefined,
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+  } = useAdminPaymentMethodsQuery({
+    search: search || undefined,
+    type: typeFilter || undefined,
+    status: statusFilter || undefined,
     page,
     limit: PAGE_SIZE,
   });
@@ -493,24 +632,23 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
   const [remove, { isLoading: isDeleting }] =
     useAdminDeletePaymentMethodMutation();
 
-  const list = useMemo(
-    () => extractList(data).map(toUi).filter(Boolean) as UiPaymentMethod[],
-    [data],
-  );
-  const total = extractTotal(data);
-  const totalPages = Math.max(
-    1,
-    total !== null
-      ? Math.ceil(total / PAGE_SIZE)
-      : Math.ceil(list.length / PAGE_SIZE) || 1,
-  );
+  // ── Destructure API response ─────────────────────────────────────────────
+  // Shape: { success, statusCode, message, data: { items: [...], meta: { total, page, limit, totalPages } } }
+  const list = useMemo<UiPaymentMethod[]>(() => {
+    return extractItems(apiResponse).map(toUi);
+  }, [apiResponse]);
 
-  const totalCount = total ?? list.length;
+  const meta = extractMeta(apiResponse);
+  const total = meta?.total ?? list.length;
+  const totalPages =
+    meta?.totalPages ?? Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Stats derived from meta total + current page counts
   const approvedCount = list.filter((m) => m.status === "approved").length;
   const pendingCount = list.filter((m) => m.status === "pending").length;
   const rejectedCount = list.filter((m) => m.status === "rejected").length;
 
-  const [detailsId, setDetailsId] = useState<number | string | null>(null);
+  const [detailsId, setDetailsId] = useState<number | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UiPaymentMethod | null>(
     null,
   );
@@ -530,9 +668,9 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               <span className="font-semibold text-gray-800">
                 {deleteTarget.label}
               </span>{" "}
-              from{" "}
+              ({deleteTarget.account}) owned by{" "}
               <span className="font-semibold text-gray-800">
-                {deleteTarget.account}
+                {deleteTarget.owner}
               </span>
               ?
             </>
@@ -548,7 +686,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
       )}
 
       <div className="min-h-screen bg-gray-50/60 p-3 sm:p-4 lg:p-6">
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-start justify-between mb-5 sm:mb-6 gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-violet-600 flex items-center justify-center flex-shrink-0">
@@ -570,11 +708,11 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ── Stat Cards ── */}
+        {/* Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-4 sm:mb-5">
           <StatCard
             label="Total Methods"
-            value={totalCount}
+            value={total}
             icon={CreditCard}
             variant="default"
           />
@@ -598,7 +736,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
           />
         </div>
 
-        {/* ── Filters ── */}
+        {/* Filters */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2">
@@ -609,7 +747,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                placeholder="Search name, account, owner..."
+                placeholder="Search name, account, email..."
                 className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none bg-transparent"
               />
               {search && (
@@ -624,11 +762,10 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 </button>
               )}
             </div>
-            {/* Filter toggle button — mobile only */}
             <button
               onClick={() => setFiltersOpen((v) => !v)}
               className={`sm:hidden h-9 w-9 rounded-xl border flex items-center justify-center transition-colors flex-shrink-0 ${
-                filtersOpen || type || status
+                filtersOpen || typeFilter || statusFilter
                   ? "border-violet-300 bg-violet-50 text-violet-600"
                   : "border-gray-200 text-gray-500 hover:bg-gray-50"
               }`}
@@ -637,14 +774,13 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
             </button>
           </div>
 
-          {/* Selects */}
           <div
             className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-2 mt-2.5`}
           >
             <select
-              value={type}
+              value={typeFilter}
               onChange={(e) => {
-                setType(e.target.value as any);
+                setTypeFilter(e.target.value as any);
                 setPage(1);
               }}
               className="flex-1 sm:flex-none h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white text-gray-700 outline-none cursor-pointer hover:border-gray-300 transition-colors min-w-[120px]"
@@ -656,9 +792,9 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               <option value="binance">Binance</option>
             </select>
             <select
-              value={status}
+              value={statusFilter}
               onChange={(e) => {
-                setStatus(e.target.value as any);
+                setStatusFilter(e.target.value as any);
                 setPage(1);
               }}
               className="flex-1 sm:flex-none h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white text-gray-700 outline-none cursor-pointer hover:border-gray-300 transition-colors min-w-[120px]"
@@ -668,11 +804,11 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
             </select>
-            {(type || status) && (
+            {(typeFilter || statusFilter) && (
               <button
                 onClick={() => {
-                  setType("");
-                  setStatus("");
+                  setTypeFilter("");
+                  setStatusFilter("");
                   setPage(1);
                 }}
                 className="h-9 px-3 text-[12px] font-semibold text-red-500 border border-red-200 bg-red-50 rounded-xl hover:bg-red-100 transition-colors whitespace-nowrap"
@@ -683,7 +819,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ── Desktop Table (hidden on mobile) ── */}
+        {/* Desktop Table */}
         <div className="hidden sm:block bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -692,9 +828,10 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                   {[
                     "Owner",
                     "Method",
-                    "Account",
+                    "Account / ID",
                     "Status",
-                    "Joined",
+                    "Default",
+                    "Created",
                     "Actions",
                   ].map((h) => (
                     <th
@@ -709,7 +846,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               <tbody className="divide-y divide-gray-50">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10">
+                    <td colSpan={7} className="px-4 py-10">
                       <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold">
                         <Loader2 className="h-4 w-4 animate-spin text-violet-500" />{" "}
                         Loading payment methods...
@@ -719,7 +856,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 ) : isError ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-4 py-10 text-center text-[12px] text-red-500 font-semibold"
                     >
                       Failed to load payment methods
@@ -727,7 +864,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                   </tr>
                 ) : list.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-14 text-center">
+                    <td colSpan={7} className="px-4 py-14 text-center">
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
                           <CreditCard size={20} className="text-gray-400" />
@@ -741,7 +878,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 ) : (
                   list.map((m) => (
                     <tr
-                      key={String(m.id)}
+                      key={m.id}
                       className="hover:bg-violet-50/20 transition-colors"
                     >
                       <td className="px-4 py-3">
@@ -752,7 +889,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                               {m.owner}
                             </p>
                             <p className="text-[10px] text-gray-400 mt-0.5">
-                              {String(m.id)}
+                              {m.ownerEmail}
                             </p>
                           </div>
                         </div>
@@ -770,6 +907,15 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                       </td>
                       <td className="px-4 py-3">
                         <StatusPill status={m.status} />
+                      </td>
+                      <td className="px-4 py-3 text-[12px] font-semibold text-gray-600">
+                        {m.isDefault ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">
+                            Default
+                          </span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-[12px] text-gray-500 whitespace-nowrap">
                         {m.createdAt}
@@ -823,15 +969,16 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               </tbody>
             </table>
           </div>
+
           {/* Desktop Pagination */}
           <div className="px-4 py-3.5 border-t border-gray-100 flex items-center justify-between">
             <p className="text-[11px] text-gray-400 font-semibold">
               Showing{" "}
               <span className="text-gray-700">
                 {list.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0}–
-                {Math.min(page * PAGE_SIZE, total ?? list.length)}
+                {Math.min(page * PAGE_SIZE, total)}
               </span>{" "}
-              of <span className="text-gray-700">{total ?? list.length}</span>
+              of <span className="text-gray-700">{total}</span>
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -855,7 +1002,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ── Mobile Cards (hidden on sm+) ── */}
+        {/* Mobile Cards */}
         <div className="sm:hidden space-y-3">
           {isLoading ? (
             <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold py-10">
@@ -879,7 +1026,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
             <>
               {list.map((m) => (
                 <MobileCard
-                  key={String(m.id)}
+                  key={m.id}
                   m={m}
                   busy={busy}
                   onDetails={() => setDetailsId(m.id)}
@@ -897,10 +1044,9 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 <p className="text-[11px] text-gray-400 font-semibold">
                   <span className="text-gray-700">
                     {list.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0}–
-                    {Math.min(page * PAGE_SIZE, total ?? list.length)}
+                    {Math.min(page * PAGE_SIZE, total)}
                   </span>{" "}
-                  of{" "}
-                  <span className="text-gray-700">{total ?? list.length}</span>
+                  of <span className="text-gray-700">{total}</span>
                 </p>
                 <div className="flex items-center gap-2">
                   <button
