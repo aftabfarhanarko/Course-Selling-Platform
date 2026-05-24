@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { usePublicCoursesAllQuery } from "@/lib/api/admin/course";
 import { useAdminCategoriesQuery } from "@/lib/api/admin/category";
 import { Course, EarningTier, SortKey } from "./types";
@@ -23,10 +22,7 @@ import MobileFilterSheet from "./MobileFilterSheet";
 // import EmptyState from "./components/EmptyState";
 // import Pagination from "./components/Pagination";
 
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
+
 const PAGE_SIZE = 8; // renamed from _paginationPage
 
 export default function CourseList() {
@@ -34,6 +30,7 @@ export default function CourseList() {
   const { data: catData } = useAdminCategoriesQuery();
   const router = useRouter();
   const searchParams = useSearchParams();
+  console.log("All Course", allCoursesData)
 
   // Filter / sort state
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
@@ -159,6 +156,7 @@ export default function CourseList() {
     (safePage - 1) * PAGE_SIZE,
     safePage * PAGE_SIZE,
   );
+ 
   const hasActive =
     selectedCats.length > 0 ||
     !!selectedEarning ||
@@ -186,7 +184,7 @@ export default function CourseList() {
 
   return (
     <div
-      className={`${plusJakarta.className} min-h-screen mt-17 md:mt-18 bg-[#f8f9fc]`}
+      className={` min-h-screen mt-17 md:mt-18 bg-[#f8f9fc]`}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 flex flex-col lg:flex-row gap-6">
         {/* Desktop sidebar */}

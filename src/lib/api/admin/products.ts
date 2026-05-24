@@ -36,6 +36,13 @@ export const adminProductsApi = baseApi.injectEndpoints({
       },
       providesTags: ["Product"],
     }),
+    adminProduct: build.query<AdminProductResponse, number | string>({
+      query: (id) => ({
+        url: "/products/" + id,
+        method: "GET",
+      }),
+      providesTags: ["Product"],
+    }),
     adminCreateProduct: build.mutation<
       AdminProductResponse,
       AdminCreateProductRequest
@@ -70,7 +77,13 @@ export const {
   useLazyAdminProductsQuery,
   useAdminMyProductsQuery,
   useLazyAdminMyProductsQuery,
+  useAdminProductQuery,
+  useLazyAdminProductQuery,
   useAdminCreateProductMutation,
   useAdminApproveProductMutation,
   useAdminDeleteProductMutation,
 } = adminProductsApi;
+
+
+
+
