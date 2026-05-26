@@ -15,7 +15,8 @@ export type AdminCreateCourseRequest = Record<string, any>;
 
 export type AdminUpdateCourseRequest = {
   id: number | string;
-} & Record<string, any>;
+  body: any;
+};
 
 export const adminCoursesApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -61,7 +62,7 @@ export const adminCoursesApi = baseApi.injectEndpoints({
       AdminCourseResponse,
       AdminUpdateCourseRequest
     >({
-      query: ({ id, ...body }) => ({
+      query: ({ id, body }) => ({
         url: "/course/" + id,
         method: "PATCH",
         body,

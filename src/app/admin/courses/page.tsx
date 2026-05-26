@@ -9,6 +9,7 @@ import {
   useAdminDeleteCourseMutation,
 } from "@/lib/api/admin/course";
 import { useAdminCategoriesQuery } from "@/lib/api/admin/category";
+import { useAdminInstructorsQuery } from "@/lib/api/admin/instructor";
 import { UiCourse } from "./components/types";
 import {
   extractCourses,
@@ -34,6 +35,7 @@ export default function AdminCoursesPage(): React.JSX.Element {
   const [deleteCourse, { isLoading: isDeleting }] =
     useAdminDeleteCourseMutation();
   const { data: catData } = useAdminCategoriesQuery();
+  const { data: instData } = useAdminInstructorsQuery();
 
   // UI state
   const [search, setSearch] = useState("");
@@ -60,6 +62,27 @@ export default function AdminCoursesPage(): React.JSX.Element {
     categoryList.forEach((c) => m.set(String(c.id), c.name));
     return m;
   }, [categoryList]);
+
+  // Process instructors
+  const instructorsRaw = useMemo(() => {
+    const p = instData as any;
+    if (!p) return [];
+    if (Array.isArray(p)) return p;
+    if (Array.isArray(p?.data?.data)) return p.data.data;
+    if (Array.isArray(p?.data)) return p.data;
+    return [];
+  }, [instData]);
+  
+  const instructorList = useMemo(
+    () =>
+      instructorsRaw
+        .map((i: any) => ({
+          id: i?.id ?? i?._id,
+          name: String(i?.user?.name ?? i?.name ?? "").trim(),
+        }))
+        .filter((i) => i.id && i.name),
+    [instructorsRaw]
+  );
 
   // Process courses
   const coursesRaw = useMemo(() => extractCourses(data), [data]);
@@ -99,9 +122,10 @@ export default function AdminCoursesPage(): React.JSX.Element {
       {createOpen && (
         <CourseFormModal
           categories={categoryList}
+          instructors={instructorList}
           loading={isCreating}
           onClose={() => setCreateOpen(false)}
-          onSubmit={async (payload) => {
+          onSubmit={async (payload: any) => {
             await createCourse(payload).unwrap();
             setCreateOpen(false);
           }}
@@ -112,10 +136,11 @@ export default function AdminCoursesPage(): React.JSX.Element {
         <CourseFormModal
           initial={edit}
           categories={categoryList}
+          instructors={instructorList}
           loading={isUpdating}
           onClose={() => setEdit(null)}
-          onSubmit={async (payload) => {
-            await updateCourse({ id: edit.id, ...payload }).unwrap();
+          onSubmit={async (payload: any) => {
+            await updateCourse({ id: edit.id, body: payload }).unwrap();
             setEdit(null);
           }}
         />

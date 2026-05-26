@@ -6,6 +6,9 @@ import {
   Loader2,
   Pencil,
   Trash2,
+  Users,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { UiCourse } from "./types";
 
@@ -40,7 +43,7 @@ export default function AdminCourseTable({
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/70">
-              {["Name", "Category", "Created", "Status", "Actions"].map((h) => (
+              {["Course", "Instructor", "Pricing", "Visibility", "Status", "Actions"].map((h) => (
                 <th
                   key={h}
                   className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3"
@@ -53,7 +56,7 @@ export default function AdminCourseTable({
           <tbody className="divide-y divide-gray-50">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10">
+                <td colSpan={6} className="px-4 py-10">
                   <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold">
                     <Loader2 className="h-4 w-4 animate-spin" /> Loading courses...
                   </div>
@@ -62,7 +65,7 @@ export default function AdminCourseTable({
             ) : isError ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-4 py-10 text-center text-[12px] text-red-500 font-semibold"
                 >
                   Failed to load courses
@@ -71,7 +74,7 @@ export default function AdminCourseTable({
             ) : courses.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-4 py-10 text-center text-[12px] text-gray-400"
                 >
                   No courses found.
@@ -84,22 +87,55 @@ export default function AdminCourseTable({
                   className="hover:bg-indigo-50/20 transition-colors"
                 >
                   <td className="px-4 py-3">
-                    <div className="min-w-0">
-                      <p className="text-[12px] font-bold text-gray-900 truncate">
-                        {c.name}
-                      </p>
-                      {c.description && (
-                        <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-1">
-                          {c.description}
+                    <div className="flex items-center gap-3">
+                      {c.thumbnail ? (
+                        <img src={c.thumbnail} alt={c.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-gray-200" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
+                          <span className="text-[10px] text-gray-400 font-semibold text-center leading-tight">No<br/>Img</span>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-bold text-gray-900 truncate">
+                          {c.name}
                         </p>
+                        <p className="text-[11px] text-gray-500 mt-0.5 truncate">
+                          {c.categoryName}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="text-[12px] font-medium text-gray-700">
+                      {c.instructorName ?? "—"}
+                    </p>
+                    <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-1">
+                      <Users size={12} />
+                      {c.enrollmentCount ?? 0} enrolls
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[13px] font-bold text-gray-900">
+                        ${Number(c.discountPrice ?? c.price ?? 0).toFixed(2)}
+                      </span>
+                      {c.discountPrice && c.price && Number(c.discountPrice) < Number(c.price) && (
+                        <span className="text-[11px] text-gray-400 line-through">
+                          ${Number(c.price).toFixed(2)}
+                        </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[12px] font-medium text-indigo-700">
-                    {c.categoryName}
-                  </td>
-                  <td className="px-4 py-3 text-[12px] text-gray-500">
-                    {c.createdAt ?? "—"}
+                  <td className="px-4 py-3">
+                    {c.isPublished ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
+                        <Globe size={11} /> Published
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-md border border-gray-200">
+                        <Lock size={11} /> Draft
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <span

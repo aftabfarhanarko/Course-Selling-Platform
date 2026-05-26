@@ -1,4 +1,4 @@
-﻿export type Status = "Active" | "Deleted";
+export type Status = "Active" | "Deleted";
 
 export type UiCourse = {
   id: number | string;
@@ -15,5 +15,9 @@ export type UiCourse = {
   isPublished?: boolean;
   isActive?: boolean;
   instructorName?: string;
+  instructorId?: number | string;
+  courseUrl?: string;
+  level?: string;
+  is_premium?: boolean;
   thumbnail?: string;
 };

@@ -4,8 +4,10 @@ export function extractCourses(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.courses)) return payload.courses;
-  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
   if (Array.isArray(payload?.data?.courses)) return payload.data.courses;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
+  if (Array.isArray(payload?.data)) return payload.data;
   if (Array.isArray(payload?.data?.data)) return payload.data.data;
   return [];
 }
@@ -14,6 +16,8 @@ export function extractCategories(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.categories)) return payload.categories;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
   if (Array.isArray(payload?.data)) return payload.data;
   if (Array.isArray(payload?.data?.categories)) return payload.data.categories;
   return [];
@@ -64,5 +68,15 @@ export function normalizeCourse(
     categoryName,
     status: normalizeStatus(raw),
     createdAt,
+    price: raw?.price,
+    discountPrice: raw?.discountPrice,
+    enrollmentCount: raw?.enrollmentCount,
+    isPublished: raw?.isPublished,
+    instructorName: raw?.instructor?.name,
+    instructorId: raw?.instructor?.id ?? raw?.instructorId,
+    courseUrl: raw?.courseUrl,
+    level: raw?.metadata?.level,
+    is_premium: raw?.metadata?.is_premium,
+    thumbnail: raw?.thumbnail,
   };
 }
