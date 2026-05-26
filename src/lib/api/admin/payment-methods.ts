@@ -37,14 +37,18 @@ export const adminPaymentMethodsApi = baseApi.injectEndpoints({
     adminApprovePaymentMethod: build.mutation<AdminPaymentMethodResponse, number | string>({
       query: (id) => ({
         url: `/payment-methods/${id}/approve`,
-        method: "POST",
+        method: "PATCH",
       }),
       invalidatesTags: ["PaymentMethod"],
     }),
-    adminRejectPaymentMethod: build.mutation<AdminPaymentMethodResponse, number | string>({
-      query: (id) => ({
+    adminRejectPaymentMethod: build.mutation<
+      AdminPaymentMethodResponse,
+      { id: number | string; reason: string }
+    >({
+      query: ({ id, reason }) => ({
         url: `/payment-methods/${id}/reject`,
-        method: "POST",
+        method: "PATCH",
+        body: { reason },
       }),
       invalidatesTags: ["PaymentMethod"],
     }),

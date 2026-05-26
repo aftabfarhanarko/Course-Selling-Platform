@@ -1,80 +1,74 @@
-﻿import { baseApi, toQueryString } from "../baseApi";
+import { baseApi, toQueryString } from "../baseApi";
 
-export type EnrollmentListQuery = {
+export type WithdrawListQuery = {
   search?: string;
+  status?: string;
   page?: number;
   limit?: number;
 };
 
-export type AdminEnrollmentsResponse = Record<string, any>;
-export type AdminEnrollmentResponse = Record<string, any>;
-
-export type AdminEnrollmentPayRequest = Record<string, any>;
-export type AdminEnrollmentManualRequest = Record<string, any>;
+export type WithdrawResponse = Record<string, any>;
 
 export const adminWithdrawApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    adminEnrollments: build.query<
-      AdminEnrollmentsResponse,
-      EnrollmentListQuery | void
-    >({
+    adminWithdraws: build.query<WithdrawResponse, WithdrawListQuery | void>({
       query: (q) => {
         const query = q ?? {};
         const qs = toQueryString(query as Record<string, unknown>);
         return {
-          url: `/enrollments${qs}`,
+          url: `/withdraw${qs}`,
           method: "GET",
         };
       },
-      providesTags: ["Enrollment"],
+      providesTags: ["Withdraw" as any],
     }),
-    adminEnrollment: build.query<AdminEnrollmentResponse, number | string>({
+    adminWithdraw: build.query<WithdrawResponse, number | string>({
       query: (id) => ({
-        url: `/enrollments/${id}`,
+        url: `/withdraw/${id}`,
         method: "GET",
       }),
-      providesTags: ["Enrollment"],
+      providesTags: ["Withdraw" as any],
     }),
-    adminEnrollmentsMyCourses: build.query<AdminEnrollmentsResponse, void>({
-      query: () => ({
-        url: "/enrollments/my-courses",
-        method: "GET",
+    adminApproveWithdraw: build.mutation<any, { id: number | string; percentageId?: number }>({
+      query: ({ id, percentageId }) => ({
+        url: `/withdraw/${id}/approve`,
+        method: "POST",
+        body: { percentageId },
       }),
-      providesTags: ["Enrollment"],
+      invalidatesTags: ["Withdraw" as any],
     }),
-    adminEnrollmentsPay: build.mutation<
-      AdminEnrollmentResponse,
-      AdminEnrollmentPayRequest
-    >({
+    adminRejectWithdraw: build.mutation<any, { id: number | string; reason: string }>({
+      query: ({ id, reason }) => ({
+        url: `/withdraw/${id}/reject`,
+        method: "POST",
+        body: { reason },
+      }),
+      invalidatesTags: ["Withdraw" as any],
+    }),
+    adminDirectWithdraw: build.mutation<any, { studentId: number; productId?: number; enrollmentId?: number; percentageId?: number }>({
       query: (body) => ({
-        url: "/enrollments/pay",
+        url: `/withdraw/direct`,
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Enrollment"],
+      invalidatesTags: ["Withdraw" as any],
     }),
-    adminEnrollmentsManual: build.mutation<
-      AdminEnrollmentResponse,
-      AdminEnrollmentManualRequest
-    >({
-      query: (body) => ({
-        url: "/enrollments/manual",
-        method: "POST",
-        body,
+    adminDeleteWithdraw: build.mutation<any, number | string>({
+      query: (id) => ({
+        url: `/withdraw/${id}`,
+        method: "DELETE",
       }),
-      invalidatesTags: ["Enrollment"],
+      invalidatesTags: ["Withdraw" as any],
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 export const {
-  useAdminEnrollmentsQuery,
-  useLazyAdminEnrollmentsQuery,
-  useAdminEnrollmentQuery,
-  useLazyAdminEnrollmentQuery,
-  useAdminEnrollmentsMyCoursesQuery,
-  useLazyAdminEnrollmentsMyCoursesQuery,
-  useAdminEnrollmentsPayMutation,
-  useAdminEnrollmentsManualMutation,
+  useAdminWithdrawsQuery,
+  useLazyAdminWithdrawQuery,
+  useAdminApproveWithdrawMutation,
+  useAdminRejectWithdrawMutation,
+  useAdminDirectWithdrawMutation,
+  useAdminDeleteWithdrawMutation,
 } = adminWithdrawApi;

@@ -37,6 +37,7 @@ type UiPaymentMethod = {
   account: string;
   owner: string;
   createdAt: string;
+  balance?: string;
 };
 
 const PAGE_SIZE = 10;
@@ -48,6 +49,8 @@ function extractList(payload: any): any[] {
   if (Array.isArray(payload?.paymentMethods)) return payload.paymentMethods;
   if (Array.isArray(payload?.methods)) return payload.methods;
   if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
+  if (Array.isArray(payload?.items)) return payload.items;
   if (Array.isArray(payload?.data?.paymentMethods))
     return payload.data.paymentMethods;
   if (Array.isArray(payload?.data?.methods)) return payload.data.methods;
@@ -71,12 +74,13 @@ function extractTotal(payload: any): number | null {
   return null;
 }
 
-function normalizeType(value: unknown): UiPaymentMethod["type"] {
+function normalizeType(value: unknown): MethodType | "unknown" {
   const v = String(value ?? "")
     .toLowerCase()
     .trim();
   if (v === "bkash") return "bkash";
   if (v === "nagad") return "nagad";
+  if (v === "rocket") return "bkash"; // Handle rocket as bkash/unknown for now
   if (v === "bank") return "bank";
   if (v === "binance" || v === "binence") return "binance";
   return "unknown";
@@ -108,14 +112,11 @@ function formatDate(value: unknown): string {
 function toUi(raw: any): UiPaymentMethod | null {
   const id = raw?.id ?? raw?._id ?? raw?.paymentMethodId ?? null;
   if (!id) return null;
-
   const type = normalizeType(raw?.type ?? raw?.method ?? raw?.provider);
   const status = normalizeStatus(raw?.status);
-
   const label =
     String(raw?.label ?? raw?.name ?? raw?.title ?? type).trim() ||
     String(type).toUpperCase();
-
   const account =
     String(
       raw?.accountNumber ??
@@ -125,7 +126,6 @@ function toUi(raw: any): UiPaymentMethod | null {
         raw?.number ??
         "",
     ).trim() || "—";
-
   const owner =
     String(
       raw?.user?.name ??
@@ -135,10 +135,9 @@ function toUi(raw: any): UiPaymentMethod | null {
         raw?.nameOnAccount ??
         "",
     ).trim() || "—";
-
   const createdAt = formatDate(raw?.createdAt ?? raw?.created_at);
-
-  return { id, type, status, label, account, owner, createdAt };
+  const balance = raw?.balance;
+  return { id, type, status, label, account, owner, createdAt, balance };
 }
 
 /* ─── Stat Card ─── */
@@ -291,6 +290,8 @@ function DetailsModal({
   onClose: () => void;
 }) {
   const { data, isFetching, isError } = useAdminPaymentMethodQuery(id);
+  const raw = data?.data?.paymentMethod || data?.paymentMethod || data?.data || data;
+  const method = React.useMemo(() => toUi(raw), [raw]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -299,23 +300,21 @@ function DetailsModal({
         onClick={onClose}
       />
       <div className="relative w-full sm:max-w-xl bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white flex-shrink-0">
           <div>
             <h2 className="text-[14px] font-extrabold text-gray-900">
               Payment Method Details
             </h2>
-            <p className="text-[11px] text-gray-400 mt-0.5">
-              GET /payment-methods/:id
-            </p>
+            <p className="text-[11px] text-gray-400 mt-0.5">ID: {String(id)}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors"
           >
             <X size={15} />
           </button>
         </div>
-        <div className="px-6 py-5 overflow-auto flex-1">
+        <div className="px-5 py-4 overflow-auto flex-1 custom-scrollbar">
           {isFetching ? (
             <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold py-10">
               <Loader2 className="h-4 w-4 animate-spin" /> Loading...
@@ -324,10 +323,48 @@ function DetailsModal({
             <div className="text-[12px] text-red-500 font-semibold py-4">
               Failed to load details
             </div>
-          ) : (
-            <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto max-h-[420px]">
-              {JSON.stringify(data ?? null, null, 2)}
+          ) : !method ? (
+            <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto">
+              {JSON.stringify(raw ?? null, null, 2)}
             </pre>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl">
+                <div>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1.5">Status</p>
+                  <StatusPill status={method.status} />
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1.5">Method Type</p>
+                  <TypePill type={method.type} />
+                </div>
+              </div>
+              <div className="p-4 border border-gray-100 rounded-2xl bg-white space-y-4">
+                <div>
+                  <p className="text-[10px] text-gray-400 font-bold mb-1">OWNER</p>
+                  <p className="text-[13px] font-semibold text-gray-800">{method.owner}</p>
+                </div>
+                {method.balance !== undefined ? (
+                  <div>
+                    <p className="text-[10px] text-gray-400 font-bold mb-1">BALANCE</p>
+                    <p className="text-[13px] font-extrabold text-gray-900">৳{method.balance}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-[10px] text-gray-400 font-bold mb-1">ACCOUNT NUMBER</p>
+                    <p className="text-[13px] font-semibold text-gray-800 break-all">{method.account}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-[10px] text-gray-400 font-bold mb-1">LABEL</p>
+                  <p className="text-[13px] font-semibold text-gray-800">{method.label}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-400 font-bold mb-1">CREATED AT</p>
+                  <p className="text-[13px] font-semibold text-gray-800">{method.createdAt}</p>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -371,14 +408,14 @@ function ConfirmModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:pointer-events-none"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-red-200 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-red-200 transition-colors disabled:opacity-60 disabled:pointer-events-none"
           >
             {loading ? (
               <Loader2 size={14} className="animate-spin" />
@@ -406,7 +443,7 @@ function MobileCard({
   busy: boolean;
   onDetails: () => void;
   onApprove: () => void;
-  onReject: () => void;
+  onReject: (data: { id: number | string; reason: string }) => void;
   onDelete: () => void;
 }) {
   return (
@@ -458,7 +495,12 @@ function MobileCard({
             </button>
             <button
               disabled={busy}
-              onClick={onReject}
+              onClick={async () => {
+                const reason = window.prompt("Reason for rejection?", "Invalid payment details");
+                if (reason !== null) {
+                  onReject({ id: m.id, reason });
+                }
+              }}
               className="flex-1 h-9 rounded-xl border border-amber-200 bg-amber-50 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
             >
               <X size={13} /> Reject
@@ -523,16 +565,14 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
   const [deleteTarget, setDeleteTarget] = useState<UiPaymentMethod | null>(
     null,
   );
-
   const busy = isApproving || isRejecting || isDeleting;
 
   return (
     <>
-      {detailsId !== null ? (
+      {detailsId !== null && (
         <DetailsModal id={detailsId} onClose={() => setDetailsId(null)} />
-      ) : null}
-
-      {deleteTarget ? (
+      )}
+      {deleteTarget && (
         <ConfirmModal
           title="Delete payment method?"
           description={
@@ -541,10 +581,11 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               <span className="font-semibold text-gray-800">
                 {deleteTarget.label}
               </span>{" "}
-              ({String(deleteTarget.id)}) from{" "}
+              from{" "}
               <span className="font-semibold text-gray-800">
-                /payment-methods/:id
+                {deleteTarget.account}
               </span>
+              ?
             </>
           }
           confirmText="Delete"
@@ -555,26 +596,25 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
             setDeleteTarget(null);
           }}
         />
-      ) : null}
+      )}
 
-      <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
+      <div className="min-h-screen bg-gray-50/60 p-3 sm:p-4 lg:p-6">
         {/* ── Header ── */}
-        <div className="flex items-start justify-between mb-5 gap-3">
+        <div className="flex items-start justify-between mb-5 sm:mb-6 gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-violet-600 flex items-center justify-center flex-shrink-0">
               <CreditCard size={18} className="text-white" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-[16px] sm:text-[18px] font-extrabold text-gray-900 tracking-tight">
-                Wallet · Payment Methods
+              <h1 className="text-[16px] sm:text-[20px] font-extrabold text-gray-900 tracking-tight leading-none">
+                Payment Methods
               </h1>
-              <p className="text-[11px] text-gray-400 mt-0.5 font-medium hidden sm:block">
-                /payment-methods (search, type, status, page, limit) +
-                approve/reject/delete
+              <p className="text-[11px] sm:text-[12px] text-gray-400 mt-0.5 sm:mt-1 font-medium hidden sm:block">
+                Manage payment methods, roles, access & account status.
               </p>
             </div>
           </div>
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-200 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-[12px] font-semibold text-gray-600 flex-shrink-0">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-200 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-[12px] font-semibold text-gray-600 shadow-sm flex-shrink-0">
             <ShieldCheck size={13} className="text-emerald-600" />
             <span className="hidden sm:inline">Admin review panel</span>
             <span className="sm:hidden">Admin</span>
@@ -610,17 +650,17 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
         </div>
 
         {/* ── Filters ── */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 sm:p-4 mb-4 flex flex-col gap-3">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2.5 flex-1 border border-gray-200 rounded-xl px-3 py-2">
-              <Search size={15} className="text-gray-400 flex-shrink-0" />
+            <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2">
+              <Search size={14} className="text-gray-400 flex-shrink-0" />
               <input
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                placeholder="Search..."
+                placeholder="Search name, account, owner..."
                 className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none bg-transparent"
               />
               {search && (
@@ -635,7 +675,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 </button>
               )}
             </div>
-            {/* Mobile filter toggle */}
+            {/* Filter toggle button — mobile only */}
             <button
               onClick={() => setFiltersOpen((v) => !v)}
               className={`sm:hidden h-9 w-9 rounded-xl border flex items-center justify-center transition-colors flex-shrink-0 ${
@@ -648,8 +688,9 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
             </button>
           </div>
 
+          {/* Selects */}
           <div
-            className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-2`}
+            className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-2 mt-2.5`}
           >
             <select
               value={type}
@@ -657,13 +698,13 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 setType(e.target.value as any);
                 setPage(1);
               }}
-              className="flex-1 sm:flex-none h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white min-w-[120px] outline-none cursor-pointer hover:border-gray-300 transition-colors"
+              className="flex-1 sm:flex-none h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white text-gray-700 outline-none cursor-pointer hover:border-gray-300 transition-colors min-w-[120px]"
             >
               <option value="">All Types</option>
-              <option value="bkash">bkash</option>
-              <option value="nagad">nagad</option>
-              <option value="bank">bank</option>
-              <option value="binance">binance</option>
+              <option value="bkash">bKash</option>
+              <option value="nagad">Nagad</option>
+              <option value="bank">Bank</option>
+              <option value="binance">Binance</option>
             </select>
             <select
               value={status}
@@ -671,12 +712,12 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 setStatus(e.target.value as any);
                 setPage(1);
               }}
-              className="flex-1 sm:flex-none h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white min-w-[120px] outline-none cursor-pointer hover:border-gray-300 transition-colors"
+              className="flex-1 sm:flex-none h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white text-gray-700 outline-none cursor-pointer hover:border-gray-300 transition-colors min-w-[120px]"
             >
               <option value="">All Status</option>
-              <option value="pending">pending</option>
-              <option value="approved">approved</option>
-              <option value="rejected">rejected</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
             </select>
             {(type || status) && (
               <button
@@ -687,33 +728,44 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                 }}
                 className="h-9 px-3 text-[12px] font-semibold text-red-500 border border-red-200 bg-red-50 rounded-xl hover:bg-red-100 transition-colors whitespace-nowrap"
               >
-                Clear
+                Clear filters
               </button>
             )}
           </div>
         </div>
 
-        {/* ── Desktop Table ── */}
+        {/* ── Desktop Table (hidden on mobile) ── */}
         <div className="hidden sm:block bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/70">
-                  {[
-                    "Owner",
-                    "Method",
-                    "Account",
-                    "Status",
-                    "Created",
-                    "Actions",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3"
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  {list.length > 0 && list.some(m => m.balance !== undefined) ? (
+                    ["Owner", "Balance", "Joined", "Actions"].map((h) => (
+                      <th
+                        key={h}
+                        className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3 whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    ))
+                  ) : (
+                    [
+                      "Owner",
+                      "Method",
+                      "Account",
+                      "Status",
+                      "Joined",
+                      "Actions",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 py-3 whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    ))
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -722,7 +774,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                     <td colSpan={6} className="px-4 py-10">
                       <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold">
                         <Loader2 className="h-4 w-4 animate-spin text-violet-500" />{" "}
-                        Loading...
+                        Loading payment methods...
                       </div>
                     </td>
                   </tr>
@@ -737,92 +789,107 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                   </tr>
                 ) : list.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-10 text-center text-[12px] text-gray-400"
-                    >
-                      No payment methods found.
+                    <td colSpan={6} className="px-4 py-14 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
+                          <CreditCard size={20} className="text-gray-400" />
+                        </div>
+                        <p className="text-[12px] text-gray-400 font-semibold">
+                          No payment methods found.
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   list.map((m) => (
                     <tr
                       key={String(m.id)}
-                      className="hover:bg-indigo-50/20 transition-colors"
+                      className="hover:bg-violet-50/20 transition-colors"
                     >
-                      {/* Owner */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <Avatar name={m.owner} />
                           <div>
-                            <p className="text-[12px] font-bold text-gray-900 leading-none">
+                            <p className="text-[13px] font-bold text-gray-900 leading-none mb-1">
                               {m.owner}
                             </p>
-                            <p className="text-[11px] text-gray-400 mt-0.5">
-                              {String(m.id)}
+                            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+                              ID: {m.id}
                             </p>
                           </div>
                         </div>
                       </td>
-                      {/* Method */}
+                      {m.balance !== undefined ? (
+                        <>
+                          <td className="px-4 py-3">
+                            <p className="text-[14px] font-extrabold text-gray-900">
+                              ৳{m.balance}
+                            </p>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <TypePill type={m.type} />
+                              <span className="text-[12px] font-semibold text-gray-700">{m.label}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="text-[12px] font-bold text-gray-700 tracking-wide">
+                              {m.account}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <StatusPill status={m.status} />
+                          </td>
+                        </>
+                      )}
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <TypePill type={m.type} />
-                          <span className="text-[12px] font-semibold text-gray-700">
-                            {m.label}
-                          </span>
-                        </div>
+                        <p className="text-[11px] font-semibold text-gray-500 whitespace-nowrap">
+                          {m.createdAt}
+                        </p>
                       </td>
-                      {/* Account */}
-                      <td className="px-4 py-3 text-[12px] text-gray-700 font-semibold">
-                        {m.account}
-                      </td>
-                      {/* Status */}
                       <td className="px-4 py-3">
-                        <StatusPill status={m.status} />
-                      </td>
-                      {/* Created */}
-                      <td className="px-4 py-3 text-[12px] text-gray-500">
-                        {m.createdAt}
-                      </td>
-                      {/* Actions */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={() => setDetailsId(m.id)}
-                            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
-                            title="Details"
+                            className="w-8 h-8 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+                            title="View Details"
                           >
                             <Eye size={14} />
                           </button>
-
-                          {m.status === "pending" ? (
+                          {m.status === "pending" && (
                             <>
                               <button
                                 disabled={busy}
                                 onClick={async () => {
                                   await approve(m.id).unwrap();
                                 }}
-                                className="px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[12px] font-bold disabled:opacity-60 disabled:pointer-events-none transition-colors"
+                                className="w-8 h-8 rounded-lg border border-emerald-200 bg-emerald-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                                title="Approve"
                               >
-                                Approve
+                                <Check size={14} />
                               </button>
                               <button
                                 disabled={busy}
                                 onClick={async () => {
-                                  await reject(m.id).unwrap();
+                                  const reason = window.prompt("Reason for rejection?", "Invalid payment details");
+                                  if (reason !== null) {
+                                    await reject({ id: m.id, reason }).unwrap();
+                                  }
                                 }}
-                                className="px-3 py-2 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 text-[12px] font-bold disabled:opacity-60 disabled:pointer-events-none transition-colors"
+                                className="w-8 h-8 rounded-lg border border-amber-200 bg-amber-50 flex items-center justify-center text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                                title="Reject"
                               >
-                                Reject
+                                <X size={14} />
                               </button>
                             </>
-                          ) : null}
-
+                          )}
                           <button
                             disabled={busy}
                             onClick={() => setDeleteTarget(m)}
-                            className="p-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 disabled:opacity-60 disabled:pointer-events-none transition-colors"
+                            className="w-8 h-8 rounded-lg border border-red-200 bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
                             title="Delete"
                           >
                             <Trash2 size={14} />
@@ -835,25 +902,31 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               </tbody>
             </table>
           </div>
-
           {/* Desktop Pagination */}
-          <div className="px-4 py-4 border-t border-gray-100 flex items-center justify-between">
+          <div className="px-4 py-3.5 border-t border-gray-100 flex items-center justify-between">
             <p className="text-[11px] text-gray-400 font-semibold">
-              Page <span className="text-gray-700">{page}</span> of{" "}
-              <span className="text-gray-700">{totalPages}</span>
+              Showing{" "}
+              <span className="text-gray-700">
+                {list.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0}–
+                {Math.min(page * PAGE_SIZE, total ?? list.length)}
+              </span>{" "}
+              of <span className="text-gray-700">{total ?? list.length}</span>
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
               >
                 <ChevronLeft size={16} />
               </button>
+              <span className="text-[12px] font-bold text-gray-600 px-1">
+                {page} / {totalPages}
+              </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
-                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
               >
                 <ChevronRight size={16} />
               </button>
@@ -861,7 +934,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ── Mobile Cards ── */}
+        {/* ── Mobile Cards (hidden on sm+) ── */}
         <div className="sm:hidden space-y-3">
           {isLoading ? (
             <div className="flex items-center justify-center gap-2 text-[12px] text-gray-500 font-semibold py-10">
@@ -873,8 +946,13 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
               Failed to load payment methods
             </div>
           ) : list.length === 0 ? (
-            <div className="text-center py-10 text-[12px] text-gray-400">
-              No payment methods found.
+            <div className="flex flex-col items-center gap-2 py-14">
+              <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
+                <CreditCard size={20} className="text-gray-400" />
+              </div>
+              <p className="text-[12px] text-gray-400 font-semibold">
+                No payment methods found.
+              </p>
             </div>
           ) : (
             <>
@@ -887,30 +965,37 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
                   onApprove={async () => {
                     await approve(m.id).unwrap();
                   }}
-                  onReject={async () => {
-                    await reject(m.id).unwrap();
+                  onReject={async ({ id, reason }) => {
+                    await reject({ id, reason }).unwrap();
                   }}
                   onDelete={() => setDeleteTarget(m)}
                 />
               ))}
               {/* Mobile Pagination */}
-              <div className="flex items-center justify-between pt-1 pb-2">
+              <div className="flex items-center justify-between pt-1">
                 <p className="text-[11px] text-gray-400 font-semibold">
-                  Page <span className="text-gray-700">{page}</span> of{" "}
-                  <span className="text-gray-700">{totalPages}</span>
+                  <span className="text-gray-700">
+                    {list.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0}–
+                    {Math.min(page * PAGE_SIZE, total ?? list.length)}
+                  </span>{" "}
+                  of{" "}
+                  <span className="text-gray-700">{total ?? list.length}</span>
                 </p>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page <= 1}
-                    className="h-9 w-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                    className="h-9 w-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   >
                     <ChevronLeft size={16} />
                   </button>
+                  <span className="text-[12px] font-bold text-gray-600">
+                    {page} / {totalPages}
+                  </span>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page >= totalPages}
-                    className="h-9 w-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                    className="h-9 w-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>

@@ -1,4 +1,4 @@
-﻿import { baseApi, toQueryString } from "../baseApi";
+import { baseApi, toQueryString } from "../baseApi";
 
 export type ProductListQuery = {
   search?: string;
@@ -61,6 +61,14 @@ export const adminProductsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Product"],
     }),
+    adminRejectProduct: build.mutation<AdminProductResponse, { id: number | string; reason: string }>({
+      query: ({ id, reason }) => ({
+        url: `/products/${id}/reject`,
+        method: "POST",
+        body: { reason },
+      }),
+      invalidatesTags: ["Product"],
+    }),
     adminDeleteProduct: build.mutation<AdminProductResponse, number | string>({
       query: (id) => ({
         url: `/products/${id}`,
@@ -81,6 +89,7 @@ export const {
   useLazyAdminProductQuery,
   useAdminCreateProductMutation,
   useAdminApproveProductMutation,
+  useAdminRejectProductMutation,
   useAdminDeleteProductMutation,
 } = adminProductsApi;
 

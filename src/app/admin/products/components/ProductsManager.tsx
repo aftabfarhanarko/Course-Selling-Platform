@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,6 +7,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
   Eye,
   Globe,
   Loader2,
@@ -22,11 +23,10 @@ import {
   useAdminApproveProductMutation,
   useAdminCreateProductMutation,
   useAdminDeleteProductMutation,
-  useAdminMyProductsQuery,
   useAdminProductsQuery,
+  useAdminRejectProductMutation,
 } from "@/lib/api/admin/products";
-
-type Tab = "all" | "my";
+import { useAdminDirectWithdrawMutation } from "@/lib/api/admin/withdraw";
 
 type UiProduct = {
   id: number | string;
@@ -36,8 +36,13 @@ type UiProduct = {
   ownerPhoto?: string;
   price: string;
   status: string;
+  status: string;
   createdAt: string;
+<<<<<<< HEAD
   countryCodes: string[];
+=======
+  userId: number;
+>>>>>>> 4e23ea4 (update)
   raw: any;
 };
 
@@ -59,9 +64,14 @@ function formatDate(value: unknown): string {
 function extractList(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
+<<<<<<< HEAD
   if (Array.isArray(payload?.data?.items)) return payload.data.items;
   if (Array.isArray(payload?.items)) return payload.items;
   if (Array.isArray(payload?.data?.products)) return payload.data.products;
+=======
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
+>>>>>>> 4e23ea4 (update)
   if (Array.isArray(payload?.products)) return payload.products;
   if (Array.isArray(payload?.data)) return payload.data;
   return [];
@@ -86,7 +96,14 @@ function toUi(raw: any): UiProduct | null {
   const id = raw?.id ?? raw?._id ?? raw?.productId ?? null;
   if (!id) return null;
   const title =
+<<<<<<< HEAD
     String(raw?.botName ?? raw?.title ?? raw?.name ?? "").trim() || "—";
+=======
+    String(
+      raw?.botName ?? raw?.title ?? raw?.name ?? raw?.course?.title ?? raw?.productName ?? "",
+    ).trim() || "—";
+
+>>>>>>> 4e23ea4 (update)
   const owner =
     String(
       raw?.user?.name ?? raw?.seller?.name ?? raw?.owner?.name ?? "",
@@ -106,6 +123,7 @@ function toUi(raw: any): UiProduct | null {
     String(raw?.status ?? raw?.state ?? raw?.approvalStatus ?? "—").trim() ||
     "—";
   const createdAt = formatDate(raw?.createdAt ?? raw?.created_at);
+<<<<<<< HEAD
   const countryCodes: string[] = Array.isArray(raw?.countryCodes)
     ? raw.countryCodes
     : [];
@@ -121,6 +139,12 @@ function toUi(raw: any): UiProduct | null {
     countryCodes,
     raw,
   };
+=======
+
+  const userId = raw?.user?.id ?? raw?.seller?.id ?? raw?.owner?.id ?? raw?.userId ?? null;
+
+  return { id, title, owner, price, status, createdAt, userId, raw };
+>>>>>>> 4e23ea4 (update)
 }
 
 function StatusPill({ status }: { status: string }) {
@@ -161,18 +185,70 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
+<<<<<<< HEAD
 function JsonBodyModal({
+=======
+function ModalShell({
+  title,
+  subtitle,
+  loading,
+  onClose,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  loading?: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 className="text-[14px] font-extrabold text-gray-900">
+              {title}
+            </h2>
+            <p className="text-[11px] text-gray-400 mt-0.5">{subtitle}</p>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+          >
+            <X size={15} />
+          </button>
+        </div>
+        <div className="px-6 py-5">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function CreateProductModal({
+>>>>>>> 4e23ea4 (update)
   loading,
   onClose,
   onSubmit,
 }: {
   loading: boolean;
   onClose: () => void;
-  onSubmit: (body: Record<string, any>) => void;
+  onSubmit: (body: any) => void;
 }) {
+<<<<<<< HEAD
   const [text, setText] = useState("{}");
+=======
+  const [botName, setBotName] = useState("");
+  const [countryCodes, setCountryCodes] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+>>>>>>> 4e23ea4 (update)
   const [error, setError] = useState<string | null>(null);
   const submit = () => {
+<<<<<<< HEAD
     try {
       const parsed = JSON.parse(text);
       setError(null);
@@ -180,8 +256,21 @@ function JsonBodyModal({
     } catch {
       setError("Invalid JSON — please fix before submitting");
     }
+=======
+    if (!botName.trim()) return setError("Bot name is required.");
+    if (!totalAmount || isNaN(Number(totalAmount))) return setError("Total amount must be a number.");
+    
+    const codes = countryCodes.split(",").map(c => c.trim()).filter(Boolean);
+    
+    onSubmit({
+      botName,
+      countryCodes: codes,
+      totalAmount: Number(totalAmount),
+    });
+>>>>>>> 4e23ea4 (update)
   };
   return (
+<<<<<<< HEAD
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
@@ -197,6 +286,45 @@ function JsonBodyModal({
               POST /products
             </p>
           </div>
+=======
+    <ModalShell
+      title="Create Product"
+      subtitle="POST /products"
+      loading={loading}
+      onClose={onClose}
+    >
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[11px] font-bold text-gray-700 mb-1">Bot Name</label>
+          <input
+            value={botName}
+            onChange={(e) => setBotName(e.target.value)}
+            className="w-full px-3 py-2 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            placeholder="e.g. My Awesome Bot"
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] font-bold text-gray-700 mb-1">Country Codes (comma separated)</label>
+          <input
+            value={countryCodes}
+            onChange={(e) => setCountryCodes(e.target.value)}
+            className="w-full px-3 py-2 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            placeholder="e.g. US, UK, BD"
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] font-bold text-gray-700 mb-1">Total Amount</label>
+          <input
+            type="number"
+            value={totalAmount}
+            onChange={(e) => setTotalAmount(e.target.value)}
+            className="w-full px-3 py-2 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            placeholder="e.g. 100"
+          />
+        </div>
+        {error ? <p className="text-[10px] text-red-500">{error}</p> : null}
+        <div className="flex gap-2.5 mt-2">
+>>>>>>> 4e23ea4 (update)
           <button
             onClick={onClose}
             disabled={loading}
@@ -240,7 +368,245 @@ function JsonBodyModal({
           </div>
         </div>
       </div>
+<<<<<<< HEAD
     </div>
+=======
+    </ModalShell>
+  );
+}
+
+function DetailsModal({
+  product,
+  onClose,
+}: {
+  product: UiProduct;
+  onClose: () => void;
+}) {
+  const raw = product.raw || {};
+  
+  return (
+    <ModalShell
+      title="Product Details"
+      subtitle={`ID: ${product.id}`}
+      onClose={onClose}
+    >
+      <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        {/* Header Section */}
+        <div className="flex items-start justify-between bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+          <div>
+            <h3 className="text-[16px] font-extrabold text-gray-900">{product.title}</h3>
+            <p className="text-[12px] text-gray-500 mt-1 font-medium">{product.owner}</p>
+          </div>
+          <StatusPill status={product.status} />
+        </div>
+
+        {/* Details Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm shadow-gray-100/50">
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Price / Amount</p>
+            <p className="text-[14px] font-semibold text-gray-900">
+              {product.price !== "—" ? `$${product.price}` : "Free"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm shadow-gray-100/50">
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Created At</p>
+            <p className="text-[13px] font-medium text-gray-900">{product.createdAt}</p>
+          </div>
+        </div>
+
+        {/* Extra Information */}
+        <div className="space-y-3">
+          <h4 className="text-[13px] font-extrabold text-gray-900 border-b border-gray-100 pb-2">Additional Information</h4>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4">
+            {raw.countryCodes && raw.countryCodes.length > 0 && (
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 mb-1">Country Codes</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {raw.countryCodes.map((code: string, idx: number) => (
+                    <span key={idx} className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-[10px] font-bold border border-indigo-100">
+                      {code}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {raw.approvedByName && (
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 mb-1">Approved By</p>
+                <p className="text-[12px] font-semibold text-gray-800">{raw.approvedByName}</p>
+              </div>
+            )}
+
+            {raw.approvalDate && (
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 mb-1">Approval Date</p>
+                <p className="text-[12px] font-semibold text-gray-800">{formatDate(raw.approvalDate)}</p>
+              </div>
+            )}
+            
+            {raw.rejectReason && (
+              <div className="col-span-1 sm:col-span-2 bg-red-50 p-3 rounded-xl border border-red-100">
+                <p className="text-[11px] font-bold text-red-600 mb-1">Reject Reason</p>
+                <p className="text-[12px] font-medium text-red-800">{raw.rejectReason}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </ModalShell>
+  );
+}
+function PaymentMethodsModal({
+  product,
+  onClose,
+}: {
+  product: UiProduct;
+  onClose: () => void;
+}) {
+  const methods = (product.raw?.user?.paymentMethods || []).filter(
+    (pm: any) => pm.status?.toLowerCase() !== "rejected"
+  );
+
+  return (
+    <ModalShell
+      title="Payment Methods"
+      subtitle={`Owner: ${product.owner}`}
+      onClose={onClose}
+    >
+      <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        {methods.length === 0 ? (
+          <div className="text-center py-8">
+            <CreditCard size={32} className="mx-auto text-gray-300 mb-2" />
+            <p className="text-[12px] font-semibold text-gray-500">No payment methods found for this user.</p>
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {methods.map((pm: any, idx: number) => (
+              <PaymentMethodCard key={idx} pm={pm} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
+    </ModalShell>
+  );
+}
+
+function PaymentMethodCard({ pm, product }: { pm: any; product: UiProduct }) {
+  const [directWithdraw, { isLoading }] = useAdminDirectWithdrawMutation();
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const handlePay = async () => {
+    try {
+      setError("");
+      await directWithdraw({
+        studentId: product.userId,
+        productId: Number(product.id),
+      }).unwrap();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (e: any) {
+      setError(e?.data?.message || e?.message || "Payment failed");
+    }
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-1.5">
+      <div className="flex items-center justify-between border-b border-gray-50 pb-2 mb-1">
+        <span className="text-[12px] font-extrabold text-indigo-700 uppercase tracking-wider">{pm.type}</span>
+        <StatusPill status={pm.status || "active"} />
+      </div>
+      {pm.accountNumber && (
+        <div className="flex justify-between items-center text-[12px]">
+          <span className="font-bold text-gray-400">Account No:</span>
+          <span className="font-semibold text-gray-800">{pm.accountNumber}</span>
+        </div>
+      )}
+      {pm.accountHolderName && (
+        <div className="flex justify-between items-center text-[12px]">
+          <span className="font-bold text-gray-400">Holder Name:</span>
+          <span className="font-semibold text-gray-800">{pm.accountHolderName}</span>
+        </div>
+      )}
+      {pm.bankName && (
+        <div className="flex justify-between items-center text-[12px]">
+          <span className="font-bold text-gray-400">Bank Name:</span>
+          <span className="font-semibold text-gray-800">{pm.bankName}</span>
+        </div>
+      )}
+      {pm.branchName && (
+        <div className="flex justify-between items-center text-[12px]">
+          <span className="font-bold text-gray-400">Branch Name:</span>
+          <span className="font-semibold text-gray-800">{pm.branchName}</span>
+        </div>
+      )}
+      {pm.binanceId && (
+        <div className="flex justify-between items-center text-[12px]">
+          <span className="font-bold text-gray-400">Binance ID:</span>
+          <span className="font-semibold text-gray-800">{pm.binanceId}</span>
+        </div>
+      )}
+      <div className="mt-3 pt-3 border-t border-gray-100">
+        <button
+          onClick={handlePay}
+          disabled={isLoading || success || !product.userId}
+          className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-indigo-100 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+        >
+          {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          {success ? "Payment Sent" : "Pay Directly"}
+        </button>
+        {error && <p className="text-[10px] text-red-500 mt-1 text-center">{error}</p>}
+      </div>
+    </div>
+  );
+}
+
+
+function RejectModal({
+  loading,
+  onClose,
+  onSubmit,
+}: {
+  loading: boolean;
+  onClose: () => void;
+  onSubmit: (reason: string) => void;
+}) {
+  const [reason, setReason] = useState("");
+  return (
+    <ModalShell title="Reject Product" subtitle="POST /products/:id/reject" loading={loading} onClose={onClose}>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[11px] font-bold text-gray-700 mb-1">Reason for Rejection</label>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className="w-full px-3 py-2 text-[12px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 min-h-[100px]"
+            placeholder="Please specify a reason..."
+          />
+        </div>
+        <div className="flex gap-2.5 mt-2">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-[12px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSubmit(reason)}
+            disabled={loading || !reason.trim()}
+            className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-red-200 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+          >
+            {loading ? <Loader2 size={14} className="animate-spin" /> : null}
+            Reject
+          </button>
+        </div>
+      </div>
+    </ModalShell>
+>>>>>>> 4e23ea4 (update)
   );
 }
 
@@ -298,8 +664,11 @@ function ConfirmModal({
    MAIN LIST PAGE
 ════════════════════════════════════════════ */
 export default function ProductsManager(): React.JSX.Element {
+<<<<<<< HEAD
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("all");
+=======
+>>>>>>> 4e23ea4 (update)
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
@@ -310,6 +679,7 @@ export default function ProductsManager(): React.JSX.Element {
     page,
     limit: PAGE_SIZE,
   });
+<<<<<<< HEAD
   const my = useAdminMyProductsQuery(
     {
       search: search || undefined,
@@ -323,6 +693,12 @@ export default function ProductsManager(): React.JSX.Element {
   const listPayload = tab === "my" ? my.data : all.data;
   const listLoading = tab === "my" ? my.isLoading : all.isLoading;
   const listError = tab === "my" ? my.isError : all.isError;
+=======
+
+  const listPayload = all.data;
+  const listLoading = all.isLoading;
+  const listError = all.isError;
+>>>>>>> 4e23ea4 (update)
 
   const products = useMemo(
     () =>
@@ -336,18 +712,32 @@ export default function ProductsManager(): React.JSX.Element {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<UiProduct | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<UiProduct | null>(null);
+  const [paymentTarget, setPaymentTarget] = useState<UiProduct | null>(null);
 
   const [createProduct, { isLoading: isCreating }] =
     useAdminCreateProductMutation();
   const [approve, { isLoading: isApproving }] =
     useAdminApproveProductMutation();
+  const [reject, { isLoading: isRejecting }] =
+    useAdminRejectProductMutation();
   const [remove, { isLoading: isDeleting }] = useAdminDeleteProductMutation();
+<<<<<<< HEAD
   const busy = isCreating || isApproving || isDeleting;
 
   return (
     <>
       {createOpen && (
         <JsonBodyModal
+=======
+
+  const busy = isCreating || isApproving || isRejecting || isDeleting;
+
+  return (
+    <>
+      {createOpen ? (
+        <CreateProductModal
+>>>>>>> 4e23ea4 (update)
           loading={isCreating}
           onClose={() => setCreateOpen(false)}
           onSubmit={async (body) => {
@@ -368,6 +758,7 @@ export default function ProductsManager(): React.JSX.Element {
         />
       )}
 
+<<<<<<< HEAD
       <div className="min-h-screen bg-[#f5f6fa] p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
@@ -383,6 +774,44 @@ export default function ProductsManager(): React.JSX.Element {
                 Manage all products &amp; approvals
               </p>
             </div>
+=======
+      {rejectTarget ? (
+        <RejectModal
+          loading={busy}
+          onClose={() => setRejectTarget(null)}
+          onSubmit={async (reason) => {
+            await reject({ id: rejectTarget.id, reason }).unwrap();
+            setRejectTarget(null);
+          }}
+        />
+      ) : null}
+
+      {paymentTarget ? (
+        <PaymentMethodsModal
+          product={paymentTarget}
+          onClose={() => setPaymentTarget(null)}
+        />
+      ) : null}
+
+      {paymentTarget ? (
+        <PaymentMethodsModal
+          product={paymentTarget}
+          onClose={() => setPaymentTarget(null)}
+        />
+      ) : null}
+
+      <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h1 className="text-[18px] font-extrabold text-gray-900 tracking-tight">
+              Products
+            </h1>
+            <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
+              POST /products · POST /products/:id/approve · GET /products
+              (search,status,page,limit) · GET /products/my
+              (search,status,page,limit) · DELETE /products/:id
+            </p>
+>>>>>>> 4e23ea4 (update)
           </div>
           <button
             onClick={() => setCreateOpen(true)}
@@ -394,6 +823,7 @@ export default function ProductsManager(): React.JSX.Element {
           </button>
         </div>
 
+<<<<<<< HEAD
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
@@ -460,6 +890,20 @@ export default function ProductsManager(): React.JSX.Element {
                 {t === "all" ? "All Products" : "My Products"}
               </button>
             ))}
+=======
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-2.5 w-full lg:w-[360px]">
+            <Search size={16} className="text-gray-400" />
+            <input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search..."
+              className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none"
+            />
+>>>>>>> 4e23ea4 (update)
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 w-64">
@@ -664,6 +1108,7 @@ export default function ProductsManager(): React.JSX.Element {
                           >
                             <Eye size={13} />
                           </button>
+<<<<<<< HEAD
                           {p.status.toLowerCase() === "pending" && (
                             <button
                               disabled={busy}
@@ -680,6 +1125,38 @@ export default function ProductsManager(): React.JSX.Element {
                               Approve
                             </button>
                           )}
+=======
+                          
+                          <button
+                            onClick={() => setPaymentTarget(p)}
+                            className="p-2 rounded-lg border border-gray-200 hover:bg-indigo-50 text-indigo-600"
+                            title="Payment Methods"
+                          >
+                            <CreditCard size={14} />
+                          </button>
+
+                          {p.status.toLowerCase() === "pending" ? (
+                            <>
+                              <button
+                                disabled={busy}
+                                onClick={async () => {
+                                  await approve(p.id).unwrap();
+                                }}
+                                className="px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[12px] font-bold disabled:opacity-60 disabled:pointer-events-none"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                disabled={busy}
+                                onClick={() => setRejectTarget(p)}
+                                className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 text-[12px] font-bold disabled:opacity-60 disabled:pointer-events-none"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          ) : null}
+
+>>>>>>> 4e23ea4 (update)
                           <button
                             disabled={busy}
                             onClick={() => setDeleteTarget(p)}
@@ -726,6 +1203,10 @@ export default function ProductsManager(): React.JSX.Element {
               </button>
             </div>
           </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4e23ea4 (update)
         </div>
       </div>
     </>
