@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -70,11 +70,6 @@ const menuItems = [
     name: "Affiliate",
     href: "/student/affiliate",
     icon: Users,
-  },
-  {
-    name: "Shop",
-    href: "/student/shop",
-    icon: ShoppingBag,
   },
 ];
 

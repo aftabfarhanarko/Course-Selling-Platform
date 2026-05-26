@@ -125,7 +125,7 @@ export default function AdminCoursesPage(): React.JSX.Element {
           instructors={instructorList}
           loading={isCreating}
           onClose={() => setCreateOpen(false)}
-          onSubmit={async (payload: any) => {
+          onSubmit={async (payload) => {
             await createCourse(payload).unwrap();
             setCreateOpen(false);
           }}
@@ -139,8 +139,8 @@ export default function AdminCoursesPage(): React.JSX.Element {
           instructors={instructorList}
           loading={isUpdating}
           onClose={() => setEdit(null)}
-          onSubmit={async (payload: any) => {
-            await updateCourse({ id: edit.id, body: payload }).unwrap();
+          onSubmit={async (payload) => {
+            await updateCourse({ id: edit.id, ...payload }).unwrap();
             setEdit(null);
           }}
         />

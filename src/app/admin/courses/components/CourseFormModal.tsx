@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Check, Loader2, DollarSign, Link as LinkIcon, Image as ImageIcon, User, ShieldCheck, Upload } from "lucide-react";
 import { UiCourse } from "./types";
 import ModalShell from "./ModalShell";
-import { uploadImageToImgBB } from "@/lib/images.upload";
+import { uploadImageToBackend } from "@/lib/images.upload";
 
 type Props = {
   initial?: UiCourse | null;
@@ -10,7 +10,22 @@ type Props = {
   instructors?: { id: number | string; name: string }[];
   loading: boolean;
   onClose: () => void;
-  onSubmit: (payload: FormData) => void;
+  onSubmit: (payload: {
+    title: string;
+    slug?: string;
+    description?: string;
+    categoryId: number;
+    instructorId?: number;
+    price?: number;
+    discountPrice?: number;
+    thumbnail?: string;
+    courseUrl?: string;
+    isPublished?: boolean;
+    metadata?: {
+      level?: string;
+      is_premium?: boolean;
+    };
+  }) => void;
 };
 
 export default function CourseFormModal({
@@ -42,6 +57,7 @@ export default function CourseFormModal({
   const [isPremium, setIsPremium] = useState(initial?.is_premium ?? false);
   const [isPublished, setIsPublished] = useState(initial?.isPublished ?? false);
   
+  const [uploadingImg, setUploadingImg] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -62,33 +78,38 @@ export default function CourseFormModal({
     setErrors(e);
     if (Object.keys(e).length > 0) return;
     
-    const formData = new FormData();
-    formData.append("title", title.trim());
-    if (slug.trim()) formData.append("slug", slug.trim());
-    if (description.trim()) formData.append("description", description.trim());
-    formData.append("categoryId", String(categoryId));
-    if (instructorId) formData.append("instructorId", String(instructorId));
-    if (price) formData.append("price", String(price));
-    if (discountPrice) formData.append("discountPrice", String(discountPrice));
-    if (courseUrl.trim()) formData.append("courseUrl", courseUrl.trim());
+    let finalThumbnail = thumbnail;
     
-    // Convert boolean to string for FormData
-    formData.append("isPublished", String(isPublished));
-
-    const metadata = {
-      level: level.trim() || undefined,
-      is_premium: isPremium,
-    };
-    formData.append("metadata", JSON.stringify(metadata));
-
     if (thumbnailFile) {
-      formData.append("image", thumbnailFile);
+      setUploadingImg(true);
+      try {
+        finalThumbnail = await uploadImageToBackend(thumbnailFile);
+      } catch (err) {
+        alert("Image upload failed. Please try again.");
+        setUploadingImg(false);
+        return;
+      }
+      setUploadingImg(false);
     }
     
-    onSubmit(formData);
+    onSubmit({
+      title: title.trim(),
+      slug: slug.trim() || undefined,
+      description: description.trim() || undefined,
+      categoryId: Number(categoryId),
+      instructorId: instructorId ? Number(instructorId) : undefined,
+      price: price ? Number(price) : undefined,
+      discountPrice: discountPrice ? Number(discountPrice) : undefined,
+      thumbnail: finalThumbnail.trim() || undefined,
+      courseUrl: courseUrl.trim() || undefined,
+      metadata: {
+        level: level.trim() || undefined,
+        is_premium: isPremium,
+      }
+    });
   };
 
-  const isBusy = loading;
+  const isBusy = loading || uploadingImg;
 
   return (
     <ModalShell
@@ -334,7 +355,7 @@ export default function CourseFormModal({
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-200 transition-colors disabled:opacity-60"
           >
             {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Check size={13} />}
-            {initial ? "Save Changes" : "Create Course"}
+            {uploadingImg ? "Uploading Image..." : initial ? "Save Changes" : "Create Course"}
           </button>
         </div>
       </div>

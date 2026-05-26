@@ -1,8 +1,8 @@
 export default function Head() {
   return (
     <>
-      <title>Shop | Course Selling Platform</title>
-      <meta name="description" content="Admin shop management." />
+      <title>Admin Shop | Course Selling Platform</title>
+      <meta name="description" content="Manage admin shop items." />
       <meta name="robots" content="noindex,nofollow" />
     </>
   );
