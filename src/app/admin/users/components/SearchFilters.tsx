@@ -54,9 +54,10 @@ export function SearchFilters({
           className="h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200"
         >
           <option value="All">All Roles</option>
-          <option value="Student">Student</option>
-          <option value="Instructor">Instructor</option>
-          <option value="Admin">Admin</option>
+          <option value="student">Student</option>
+          <option value="buyer">Buyer</option>
+          <option value="affiliate">Affiliate</option>
+          <option value="admin">Admin</option>
         </select>
         <select
           value={statusFilter}

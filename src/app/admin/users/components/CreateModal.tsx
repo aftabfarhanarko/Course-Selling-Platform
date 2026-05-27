@@ -27,14 +27,14 @@ export function CreateModal({
     country: "",
     password: "",
     photo: "",
-    role: "Student" as Role,
+    role: "student" as Role,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const set =
     (k: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-      setForm((p) => ({ ...p, [k]: e.target.value }));
+      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+        setForm((p) => ({ ...p, [k]: e.target.value }));
 
   const submit = () => {
     const e: Record<string, string> = {};
@@ -127,9 +127,10 @@ export function CreateModal({
                 onChange={set("role")}
                 className="w-full h-10 px-3 text-[13px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-200 bg-white"
               >
-                <option>Student</option>
-                <option>Instructor</option>
-                <option>Admin</option>
+                <option value="student">Student</option>
+                <option value="buyer">Buyer</option>
+                <option value="affiliate">Affiliate</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
           </div>

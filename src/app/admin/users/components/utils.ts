@@ -37,10 +37,11 @@ export function normalizeRole(value: unknown): Role {
   const v = String(value ?? "")
     .trim()
     .toLowerCase();
-  if (v === "admin" || v === "superadmin" || v === "super_admin")
-    return "Admin";
-  if (v === "instructor" || v === "teacher") return "Instructor";
-  return "Student";
+  if (v === "admin" || v === "superadmin" || v === "super_admin") return "admin";
+  if (v === "affiliate") return "affiliate";
+  if (v === "buyer") return "buyer";
+  if (v === "instructor" || v === "teacher") return "instructor";
+  return "student";
 }
 
 export function normalizeStatus(user: any): Status {

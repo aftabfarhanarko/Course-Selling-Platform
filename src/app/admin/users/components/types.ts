@@ -1,5 +1,5 @@
 // types.ts
-export type Role = "Student" | "Instructor" | "Admin";
+export type Role = "Student" | "Instructor" | "Admin" | "Affiliate" | "Buyer" | "student" | "instructor" | "admin" | "affiliate" | "buyer";
 export type Status = "Active" | "Suspended" | "Deleted";
 
 export interface UiUser {

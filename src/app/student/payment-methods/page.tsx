@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useMemo, useState } from "react";
 import {
@@ -43,6 +43,7 @@ function normalizeType(v: any): string {
   if (s === "nagad") return "nagad";
   if (s === "bank") return "bank";
   if (s === "binance") return "binance";
+  if (s === "visa") return "visa";
   return s || "unknown";
 }
 
@@ -55,6 +56,8 @@ function normalizeStatus(v: any): string {
 function extractList(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
   if (Array.isArray(payload?.paymentMethods)) return payload.paymentMethods;
   if (Array.isArray(payload?.methods)) return payload.methods;
   if (Array.isArray(payload?.data)) return payload.data;
@@ -105,7 +108,8 @@ function toUi(raw: any, fallbackId: number): UiPaymentMethod {
 
   const owner =
     String(
-      raw?.user?.name ??
+      raw?.accountHolderName ??
+        raw?.user?.name ??
         raw?.user?.email ??
         raw?.owner?.name ??
         raw?.owner ??
@@ -156,7 +160,9 @@ function TypePill({ type }: { type: string }) {
           ? "bg-blue-50 text-blue-700 border border-blue-200"
           : type === "binance"
             ? "bg-yellow-50 text-yellow-800 border border-yellow-200"
-            : "bg-zinc-50 text-zinc-700 border border-zinc-200";
+            : type === "visa"
+              ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+              : "bg-zinc-50 text-zinc-700 border border-zinc-200";
 
   return (
     <span
@@ -243,7 +249,7 @@ export default function page() {
               Payment Methods
             </h1>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              POST /payment-methods · GET /payment-methods/my-search
+              POST /payment-methods · GET /payment-methods/my
             </p>
           </div>
         </div>
@@ -287,6 +293,7 @@ export default function page() {
                 <option value="nagad">Nagad</option>
                 <option value="bank">Bank</option>
                 <option value="binance">Binance</option>
+                <option value="visa">Visa</option>
               </select>
             </div>
 
@@ -395,12 +402,10 @@ export default function page() {
                 try {
                   const body = cleanBody({
                     type: createType,
-                    label,
                     accountNumber,
-                    nameOnAccount,
+                    accountHolderName: nameOnAccount,
                     bankName: createType === "bank" ? bankName : undefined,
                     branchName: createType === "bank" ? branchName : undefined,
-                    routingNumber: createType === "bank" ? routingNumber : undefined,
                     binanceId: createType === "binance" ? binanceId : undefined,
                   });
 
@@ -463,6 +468,7 @@ export default function page() {
                   <option value="nagad">Nagad</option>
                   <option value="bank">Bank</option>
                   <option value="binance">Binance</option>
+                  <option value="visa">Visa</option>
                 </select>
 
                 <select
@@ -604,7 +610,7 @@ export default function page() {
                     Raw API Response
                   </h3>
                   <p className="text-[11px] text-zinc-400 mt-0.5">
-                    GET /payment-methods/my-search
+                    GET /payment-methods/my
                   </p>
                 </div>
               </div>

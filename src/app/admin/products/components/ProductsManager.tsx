@@ -28,6 +28,7 @@ import {
   useAdminMyProductsQuery,
 } from "@/lib/api/admin/products";
 import { useAdminDirectWithdrawMutation } from "@/lib/api/admin/withdraw";
+import { useAdminPaymentMethodsQuery } from "@/lib/api/admin/payment-methods";
 
 type UiProduct = {
   id: number | string;
@@ -295,6 +296,160 @@ function ConfirmModal({
   );
 }
 
+function PaymentConfirmModal({
+  product,
+  loading,
+  onClose,
+  onConfirm,
+}: {
+  product: UiProduct;
+  loading: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const { data, isFetching } = useAdminPaymentMethodsQuery({
+    search: product.ownerEmail,
+  });
+
+  const paymentMethods = useMemo(() => extractList(data), [data]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[85vh]">
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div>
+            <h2 className="text-[15px] font-black text-slate-900">
+              Process Direct Payment?
+            </h2>
+            <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
+              For: {product.title}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="w-9 h-9 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-all disabled:opacity-60"
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        <div className="px-6 py-6 overflow-y-auto">
+          <p className="text-[12px] text-slate-500 mb-4 leading-relaxed bg-amber-50 text-amber-700 p-3 rounded-xl border border-amber-200">
+            <strong>Note:</strong> Clicking confirm will{" "}
+            <strong>automatically approve</strong> this product and then process the direct payment.
+          </p>
+
+          <h4 className="text-[12px] font-black text-slate-900 mb-3 uppercase tracking-wider">
+            User Payment Methods
+          </h4>
+
+          {isFetching ? (
+            <div className="flex items-center justify-center py-6 text-slate-400 gap-2">
+              <Loader2 size={16} className="animate-spin" />
+              <span className="text-[12px] font-semibold">Loading methods...</span>
+            </div>
+          ) : paymentMethods.length === 0 ? (
+            <div className="py-6 text-center rounded-xl bg-slate-50 border border-slate-100 border-dashed">
+              <p className="text-[12px] font-semibold text-slate-500">
+                No payment methods found for {product.ownerEmail}.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {paymentMethods.map((pm, i) => (
+                <div
+                  key={i}
+                  className="p-3 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col gap-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-black text-slate-800 uppercase">
+                      {pm.provider || pm.type || "Method"}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                        pm.status === "approved" || pm.isVerified
+                          ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
+                      }`}
+                    >
+                      {pm.status || (pm.isVerified ? "Verified" : "Pending")}
+                    </span>
+                  </div>
+                  <div className="text-[12px] text-slate-600 bg-slate-50 p-2 rounded-xl border border-slate-100 mt-1 font-mono flex flex-col gap-1">
+                    {(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Account:</span>
+                        <span className="font-bold text-slate-800">
+                          {pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number}
+                        </span>
+                      </div>
+                    )}
+                    {(pm.accountHolderName || pm.nameOnAccount) && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Name:</span>
+                        <span className="font-bold text-slate-800">
+                          {pm.accountHolderName || pm.nameOnAccount}
+                        </span>
+                      </div>
+                    )}
+                    {pm.bankName && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Bank:</span>
+                        <span className="font-bold text-slate-800">{pm.bankName}</span>
+                      </div>
+                    )}
+                    {pm.branchName && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Branch:</span>
+                        <span className="font-bold text-slate-800">{pm.branchName}</span>
+                      </div>
+                    )}
+                    {pm.binanceId && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Binance ID:</span>
+                        <span className="font-bold text-slate-800">{pm.binanceId}</span>
+                      </div>
+                    )}
+                    {!(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) &&
+                      !(pm.accountHolderName || pm.nameOnAccount) &&
+                      !pm.bankName &&
+                      !pm.binanceId && (
+                        <div className="text-slate-400">No details provided</div>
+                      )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 py-5 border-t border-slate-100 bg-slate-50 flex gap-3">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-white hover:border-slate-300 transition-all disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-violet-200 transition-all disabled:opacity-60"
+          >
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <Check size={13} />}
+            Approve &amp; Pay
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════
    MAIN LIST PAGE
 ════════════════════════════════════════════ */
@@ -347,7 +502,8 @@ export default function ProductsManager(): React.JSX.Element {
   const [reject, { isLoading: isRejecting }] =
     useAdminRejectProductMutation();
   const [remove, { isLoading: isDeleting }] = useAdminDeleteProductMutation();
-  const busy = isCreating || isApproving || isDeleting;
+  const [direct, { isLoading: isDirecting }] = useAdminDirectWithdrawMutation();
+  const busy = isCreating || isApproving || isDeleting || isDirecting;
 
   return (
     <>
@@ -369,6 +525,29 @@ export default function ProductsManager(): React.JSX.Element {
           onConfirm={async () => {
             await remove(deleteTarget.id).unwrap();
             setDeleteTarget(null);
+          }}
+        />
+      )}
+      {paymentTarget && (
+        <PaymentConfirmModal
+          product={paymentTarget}
+          loading={isDirecting || isApproving}
+          onClose={() => setPaymentTarget(null)}
+          onConfirm={async () => {
+            try {
+              // 1. Approve product first
+              if (paymentTarget.status.toLowerCase() !== "approved" && paymentTarget.status.toLowerCase() !== "active") {
+                await approve(paymentTarget.id).unwrap();
+              }
+              // 2. Direct payment
+              const body = {
+                studentId: Number(paymentTarget.raw?.user?.id ?? paymentTarget.raw?.seller?.id ?? paymentTarget.raw?.owner?.id),
+                productId: Number(paymentTarget.id)
+              };
+              await direct(body).unwrap();
+            } finally {
+              setPaymentTarget(null);
+            }
           }}
         />
       )}
@@ -670,20 +849,30 @@ export default function ProductsManager(): React.JSX.Element {
                             <Eye size={13} />
                           </button>
                           {p.status.toLowerCase() === "pending" && (
-                            <button
-                              disabled={busy}
-                              onClick={async () => {
-                                await approve(p.id).unwrap();
-                              }}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold transition-all disabled:opacity-60 disabled:pointer-events-none"
-                            >
-                              {isApproving ? (
-                                <Loader2 size={11} className="animate-spin" />
-                              ) : (
-                                <Check size={11} />
-                              )}
-                              Approve
-                            </button>
+                            <>
+                              <button
+                                disabled={busy}
+                                onClick={() => setPaymentTarget(p)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-200 bg-violet-50 hover:bg-violet-100 text-violet-700 text-[11px] font-bold transition-all disabled:opacity-60 disabled:pointer-events-none"
+                              >
+                                <CreditCard size={11} />
+                                Pay
+                              </button>
+                              <button
+                                disabled={busy}
+                                onClick={async () => {
+                                  await approve(p.id).unwrap();
+                                }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold transition-all disabled:opacity-60 disabled:pointer-events-none"
+                              >
+                                {isApproving ? (
+                                  <Loader2 size={11} className="animate-spin" />
+                                ) : (
+                                  <Check size={11} />
+                                )}
+                                Approve
+                              </button>
+                            </>
                           )}
                           <button
                             disabled={busy}

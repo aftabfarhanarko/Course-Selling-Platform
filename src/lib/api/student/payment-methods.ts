@@ -1,6 +1,6 @@
-﻿import { baseApi, toQueryString } from "../baseApi";
+import { baseApi, toQueryString } from "../baseApi";
 
-export type PaymentMethodType = "bkash" | "nagad" | "bank" | "binance";
+export type PaymentMethodType = "bkash" | "nagad" | "bank" | "binance" | "visa";
 export type PaymentMethodStatus = "pending" | "approved" | "rejected";
 
 export type StudentPaymentMethodsMySearchQuery = {
@@ -26,7 +26,7 @@ export const studentPaymentMethodsApi = baseApi.injectEndpoints({
         const query = q ?? {};
         const qs = toQueryString(query as Record<string, unknown>);
         return {
-          url: `/payment-methods/my-search${qs}`,
+          url: `/payment-methods/my${qs}`,
           method: "GET",
         };
       },

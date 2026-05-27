@@ -8,7 +8,6 @@ import {
   HandCoins,
   LayoutDashboard,
   ShoppingBag,
-  Upload,
   Users,
   Wallet,
 } from "lucide-react";
@@ -25,11 +24,7 @@ const menuItems = [
     href: "/student/courses",
     icon: GraduationCap,
   },
-  {
-    name: "Submit Product",
-    href: "/student/submitProduct",
-    icon: Upload,
-  },
+
   {
     name: "Wallet",
     href: "/student/wallet",

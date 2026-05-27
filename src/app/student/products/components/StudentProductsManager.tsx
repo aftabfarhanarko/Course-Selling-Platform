@@ -8,9 +8,14 @@ import {
   Loader2,
   Search,
   ShoppingBag,
+  Plus,
   X,
+  Banknote,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useStudentMyProductsQuery } from "@/lib/api/student/products";
+import { useStudentWithdrawRequestMutation } from "@/lib/api/student/withdraw";
+import CreateProductModal from "./CreateProductModal";
 
 type UiProduct = {
   id: number | string;
@@ -40,9 +45,11 @@ function formatDate(value: unknown): string {
 function extractList(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
   if (Array.isArray(payload?.products)) return payload.products;
   if (Array.isArray(payload?.myProducts)) return payload.myProducts;
   if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
   if (Array.isArray(payload?.data?.products)) return payload.data.products;
   if (Array.isArray(payload?.data?.myProducts)) return payload.data.myProducts;
   if (Array.isArray(payload?.data?.data)) return payload.data.data;
@@ -73,7 +80,7 @@ function toUi(raw: any): UiProduct | null {
 
   const title =
     String(
-      raw?.title ?? raw?.name ?? raw?.productName ?? raw?.course?.title ?? "—",
+      raw?.botName ?? raw?.title ?? raw?.name ?? raw?.productName ?? raw?.course?.title ?? "—",
     ).trim() || "—";
 
   const category =
@@ -81,7 +88,7 @@ function toUi(raw: any): UiProduct | null {
       raw?.category ?? raw?.categoryName ?? raw?.course?.category ?? "—",
     ).trim() || "—";
 
-  const priceRaw = raw?.price ?? raw?.amount ?? raw?.total ?? null;
+  const priceRaw = raw?.totalAmount ?? raw?.price ?? raw?.amount ?? raw?.total ?? null;
   const price =
     priceRaw === null || priceRaw === undefined || priceRaw === ""
       ? "—"
@@ -158,6 +165,9 @@ export default function StudentProductsManager() {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [page, setPage] = useState(1);
   const [details, setDetails] = useState<UiProduct | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  const [requestWithdraw, { isLoading: isWithdrawing }] = useStudentWithdrawRequestMutation();
 
   const { data, isFetching, isError } = useStudentMyProductsQuery({
     search: search || undefined,
@@ -195,6 +205,13 @@ export default function StudentProductsManager() {
               GET /products/my (search, status, page, limit)
             </p>
           </div>
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-xl transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Product
+          </button>
         </div>
 
         <div className="mt-6 rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -325,7 +342,26 @@ export default function StudentProductsManager() {
                         {p.createdAt}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-end">
+                        <div className="flex items-center justify-end gap-2">
+                          {p.status.toLowerCase() === "approved" && (
+                            <button
+                              onClick={async () => {
+                                const toastId = toast.loading("Requesting withdrawal...");
+                                try {
+                                  await requestWithdraw({ productId: p.id }).unwrap();
+                                  toast.success("Withdrawal requested successfully!", { id: toastId });
+                                } catch (e: any) {
+                                  toast.error(e?.data?.message || e?.error || "Failed to request withdrawal", { id: toastId });
+                                }
+                              }}
+                              disabled={isWithdrawing}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 h-9 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold hover:bg-indigo-100 disabled:opacity-50 transition-colors"
+                              title="Withdraw Earnings"
+                            >
+                              <Banknote className="h-4 w-4" />
+                              <span className="text-[11px]">Withdraw</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => setDetails(p)}
                             className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
@@ -347,14 +383,83 @@ export default function StudentProductsManager() {
       {details ? (
         <ModalShell
           title="Product Details"
-          subtitle="Raw API response item"
+          subtitle="Information about your product"
           onClose={() => setDetails(null)}
         >
-          <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto max-h-[520px]">
-            {JSON.stringify(details.raw ?? null, null, 2)}
-          </pre>
+          <div className="space-y-5">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 lg:p-8 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+              <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-indigo-900/30 rounded-full blur-2xl"></div>
+              
+              <div className="relative z-10">
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <h3 className="text-2xl sm:text-3xl font-black tracking-tight">{details.title}</h3>
+                    <p className="text-indigo-100 mt-1.5 font-semibold text-[13px]">{details.category}</p>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 whitespace-nowrap">
+                    <span className="text-[11px] sm:text-[12px] font-black uppercase tracking-wider">{details.status}</span>
+                  </div>
+                </div>
+                
+                <div className="mt-8 flex items-end justify-between">
+                  <div>
+                    <p className="text-[10px] sm:text-[11px] text-indigo-200 uppercase tracking-widest font-bold">Total Amount</p>
+                    <p className="text-3xl sm:text-4xl font-black mt-1 tracking-tight">
+                      {details.price && details.price !== "—" ? `$${details.price}` : "—"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] sm:text-[11px] text-indigo-200 uppercase tracking-widest font-bold">Created</p>
+                    <p className="text-[12px] sm:text-[13px] font-semibold mt-1">{details.createdAt}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-3xl p-5 sm:p-6 border border-gray-100">
+               <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-wider mb-4">System Information</h4>
+               
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                 <div>
+                   <p className="text-[11px] text-gray-500 font-semibold mb-1">Product ID</p>
+                   <p className="text-[13px] font-bold text-gray-900 bg-white border border-gray-200 rounded-xl px-3 py-2">
+                     {details.id}
+                   </p>
+                 </div>
+                 
+                 {details.raw?.countryCodes?.length > 0 ? (
+                 <div>
+                   <p className="text-[11px] text-gray-500 font-semibold mb-1">Target Countries</p>
+                   <div className="flex flex-wrap gap-1.5">
+                     {details.raw.countryCodes.map((c: string) => (
+                       <span key={c} className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm">
+                         {c}
+                       </span>
+                     ))}
+                   </div>
+                 </div>
+                 ) : (
+                 <div>
+                   <p className="text-[11px] text-gray-500 font-semibold mb-1">Raw API Data</p>
+                   <button 
+                     onClick={() => alert(JSON.stringify(details.raw, null, 2))}
+                     className="text-[12px] font-bold text-indigo-600 hover:text-indigo-700 hover:underline"
+                   >
+                     View JSON Payload
+                   </button>
+                 </div>
+                 )}
+               </div>
+            </div>
+          </div>
         </ModalShell>
       ) : null}
+
+      <CreateProductModal 
+        isOpen={isCreateOpen} 
+        onClose={() => setIsCreateOpen(false)} 
+      />
     </div>
   );
 }

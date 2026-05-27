@@ -53,6 +53,8 @@ function formatDate(value: unknown): string {
 function extractList(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
   if (Array.isArray(payload?.withdraws)) return payload.withdraws;
   if (Array.isArray(payload?.withdrawals)) return payload.withdrawals;
   if (Array.isArray(payload?.data)) return payload.data;
@@ -168,69 +170,7 @@ function ModalShell({
   );
 }
 
-function JsonBodyModal({
-  title,
-  subtitle,
-  loading,
-  initialBody,
-  onClose,
-  onSubmit,
-}: {
-  title: string;
-  subtitle: string;
-  loading: boolean;
-  initialBody: Record<string, any>;
-  onClose: () => void;
-  onSubmit: (body: Record<string, any>) => void;
-}) {
-  const [text, setText] = useState(JSON.stringify(initialBody, null, 2));
-  const [error, setError] = useState<string | null>(null);
 
-  const submit = () => {
-    try {
-      const parsed = JSON.parse(text);
-      setError(null);
-      onSubmit(parsed);
-    } catch {
-      setError("Invalid JSON");
-    }
-  };
-
-  return (
-    <ModalShell
-      title={title}
-      subtitle={subtitle}
-      loading={loading}
-      onClose={onClose}
-    >
-      <div className="space-y-4">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className={`w-full min-h-[240px] px-3 py-2 text-[12px] border rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300 ${error ? "border-red-400 bg-red-50" : "border-gray-200"}`}
-        />
-        {error ? <p className="text-[10px] text-red-500">{error}</p> : null}
-        <div className="flex gap-2.5">
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-[12px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={submit}
-            disabled={loading}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2.5 text-[12px] font-bold text-white hover:bg-indigo-700 disabled:opacity-60"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Submit
-          </button>
-        </div>
-      </div>
-    </ModalShell>
-  );
-}
 
 function ConfirmModal({
   title,
@@ -306,7 +246,6 @@ export default function WithdrawManager() {
   const [page, setPage] = useState(1);
   const [modal, setModal] = useState<
     | { type: "none" }
-    | { type: "request" }
     | { type: "details"; item: UiWithdraw }
     | { type: "delete"; item: UiWithdraw }
   >({ type: "none" });
@@ -318,7 +257,6 @@ export default function WithdrawManager() {
     limit: PAGE_SIZE,
   });
 
-  const [requestWithdraw, requestState] = useStudentWithdrawRequestMutation();
   const [deleteWithdraw, deleteState] = useStudentWithdrawDeleteMutation();
 
   const items = useMemo(() => {
@@ -335,7 +273,7 @@ export default function WithdrawManager() {
   const canPrev = page > 1;
   const canNext = page < totalPages;
 
-  const anyLoading = requestState.isLoading || deleteState.isLoading;
+  const anyLoading = deleteState.isLoading;
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-10">
@@ -352,14 +290,6 @@ export default function WithdrawManager() {
               Request a withdrawal and manage your withdraw history.
             </p>
           </div>
-
-          <button
-            onClick={() => setModal({ type: "request" })}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-[12px] font-black text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-[0.98] transition-all"
-          >
-            <Plus className="h-4 w-4" />
-            Withdraw Request
-          </button>
         </div>
 
         <div className="mt-6 rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -516,19 +446,6 @@ export default function WithdrawManager() {
         </div>
       </div>
 
-      {modal.type === "request" ? (
-        <JsonBodyModal
-          title="Withdraw Request"
-          subtitle="POST /withdraw/request"
-          loading={requestState.isLoading}
-          initialBody={{ amount: 100, method: "bank" }}
-          onClose={() => setModal({ type: "none" })}
-          onSubmit={async (body) => {
-            await requestWithdraw(body as any).unwrap();
-            setModal({ type: "none" });
-          }}
-        />
-      ) : null}
 
       {modal.type === "details" ? (
         <DetailsModal

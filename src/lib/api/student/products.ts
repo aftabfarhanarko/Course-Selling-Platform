@@ -1,4 +1,4 @@
-﻿import { baseApi, toQueryString } from "../baseApi";
+import { baseApi, toQueryString } from "../baseApi";
 
 export type StudentProductsQuery = {
   search?: string;
@@ -22,9 +22,17 @@ export const studentProductsApi = baseApi.injectEndpoints({
       },
       providesTags: ["Product"],
     }),
+    studentCreateProduct: build.mutation<StudentProductsResponse, { botName: string; countryCodes: string[]; totalAmount: number }>({
+      query: (body) => ({
+        url: "/products",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Product"],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useStudentMyProductsQuery, useLazyStudentMyProductsQuery } =
+export const { useStudentMyProductsQuery, useLazyStudentMyProductsQuery, useStudentCreateProductMutation } =
   studentProductsApi;

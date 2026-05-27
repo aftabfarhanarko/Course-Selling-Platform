@@ -10,7 +10,6 @@ import {
   LogOut,
   Package,
   ShoppingBag,
-  Upload,
   Users,
   Wallet,
   CreditCard,
@@ -46,11 +45,7 @@ const menuItems = [
     href: "/student/products",
     icon: Package,
   },
-  {
-    name: "Submit Product",
-    href: "/student/submitProduct",
-    icon: Upload,
-  },
+
   {
     name: "Wallet",
     href: "/student/wallet",

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Eye, Loader2, Wallet, X } from "lucide-react";
+import React, { useMemo } from "react";
+import { Loader2, Wallet, X, TrendingUp, Clock, CreditCard as CardIcon } from "lucide-react";
 import { useStudentWalletMyQuery } from "@/lib/api/student/wallet";
 
 function extractRoot(payload: any): any {
@@ -41,52 +41,13 @@ function extractString(payload: any, keys: string[]): string {
 }
 
 function formatMoney(amount: number | null, currency: string): string {
-  if (amount === null) return "—";
-  const c = currency || "";
-  return c ? `${amount} ${c}` : String(amount);
-}
-
-function ModalShell({
-  title,
-  subtitle,
-  onClose,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div className="relative w-full max-w-3xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
-        <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-          <div>
-            <h2 className="text-[14px] font-extrabold text-zinc-900 dark:text-white">
-              {title}
-            </h2>
-            <p className="text-[11px] text-zinc-400 mt-0.5">{subtitle}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-          >
-            <X size={15} />
-          </button>
-        </div>
-        <div className="px-6 py-5">{children}</div>
-      </div>
-    </div>
-  );
+  const val = amount === null ? 0 : amount;
+  const c = currency || "$";
+  return `${c}${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export const WalletDashboard = () => {
   const { data, isFetching, isError } = useStudentWalletMyQuery();
-  const [apiOpen, setApiOpen] = useState(false);
 
   const root = useMemo(() => extractRoot(data), [data]);
 
@@ -173,50 +134,52 @@ export const WalletDashboard = () => {
             <h1 className="text-sm font-bold text-zinc-900 dark:text-white leading-none">
               Wallet
             </h1>
-            <p className="text-[11px] text-zinc-400 mt-0.5">GET /wallet/my</p>
+            <p className="text-[11px] text-zinc-400 mt-0.5">My Wallet Dashboard</p>
           </div>
         </div>
-
-        <button
-          onClick={() => setApiOpen(true)}
-          className="w-9 h-9 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-          title="View API"
-        >
-          <Eye className="w-4 h-4 text-zinc-500" />
-        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
-          <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-            Available
-          </p>
-          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
-            {isFetching ? (
-              <span className="inline-flex items-center gap-2 text-[12px] font-semibold text-zinc-500 dark:text-zinc-400">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-              </span>
-            ) : isError ? (
-              <span className="text-[12px] font-semibold text-red-600">
-                Error
-              </span>
-            ) : (
-              formatMoney(available, currency)
-            )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-[#1447E6] to-[#0A2E99] rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 text-blue-100 mb-3">
+              <Wallet className="w-4 h-4" />
+              <p className="text-[12px] font-bold uppercase tracking-widest">
+                Available Balance
+              </p>
+            </div>
+            <div className="text-4xl font-black tracking-tight mt-1">
+              {isFetching ? (
+                <span className="inline-flex items-center gap-2 text-lg font-semibold text-blue-200">
+                  <Loader2 className="h-5 w-5 animate-spin" /> Loading...
+                </span>
+              ) : isError ? (
+                <span className="text-lg font-semibold text-red-300">
+                  Error
+                </span>
+              ) : (
+                formatMoney(available, currency)
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
-          <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-            Pending
-          </p>
-          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="flex items-center gap-2 text-amber-500 mb-3">
+            <Clock className="w-4 h-4" />
+            <p className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+              Pending
+            </p>
+          </div>
+          <div className="text-3xl font-black text-zinc-900 dark:text-white mt-1">
             {isFetching ? (
-              <span className="inline-flex items-center gap-2 text-[12px] font-semibold text-zinc-500 dark:text-zinc-400">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-400">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading...
               </span>
             ) : isError ? (
-              <span className="text-[12px] font-semibold text-red-600">
+              <span className="text-sm font-semibold text-red-500">
                 Error
               </span>
             ) : (
@@ -225,56 +188,26 @@ export const WalletDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
-          <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-            Lifetime
-          </p>
-          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="flex items-center gap-2 text-emerald-500 mb-3">
+            <TrendingUp className="w-4 h-4" />
+            <p className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+              Lifetime Earnings
+            </p>
+          </div>
+          <div className="text-3xl font-black text-zinc-900 dark:text-white mt-1">
             {isFetching ? (
-              <span className="inline-flex items-center gap-2 text-[12px] font-semibold text-zinc-500 dark:text-zinc-400">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-400">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading...
               </span>
             ) : isError ? (
-              <span className="text-[12px] font-semibold text-red-600">
+              <span className="text-sm font-semibold text-red-500">
                 Error
               </span>
             ) : (
               formatMoney(lifetime, currency)
             )}
           </div>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
-              API Data
-            </h3>
-            <p className="text-[11px] text-zinc-400 mt-0.5">Raw response</p>
-          </div>
-          <button
-            onClick={() => setApiOpen(true)}
-            className="text-[11px] font-semibold text-[#1447E6] hover:underline"
-          >
-            Full View
-          </button>
-        </div>
-
-        <div className="mt-4">
-          {isFetching ? (
-            <div className="flex items-center gap-2 text-[12px] font-semibold text-zinc-500 dark:text-zinc-400">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-            </div>
-          ) : isError ? (
-            <div className="text-[12px] font-semibold text-red-600">
-              Failed to load wallet data
-            </div>
-          ) : (
-            <pre className="text-[11px] text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 overflow-auto max-h-[260px]">
-              {JSON.stringify(data ?? null, null, 2)}
-            </pre>
-          )}
         </div>
       </div>
 
@@ -309,10 +242,10 @@ export const WalletDashboard = () => {
                     <td className="px-4 py-3 text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 whitespace-nowrap">
                       {String(
                         m?.account ??
-                          m?.accountNumber ??
-                          m?.number ??
-                          m?.walletNumber ??
-                          "—",
+                        m?.accountNumber ??
+                        m?.number ??
+                        m?.walletNumber ??
+                        "—",
                       )}
                     </td>
                     <td className="px-4 py-3 text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 whitespace-nowrap">
@@ -359,28 +292,6 @@ export const WalletDashboard = () => {
           </div>
         </div>
       ) : null}
-
-      {apiOpen ? (
-        <ModalShell
-          title="Wallet API Response"
-          subtitle="GET /wallet/my"
-          onClose={() => setApiOpen(false)}
-        >
-          {isFetching ? (
-            <div className="flex items-center justify-center gap-2 py-10 text-[12px] font-semibold text-zinc-500 dark:text-zinc-400">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-            </div>
-          ) : isError ? (
-            <div className="py-6 text-[12px] font-semibold text-red-600">
-              Failed to load wallet data
-            </div>
-          ) : (
-            <pre className="text-[11px] text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 overflow-auto max-h-[520px]">
-              {JSON.stringify(data ?? null, null, 2)}
-            </pre>
-          )}
-        </ModalShell>
-      ) : null} 
     </div>
   );
 };

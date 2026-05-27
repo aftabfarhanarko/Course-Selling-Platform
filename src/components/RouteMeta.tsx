@@ -133,8 +133,7 @@ function resolveMeta(pathname: string): MetaInfo {
     [/^\/student\/payment-methods\/?$/, "Payment Methods"],
     [/^\/student\/products\/?$/, "My Products"],
     [/^\/student\/shop\/?$/, "Student Shop"],
-    [/^\/student\/submitProduct\/createProduct\/?$/, "Create Product"],
-    [/^\/student\/submitProduct\/?$/, "Submit Product"],
+
     [/^\/student\/wallet\/?$/, "Wallet"],
     [/^\/student\/withdraw\/?$/, "Withdraw"],
   ];

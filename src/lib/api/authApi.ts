@@ -1,4 +1,4 @@
-﻿import { baseApi } from "./baseApi";
+import { baseApi } from "./baseApi";
 
 export type RegisterRequest = {
   name: string;
@@ -92,7 +92,10 @@ export const authApi = baseApi.injectEndpoints({
       query: (body) => ({
         url: "/auth/change-password",
         method: "POST",
-        body,
+        body: {
+          oldPassword: body.currentPassword,
+          newPassword: body.newPassword,
+        },
       }),
       invalidatesTags: ["Auth"],
     }),
