@@ -51,7 +51,11 @@ const socials = [
 
 function Footer() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/student"))
+  if (
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/student") ||
+    pathname?.startsWith("/affiliate/dashboard")
+  )
     return null;
 
   return (

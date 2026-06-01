@@ -24,9 +24,7 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl:
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "https://course-selling-api.up.railway.app",
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001",
 
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
@@ -50,7 +48,7 @@ export const baseApi = createApi({
               parsed?.access_token;
             role = role ?? parsed?.user?.role ?? parsed?.role;
           }
-        } catch {}
+        } catch { }
       }
 
       if (token) {

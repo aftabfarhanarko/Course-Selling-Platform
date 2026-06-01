@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLoginMutation } from "@/lib/api/authApi";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowRight, Check, Loader2 } from "lucide-react";
@@ -14,6 +15,9 @@ type LoginFormData = {
 };
 
 export default function LoginPage(): React.JSX.Element {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams?.get("next");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [loginUser, { isLoading: isLoginLoading }] = useLoginMutation();
@@ -30,9 +34,22 @@ export default function LoginPage(): React.JSX.Element {
     const toastId = toast.loading("Signing in...");
 
     try {
-      await loginUser({ email: data.email, password: data.password }).unwrap();
+      const response = await loginUser({ email: data.email, password: data.password }).unwrap();
+      const userRole = response?.user?.role || response?.role;
       setSuccess(true);
       toast.success("Signed in!", { id: toastId });
+
+      if (next) {
+        router.push(next);
+      } else {
+        if (userRole === "superadmin" || userRole === "super_admin" || userRole === "admin") {
+          router.push("/admin/dashboard");
+        } else if (userRole === "affiliate") {
+          router.push("/affiliate/dashboard");
+        } else {
+          router.push("/student/dashboard");
+        }
+      }
     } catch {
       toast.error("Login failed", { id: toastId });
     }

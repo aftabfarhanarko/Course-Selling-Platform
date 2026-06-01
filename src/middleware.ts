@@ -1,4 +1,4 @@
-﻿// import { NextResponse } from "next/server";
+// import { NextResponse } from "next/server";
 // import type { NextRequest } from "next/server";
 
 // function isAdmin(role: string | undefined) {
@@ -69,6 +69,14 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname === "/affiliate/dashboard" || pathname.startsWith("/affiliate/dashboard/")) {
+    if (role !== "affiliate") {
+      const url = new URL("/login", request.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (pathname === "/student" || pathname.startsWith("/student/")) {
     if (!role) {
       const url = new URL("/login", request.url);
@@ -81,5 +89,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/student", "/student/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/student", "/student/:path*", "/affiliate/dashboard", "/affiliate/dashboard/:path*"],
 };

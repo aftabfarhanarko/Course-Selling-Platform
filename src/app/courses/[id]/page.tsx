@@ -1,8 +1,12 @@
 "use client";
 
-import { notFound } from "next/navigation";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAdminCourseQuery } from "@/lib/api/admin/course";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { useAdminEnrollmentsPayBkashPaymentMutation } from "@/lib/api/admin/enrollments";
+import { toast } from "sonner";
 import {
   Star,
   CheckCircle2,
@@ -13,6 +17,7 @@ import {
   Trophy,
   ChevronRight,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 
 export default function CourseDetailsPage({
@@ -21,6 +26,13 @@ export default function CourseDetailsPage({
   params: { id: string };
 }) {
   const id = params.id;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const referCode = searchParams.get("ref");
+  
+  const authUser = useSelector((state: RootState) => state.auth.user);
+  const [payBkash, { isLoading: isPaying }] = useAdminEnrollmentsPayBkashPaymentMutation();
+
   const { data, isLoading, isError, error } = useAdminCourseQuery(id);
 
   const raw = (data as any)?.data ?? data;
@@ -65,6 +77,33 @@ export default function CourseDetailsPage({
       </div>
     );
   }
+
+  const handleEnroll = async () => {
+    if (!authUser) {
+      toast.error("Please login to enroll in this course");
+      router.push(`/login?redirect=/courses/${course.id}${referCode ? `?ref=${referCode}` : ""}`);
+      return;
+    }
+    const toastId = toast.loading("Initiating payment...");
+    try {
+      const res = await payBkash({
+        studentId: Number(authUser.id),
+        courseId: Number(course.id),
+        amount: Number(course.price),
+        referCode: referCode || undefined,
+      }).unwrap();
+      
+      const paymentUrl = res?.paymentUrl ?? res?.data?.paymentUrl;
+      if (paymentUrl) {
+        toast.success("Redirecting to payment gateway...", { id: toastId });
+        window.location.href = paymentUrl;
+      } else {
+        toast.error("Failed to retrieve payment URL", { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Enrollment failed", { id: toastId });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-20">
@@ -248,9 +287,21 @@ export default function CourseDetailsPage({
               <p className="text-sm font-semibold text-emerald-600 mb-6">
                 Save 33% limited time offer
               </p>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-1 active:translate-y-0 text-lg flex items-center justify-center gap-2">
-                Enroll Now
-                <ChevronRight size={20} />
+              <button
+                onClick={handleEnroll}
+                disabled={isPaying}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-1 active:translate-y-0 text-lg flex items-center justify-center gap-2 disabled:opacity-75 disabled:pointer-events-none"
+              >
+                {isPaying ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" /> Initiating...
+                  </>
+                ) : (
+                  <>
+                    Enroll Now
+                    <ChevronRight size={20} />
+                  </>
+                )}
               </button>
               <p className="text-xs text-slate-400 font-medium mt-4">
                 30-Day Money-Back Guarantee

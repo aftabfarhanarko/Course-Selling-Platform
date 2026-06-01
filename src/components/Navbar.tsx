@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -93,13 +93,18 @@ function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/student")) {
+  if (
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/student") ||
+    pathname?.startsWith("/affiliate/dashboard")
+  ) {
     return null;
   }
 
   const role = String((user as any)?.role ?? "").toLowerCase();
   const isAdminRole =
     role === "superadmin" || role === "super_admin" || role === "admin";
+  const isAffiliateRole = role === "affiliate";
 
   const avatarUrl =
     (user as any)?.photo ||
@@ -116,7 +121,11 @@ function Header() {
 
   const initials = String(displayName).trim().slice(0, 1).toUpperCase();
 
-  const dashboardHref = isAdminRole ? "/admin/dashboard" : "/student";
+  const dashboardHref = isAdminRole 
+    ? "/admin/dashboard" 
+    : isAffiliateRole 
+      ? "/affiliate/dashboard" 
+      : "/student/dashboard";
 
   return (
     <>
@@ -194,7 +203,7 @@ function Header() {
                     ) : (
                       <LayoutDashboard className="w-4 h-4" />
                     )}
-                    {isAdminRole ? "Admin" : "Student"}
+                    {isAdminRole ? "Admin" : isAffiliateRole ? "Affiliate" : "Student"}
                   </Link>
 
                   <div className="relative" ref={profileRef}>

@@ -7,10 +7,11 @@ import { baseApi } from "@/lib/api/baseApi";
 
 const AUTH_STORAGE_KEY = "course_platform_auth";
 
-function normalizeRole(input: unknown): "student" | "superadmin" | "unknown" {
+function normalizeRole(input: unknown): "student" | "superadmin" | "affiliate" | "unknown" {
   if (typeof input !== "string") return "unknown";
   const role = input.trim().toLowerCase();
   if (role === "student") return "student";
+  if (role === "affiliate") return "affiliate";
   if (role === "superadmin" || role === "super_admin" || role === "admin")
     return "superadmin";
   return "unknown";
@@ -79,7 +80,7 @@ async function fetchCurrentUser(
 
     const res = await axios.get(
       (process.env.NEXT_PUBLIC_API_BASE_URL ||
-        "https://course-selling-api.up.railway.app") + "/users/profile",
+        "https://course-selling-api.up.railway.app") + "/auth/profile",
       {
         headers,
       },
@@ -140,10 +141,14 @@ function clearPersistedAuth() {
   }
 }
 
-function redirectByRole(role: "student" | "superadmin" | "unknown") {
+function redirectByRole(role: "student" | "superadmin" | "affiliate" | "unknown") {
   if (typeof window === "undefined") return;
   if (role === "superadmin") {
     window.location.href = "/admin/dashboard";
+    return;
+  }
+  if (role === "affiliate") {
+    window.location.href = "/affiliate/dashboard";
     return;
   }
   if (role === "student") {
