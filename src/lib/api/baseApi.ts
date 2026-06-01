@@ -24,7 +24,7 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5001",
+    baseUrl: "https://course-selling-api.up.railway.app",
 
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
