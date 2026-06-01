@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -287,7 +287,7 @@ function ApiPayloadCard({ product }: { product: Record<string, JVal> }) {
             Raw API Payload
           </p>
           <p className="text-[10px] text-slate-400">
-            Product #{product.id} · {Object.keys(product).length} fields
+            Product #{String(product.id)} · {Object.keys(product).length} fields
           </p>
         </div>
         <button
@@ -307,13 +307,14 @@ function ApiPayloadCard({ product }: { product: Record<string, JVal> }) {
   );
 }
 
-/* ── Main Page ── */
-type PageProps = Props | { params: { id: string } };
+interface PageProps {
+  params: { id: string };
+}
 
-export default function ProductDetailsPage(props: PageProps) {
+export default function ProductDetailsPage({ params }: PageProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-  const productId = "productId" in props ? props.productId : props.params.id;
+  const productId = params.id;
 
   const {
     data: productPayload,
@@ -459,7 +460,7 @@ export default function ProductDetailsPage(props: PageProps) {
                   {title}
                 </h1>
                 <p className="text-[11px] text-slate-400 font-mono">
-                  Product ID: #{product.id}
+                  Product ID: #{String(product.id)}
                 </p>
               </div>
             </div>

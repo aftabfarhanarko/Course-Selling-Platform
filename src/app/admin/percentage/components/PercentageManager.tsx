@@ -217,9 +217,8 @@ function PercentageFormModal({
             value={type}
             onChange={(e) => setType(e.target.value)}
             placeholder="e.g. student, teacher, admin"
-            className={`w-full px-3 py-2.5 text-[13px] border rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 ${
-              errors.type ? "border-red-400 bg-red-50" : "border-gray-200"
-            }`}
+            className={`w-full px-3 py-2.5 text-[13px] border rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 ${errors.type ? "border-red-400 bg-red-50" : "border-gray-200"
+              }`}
           />
           {errors.type && (
             <p className="text-[10px] text-red-500 mt-1">{errors.type}</p>
@@ -239,9 +238,8 @@ function PercentageFormModal({
             min={0}
             max={100}
             step={0.01}
-            className={`w-full px-3 py-2.5 text-[13px] border rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 ${
-              errors.percentage ? "border-red-400 bg-red-50" : "border-gray-200"
-            }`}
+            className={`w-full px-3 py-2.5 text-[13px] border rounded-xl outline-none focus:ring-2 focus:ring-indigo-300 ${errors.percentage ? "border-red-400 bg-red-50" : "border-gray-200"
+              }`}
           />
           {errors.percentage && (
             <p className="text-[10px] text-red-500 mt-1">{errors.percentage}</p>
@@ -330,7 +328,8 @@ function DetailsModal({ id, onClose }: { id: number; onClose: () => void }) {
   } = useAdminPercentageQuery(id);
 
   // The single-item query likely returns the same envelope: { data: {...} }
-  const detail: ApiPercentage | null = apiResponse?.data ?? apiResponse ?? null;
+  const detail: ApiPercentage | null =
+    (apiResponse as any)?.data ?? (apiResponse as any) ?? null;
 
   return (
     <ModalShell
@@ -628,7 +627,11 @@ export default function PercentageManager() {
           initialPercentage=""
           onClose={closeModal}
           onSubmit={async (body) => {
-            await createPercentage(body).unwrap();
+            const payload = {
+              type: body.type,
+              percentage: Number(body.percentage) || 0,
+            };
+            await createPercentage(payload).unwrap();
             closeModal();
           }}
         />
@@ -643,7 +646,11 @@ export default function PercentageManager() {
           initialPercentage={String(modal.item.percentage ?? "")}
           onClose={closeModal}
           onSubmit={async (body) => {
-            await updatePercentage({ id: modal.item.id, body }).unwrap();
+            const payload = {
+              type: body.type,
+              percentage: Number(body.percentage) || 0,
+            };
+            await updatePercentage({ id: modal.item.id, body: payload }).unwrap();
             closeModal();
           }}
         />

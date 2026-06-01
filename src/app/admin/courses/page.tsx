@@ -72,7 +72,7 @@ export default function AdminCoursesPage(): React.JSX.Element {
     if (Array.isArray(p?.data)) return p.data;
     return [];
   }, [instData]);
-  
+
   const instructorList = useMemo(
     () =>
       instructorsRaw
@@ -80,7 +80,7 @@ export default function AdminCoursesPage(): React.JSX.Element {
           id: i?.id ?? i?._id,
           name: String(i?.user?.name ?? i?.name ?? "").trim(),
         }))
-        .filter((i) => i.id && i.name),
+        .filter((i: any) => i.id && i.name),
     [instructorsRaw]
   );
 
@@ -140,7 +140,7 @@ export default function AdminCoursesPage(): React.JSX.Element {
           loading={isUpdating}
           onClose={() => setEdit(null)}
           onSubmit={async (payload) => {
-            await updateCourse({ id: edit.id, ...payload }).unwrap();
+            await updateCourse({ id: edit.id, body: payload }).unwrap();
             setEdit(null);
           }}
         />

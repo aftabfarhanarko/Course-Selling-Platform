@@ -551,7 +551,7 @@ export default function AdminEnrollmentsPage() {
             studentId: bkashBody.studentId,
           }}
           onClose={() => setBkashBody(null)}
-          onSubmit={async (body) => {
+          onSubmit={async (body: any) => {
             const payload: any = { ...body };
             delete payload.enrollmentId;
             if (payload.courseId !== undefined && payload.courseId !== null) {

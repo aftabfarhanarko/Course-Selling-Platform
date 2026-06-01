@@ -145,7 +145,7 @@ const reportTypes = [
 
 /* ─────────────────────── Smooth Line Chart ───────────────────────── */
 
-const LineChart = ({ data, animated }) => {
+const LineChart = ({ data, animated }: any) => {
   const [progress, setProgress] = useState(animated ? 0 : 1);
 
   useEffect(() => {
@@ -168,18 +168,18 @@ const LineChart = ({ data, animated }) => {
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
 
-  const max = Math.max(...data.map((d) => d.value));
-  const min = Math.min(...data.map((d) => d.value));
+  const max = Math.max(...data.map((d: any) => d.value));
+  const min = Math.min(...data.map((d: any) => d.value));
   const range = max - min || 1;
 
-  const pts = data.map((d, i) => ({
+  const pts = data.map((d: any, i: any) => ({
     x: PAD.left + (i / (data.length - 1)) * innerW,
     y: PAD.top + (1 - (d.value - min) / range) * innerH,
     ...d,
   }));
 
   // Catmull-Rom to smooth bezier
-  const smooth = (points) => {
+  const smooth = (points: any) => {
     if (points.length < 2) return "";
     let d = `M ${points[0].x},${points[0].y}`;
     for (let i = 0; i < points.length - 1; i++) {
@@ -265,7 +265,7 @@ const LineChart = ({ data, animated }) => {
         ))}
 
         {/* X-axis labels */}
-        {pts.map((p, i) => (
+        {pts.map((p: any, i: any) => (
           <text
             key={i}
             x={p.x}
@@ -295,7 +295,7 @@ const LineChart = ({ data, animated }) => {
         />
 
         {/* Data points & hover targets */}
-        {pts.map((p, i) => {
+        {pts.map((p: any, i: any) => {
           const isHov = hovered === i;
           const visible = p.x <= PAD.left + innerW * progress;
           if (!visible) return null;
@@ -369,7 +369,7 @@ const LineChart = ({ data, animated }) => {
 
 /* ──────────────────── Create Report Modal ──────────────────── */
 
-function CreateReportModal({ onClose }) {
+function CreateReportModal({ onClose }: { onClose: () => void }) {
   const [selected, setSelected] = useState("revenue");
   const [dateFrom, setDateFrom] = useState("2024-01-01");
   const [dateTo, setDateTo] = useState("2024-10-31");
@@ -425,11 +425,10 @@ function CreateReportModal({ onClose }) {
                   <button
                     key={r.id}
                     onClick={() => setSelected(r.id)}
-                    className={`flex items-start gap-2.5 p-3 rounded-xl border-2 text-left transition-all duration-150 ${
-                      selected === r.id
-                        ? "border-indigo-500 bg-indigo-50 shadow-sm"
-                        : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
-                    }`}
+                    className={`flex items-start gap-2.5 p-3 rounded-xl border-2 text-left transition-all duration-150 ${selected === r.id
+                      ? "border-indigo-500 bg-indigo-50 shadow-sm"
+                      : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                      }`}
                   >
                     <span
                       className={`mt-0.5 flex-shrink-0 ${selected === r.id ? "text-indigo-600" : "text-gray-400"}`}
@@ -495,11 +494,10 @@ function CreateReportModal({ onClose }) {
                   <button
                     key={f}
                     onClick={() => setFormat(f)}
-                    className={`flex-1 py-2 rounded-xl text-[12px] font-semibold border-2 transition-all ${
-                      format === f
-                        ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200"
-                        : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`flex-1 py-2 rounded-xl text-[12px] font-semibold border-2 transition-all ${format === f
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200"
+                      : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                      }`}
                   >
                     {f}
                   </button>
@@ -584,12 +582,12 @@ export default function Dashboard() {
 
   const chartData = chartView === "Daily" ? dailyData : weeklyData;
 
-  const handleChartView = (v) => {
+  const handleChartView = (v: string) => {
     setChartView(v);
-    setChartKey((k) => k + 1);
+    setChartKey((k: number) => k + 1);
   };
 
-  const filtered = transactions.filter((t) => {
+  const filtered = transactions.filter((t: any) => {
     const matchSearch =
       t.id.toLowerCase().includes(searchTx.toLowerCase()) ||
       t.user.toLowerCase().includes(searchTx.toLowerCase()) ||
@@ -657,11 +655,10 @@ export default function Dashboard() {
               <div className="flex items-start justify-between mb-3">
                 <div className={`${c.bg} p-2 rounded-lg`}>{c.icon}</div>
                 <span
-                  className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                    c.up
-                      ? "bg-emerald-50 text-emerald-600"
-                      : "bg-red-50 text-red-500"
-                  }`}
+                  className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${c.up
+                    ? "bg-emerald-50 text-emerald-600"
+                    : "bg-red-50 text-red-500"
+                    }`}
                 >
                   {c.up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                   {c.badge}
@@ -695,11 +692,10 @@ export default function Dashboard() {
                   <button
                     key={v}
                     onClick={() => handleChartView(v)}
-                    className={`text-[11px] font-semibold px-3 py-1 rounded-md transition-all ${
-                      chartView === v
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
+                    className={`text-[11px] font-semibold px-3 py-1 rounded-md transition-all ${chartView === v
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                      }`}
                   >
                     {v}
                   </button>
@@ -725,7 +721,7 @@ export default function Dashboard() {
                 <p className="text-[15px] font-extrabold text-gray-900">
                   {Math.round(
                     chartData.reduce((s, d) => s + d.value, 0) /
-                      chartData.length,
+                    chartData.length,
                   )}
                 </p>
               </div>
@@ -807,11 +803,10 @@ export default function Dashboard() {
               <div className="relative">
                 <button
                   onClick={() => setFilterOpen(!filterOpen)}
-                  className={`p-1.5 border rounded-lg transition-colors ${
-                    filterOpen || statusFilter !== "All"
-                      ? "border-indigo-400 bg-indigo-50 text-indigo-600"
-                      : "border-gray-200 hover:bg-gray-50 text-gray-500"
-                  }`}
+                  className={`p-1.5 border rounded-lg transition-colors ${filterOpen || statusFilter !== "All"
+                    ? "border-indigo-400 bg-indigo-50 text-indigo-600"
+                    : "border-gray-200 hover:bg-gray-50 text-gray-500"
+                    }`}
                 >
                   <SlidersHorizontal size={14} />
                 </button>
@@ -827,11 +822,10 @@ export default function Dashboard() {
                           setStatusFilter(s);
                           setFilterOpen(false);
                         }}
-                        className={`w-full text-left px-2 py-1.5 text-[12px] font-medium rounded-lg transition-colors ${
-                          statusFilter === s
-                            ? "bg-indigo-50 text-indigo-700"
-                            : "text-gray-600 hover:bg-gray-50"
-                        }`}
+                        className={`w-full text-left px-2 py-1.5 text-[12px] font-medium rounded-lg transition-colors ${statusFilter === s
+                          ? "bg-indigo-50 text-indigo-700"
+                          : "text-gray-600 hover:bg-gray-50"
+                          }`}
                       >
                         {s}
                       </button>
@@ -911,11 +905,10 @@ export default function Dashboard() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                            tx.status === "Success"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-red-50 text-red-600"
-                          }`}
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold ${tx.status === "Success"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-red-50 text-red-600"
+                            }`}
                         >
                           {tx.status}
                         </span>
@@ -936,11 +929,10 @@ export default function Dashboard() {
                     {tx.id}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      tx.status === "Success"
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-red-50 text-red-600"
-                    }`}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${tx.status === "Success"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-red-50 text-red-600"
+                      }`}
                   >
                     {tx.status}
                   </span>

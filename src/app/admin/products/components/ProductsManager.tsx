@@ -43,6 +43,8 @@ type UiProduct = {
   raw: any;
 };
 
+type Tab = "all" | "my";
+
 const PAGE_SIZE = 10;
 
 function formatDate(value: unknown): string {
