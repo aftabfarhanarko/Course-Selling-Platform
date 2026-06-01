@@ -6,12 +6,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { useAdminCourseQuery } from "@/lib/api/admin/course";
-import CourseHero from "./components/CourseHero";
-import CourseMetrics from "./components/CourseMetrics";
-import WhatYouLearn from "./components/WhatYouLearn";
-import CourseDescription from "./components/CourseDescription";
-import PricingCard from "./components/PricingCard";
-import Skeleton from "./components/Skeleton";
+
+import CourseMetrics from "./CourseMetrics";
+import WhatYouLearn from "./WhatYouLearn";
+import CourseDescription from "./CourseDescription";
+import PricingCard from "./PricingCard";
+
+import CourseHero from "./CourseHero";
+import Skeleton from "./Skeleton";
 
 export default function CourseDetailsClient() {
   const params = useParams();

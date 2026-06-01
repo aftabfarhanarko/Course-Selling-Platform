@@ -49,6 +49,7 @@ export default function CourseDetailsPage({
         commission: raw.commission ?? "0%",
         rating: Number(raw.rating ?? 4.5),
         reviews: Number(raw.reviews ?? 0),
+        duration: raw.duration ?? "14.5 Hours On‑Demand",
       }
     : null;
 
@@ -166,7 +167,7 @@ export default function CourseDetailsPage({
               </div>
               <div className="h-5 w-px bg-slate-700 hidden sm:block" />
               <div className="flex items-center gap-2 text-slate-300 text-[14px] font-medium">
-                <Clock size={18} className="text-slate-400" /> {course.d}
+                <Clock size={18} className="text-slate-400" /> {course.duration}
               </div>
             </div>
           </div>

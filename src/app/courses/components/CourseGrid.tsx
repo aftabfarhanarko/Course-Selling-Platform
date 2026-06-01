@@ -5,7 +5,7 @@ interface Props {
   courses: Course[];
   categoryMeta: Record<
     string,
-    { icon: React.ReactNode; color: string; bg: string }
+    { icon: any; color: string; bg: string }
   >;
 }
 

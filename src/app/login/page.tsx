@@ -34,7 +34,7 @@ export default function LoginPage(): React.JSX.Element {
     const toastId = toast.loading("Signing in...");
 
     try {
-      const response = await loginUser({ email: data.email, password: data.password }).unwrap();
+      const response = await loginUser({ email: data.email, password: data.password }).unwrap() as any;
       const userRole = response?.user?.role || response?.role;
       setSuccess(true);
       toast.success("Signed in!", { id: toastId });

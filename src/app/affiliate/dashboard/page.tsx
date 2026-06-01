@@ -19,7 +19,7 @@ export default function AffiliateDashboard() {
 
   const totals = useMemo(() => {
     return statsList.reduce(
-      (acc, item) => {
+      (acc: { totalIncome: number; totalSales: number }, item: any) => {
         acc.totalIncome += Number(item.totalIncome) || 0;
         acc.totalSales += Number(item.totalEnrollments) || 0;
         return acc;

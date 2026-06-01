@@ -22,7 +22,7 @@ interface Props {
   categoriesList: string[];
   categoryMeta: Record<
     string,
-    { icon: React.ReactNode; color: string; bg: string }
+    { icon: any; color: string; bg: string }
   >;
   selectedCats: string[];
   selectedEarning: EarningTier | "";
@@ -59,6 +59,7 @@ export default function FilterPanel({
           {categoriesList.map((cat) => {
             const meta = categoryMeta[cat] ?? CATEGORY_PALETTE[0];
             const active = selectedCats.includes(cat);
+            const Icon = meta.icon;
             return (
               <button
                 key={cat}
@@ -70,7 +71,7 @@ export default function FilterPanel({
                 }`}
               >
                 <span className={active ? "text-white/70" : meta.color}>
-                  {meta.icon}
+                  {Icon && <Icon className="w-4 h-4" />}
                 </span>
                 <span className="flex-1 text-left">{cat}</span>
                 {active && <X className="w-3 h-3 text-white/60" />}
