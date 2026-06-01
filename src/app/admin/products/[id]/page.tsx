@@ -307,11 +307,11 @@ function ApiPayloadCard({ product }: { product: Record<string, JVal> }) {
   );
 }
 
-interface PageProps {
+export default function ProductDetailsPage({
+  params,
+}: {
   params: { id: string };
-}
-
-export default function ProductDetailsPage({ params }: PageProps) {
+}) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const productId = params.id;
