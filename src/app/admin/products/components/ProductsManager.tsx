@@ -307,13 +307,18 @@ function PaymentConfirmModal({
   product: UiProduct;
   loading: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (selectedMethod: any) => void;
 }) {
   const { data, isFetching } = useAdminPaymentMethodsQuery({
     search: product.ownerEmail,
   });
 
+  const [selectedMethodId, setSelectedMethodId] = useState<string | number | null>(null);
+
   const paymentMethods = useMemo(() => extractList(data), [data]);
+  const selectedMethod = useMemo(() => {
+    return paymentMethods.find(pm => (pm.id ?? pm._id ?? pm.paymentMethodId) === selectedMethodId);
+  }, [paymentMethods, selectedMethodId]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -342,7 +347,7 @@ function PaymentConfirmModal({
 
         <div className="px-6 py-6 overflow-y-auto">
           <p className="text-[12px] text-slate-500 mb-4 leading-relaxed bg-amber-50 text-amber-700 p-3 rounded-xl border border-amber-200">
-            <strong>Note:</strong> Clicking confirm will{" "}
+            <strong>Note:</strong> Select a payment method below. Clicking confirm will{" "}
             <strong>automatically approve</strong> this product and then process the direct payment.
           </p>
 
@@ -363,69 +368,81 @@ function PaymentConfirmModal({
             </div>
           ) : (
             <div className="space-y-3">
-              {paymentMethods.map((pm, i) => (
-                <div
-                  key={i}
-                  className="p-3 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col gap-1"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-black text-slate-800 uppercase">
-                      {pm.provider || pm.type || "Method"}
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                        pm.status === "approved" || pm.isVerified
-                          ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                          : "bg-slate-100 text-slate-500 border border-slate-200"
-                      }`}
-                    >
-                      {pm.status || (pm.isVerified ? "Verified" : "Pending")}
-                    </span>
-                  </div>
-                  <div className="text-[12px] text-slate-600 bg-slate-50 p-2 rounded-xl border border-slate-100 mt-1 font-mono flex flex-col gap-1">
-                    {(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Account:</span>
-                        <span className="font-bold text-slate-800">
-                          {pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number}
+              {paymentMethods.map((pm, i) => {
+                const pmId = pm.id ?? pm._id ?? pm.paymentMethodId ?? i;
+                const isSelected = selectedMethodId === pmId;
+                return (
+                  <div
+                    key={i}
+                    onClick={() => setSelectedMethodId(pmId)}
+                    className={`p-3 rounded-2xl border cursor-pointer transition-all flex flex-col gap-1 ${
+                      isSelected
+                        ? "border-violet-600 bg-violet-50/50 shadow-md ring-2 ring-violet-500/20"
+                        : "border-slate-200 bg-white shadow-sm hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] font-black text-slate-800 uppercase flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full border flex items-center justify-center ${isSelected ? "border-violet-600 bg-violet-600" : "border-slate-300"}`}>
+                          {isSelected && <span className="w-1 h-1 rounded-full bg-white" />}
                         </span>
-                      </div>
-                    )}
-                    {(pm.accountHolderName || pm.nameOnAccount) && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Name:</span>
-                        <span className="font-bold text-slate-800">
-                          {pm.accountHolderName || pm.nameOnAccount}
-                        </span>
-                      </div>
-                    )}
-                    {pm.bankName && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Bank:</span>
-                        <span className="font-bold text-slate-800">{pm.bankName}</span>
-                      </div>
-                    )}
-                    {pm.branchName && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Branch:</span>
-                        <span className="font-bold text-slate-800">{pm.branchName}</span>
-                      </div>
-                    )}
-                    {pm.binanceId && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Binance ID:</span>
-                        <span className="font-bold text-slate-800">{pm.binanceId}</span>
-                      </div>
-                    )}
-                    {!(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) &&
-                      !(pm.accountHolderName || pm.nameOnAccount) &&
-                      !pm.bankName &&
-                      !pm.binanceId && (
-                        <div className="text-slate-400">No details provided</div>
+                        {pm.provider || pm.type || "Method"}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                          pm.status === "approved" || pm.isVerified
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                            : "bg-slate-100 text-slate-500 border border-slate-200"
+                        }`}
+                      >
+                        {pm.status || (pm.isVerified ? "Verified" : "Pending")}
+                      </span>
+                    </div>
+                    <div className="text-[12px] text-slate-600 bg-slate-50/50 p-2 rounded-xl border border-slate-100 mt-1 font-mono flex flex-col gap-1">
+                      {(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Account:</span>
+                          <span className="font-bold text-slate-800">
+                            {pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number}
+                          </span>
+                        </div>
                       )}
+                      {(pm.accountHolderName || pm.nameOnAccount) && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Name:</span>
+                          <span className="font-bold text-slate-800">
+                            {pm.accountHolderName || pm.nameOnAccount}
+                          </span>
+                        </div>
+                      )}
+                      {pm.bankName && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Bank:</span>
+                          <span className="font-bold text-slate-800">{pm.bankName}</span>
+                        </div>
+                      )}
+                      {pm.branchName && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Branch:</span>
+                          <span className="font-bold text-slate-800">{pm.branchName}</span>
+                        </div>
+                      )}
+                      {pm.binanceId && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Binance ID:</span>
+                          <span className="font-bold text-slate-800">{pm.binanceId}</span>
+                        </div>
+                      )}
+                      {!(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) &&
+                        !(pm.accountHolderName || pm.nameOnAccount) &&
+                        !pm.bankName &&
+                        !pm.binanceId && (
+                          <div className="text-slate-400">No details provided</div>
+                        )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -439,9 +456,9 @@ function PaymentConfirmModal({
             Cancel
           </button>
           <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-violet-200 transition-all disabled:opacity-60"
+            onClick={() => onConfirm(selectedMethod)}
+            disabled={loading || !selectedMethodId}
+            className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-violet-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <Check size={13} />}
             Approve &amp; Pay
@@ -535,7 +552,7 @@ export default function ProductsManager(): React.JSX.Element {
           product={paymentTarget}
           loading={isDirecting || isApproving}
           onClose={() => setPaymentTarget(null)}
-          onConfirm={async () => {
+          onConfirm={async (selectedMethod) => {
             try {
               // 1. Approve product first
               if (paymentTarget.status.toLowerCase() !== "approved" && paymentTarget.status.toLowerCase() !== "active") {

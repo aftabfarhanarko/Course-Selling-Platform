@@ -27,6 +27,7 @@ import {
   useLazyAdminWithdrawQuery,
 } from "@/lib/api/admin/withdraw";
 import { useAdminUsersQuery } from "@/lib/api/admin/user";
+import { useAdminPaymentMethodsQuery } from "@/lib/api/admin/payment-methods";
 
 type UiWithdraw = {
   id: number | string;
@@ -346,6 +347,178 @@ function DetailsModal({ id, onClose, onApprove, onReject, isBusy }: { id: number
 }
 
 
+function WithdrawApproveModal({
+  withdraw,
+  loading,
+  onClose,
+  onConfirm,
+}: {
+  withdraw: UiWithdraw;
+  loading: boolean;
+  onClose: () => void;
+  onConfirm: (selectedMethod: any) => void;
+}) {
+  const { data, isFetching } = useAdminPaymentMethodsQuery({
+    search: withdraw.user.email,
+  });
+
+  const [selectedMethodId, setSelectedMethodId] = useState<string | number | null>(null);
+
+  const paymentMethods = useMemo(() => extractList(data), [data]);
+  const selectedMethod = useMemo(() => {
+    return paymentMethods.find(pm => (pm.id ?? pm._id ?? pm.paymentMethodId) === selectedMethodId);
+  }, [paymentMethods, selectedMethodId]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[85vh]">
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div>
+            <h2 className="text-[15px] font-black text-slate-900">
+              Approve Withdraw & Pay?
+            </h2>
+            <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
+              Amount: ৳{withdraw.totalAmount}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="w-9 h-9 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-all disabled:opacity-60"
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        <div className="px-6 py-6 overflow-y-auto">
+          <p className="text-[12px] text-slate-500 mb-4 leading-relaxed bg-amber-50 text-amber-700 p-3 rounded-xl border border-amber-200">
+            <strong>Note:</strong> Select a payment method below. Clicking approve will{" "}
+            <strong>approve & mark as paid</strong> this withdraw request.
+          </p>
+
+          <h4 className="text-[12px] font-black text-slate-900 mb-3 uppercase tracking-wider">
+            User Payment Methods
+          </h4>
+
+          {isFetching ? (
+            <div className="flex items-center justify-center py-6 text-slate-400 gap-2">
+              <Loader2 size={16} className="animate-spin" />
+              <span className="text-[12px] font-semibold">Loading methods...</span>
+            </div>
+          ) : paymentMethods.length === 0 ? (
+            <div className="py-6 text-center rounded-xl bg-slate-50 border border-slate-100 border-dashed">
+              <p className="text-[12px] font-semibold text-slate-500">
+                No payment methods found for {withdraw.user.email}.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {paymentMethods.map((pm, i) => {
+                const pmId = pm.id ?? pm._id ?? pm.paymentMethodId ?? i;
+                const isSelected = selectedMethodId === pmId;
+                return (
+                  <div
+                    key={i}
+                    onClick={() => setSelectedMethodId(pmId)}
+                    className={`p-3 rounded-2xl border cursor-pointer transition-all flex flex-col gap-1 ${
+                      isSelected
+                        ? "border-violet-600 bg-violet-50/50 shadow-md ring-2 ring-violet-500/20"
+                        : "border-slate-200 bg-white shadow-sm hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] font-black text-slate-800 uppercase flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full border flex items-center justify-center ${isSelected ? "border-violet-600 bg-violet-600" : "border-slate-300"}`}>
+                          {isSelected && <span className="w-1 h-1 rounded-full bg-white" />}
+                        </span>
+                        {pm.provider || pm.type || "Method"}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                          pm.status === "approved" || pm.isVerified
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                            : "bg-slate-100 text-slate-500 border border-slate-200"
+                        }`}
+                      >
+                        {pm.status || (pm.isVerified ? "Verified" : "Pending")}
+                      </span>
+                    </div>
+                    <div className="text-[12px] text-slate-600 bg-slate-50/50 p-2 rounded-xl border border-slate-100 mt-1 font-mono flex flex-col gap-1">
+                      {(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Account:</span>
+                          <span className="font-bold text-slate-800">
+                            {pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number}
+                          </span>
+                        </div>
+                      )}
+                      {(pm.accountHolderName || pm.nameOnAccount) && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Name:</span>
+                          <span className="font-bold text-slate-800">
+                            {pm.accountHolderName || pm.nameOnAccount}
+                          </span>
+                        </div>
+                      )}
+                      {pm.bankName && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Bank:</span>
+                          <span className="font-bold text-slate-800">{pm.bankName}</span>
+                        </div>
+                      )}
+                      {pm.branchName && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Branch:</span>
+                          <span className="font-bold text-slate-800">{pm.branchName}</span>
+                        </div>
+                      )}
+                      {pm.binanceId && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Binance ID:</span>
+                          <span className="font-bold text-slate-800">{pm.binanceId}</span>
+                        </div>
+                      )}
+                      {!(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) &&
+                        !(pm.accountHolderName || pm.nameOnAccount) &&
+                        !pm.bankName &&
+                        !pm.binanceId && (
+                          <div className="text-slate-400">No details provided</div>
+                        )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 py-5 border-t border-slate-100 bg-slate-50 flex gap-3">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-white hover:border-slate-300 transition-all disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onConfirm(selectedMethod)}
+            disabled={loading || !selectedMethodId}
+            className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-violet-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <Check size={13} />}
+            Confirm Approve
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function ConfirmModal({ title, description, loading, confirmText, confirmStyle = "bg-red-500 hover:bg-red-600 text-white", onClose, onConfirm }: any) {
   return (
     <ModalShell title={title} onClose={onClose} loading={loading}>
@@ -415,17 +588,28 @@ export default function WithdrawManager(): React.JSX.Element {
            }}
         />
       )}
-      {actionTarget && (
+      {actionTarget && actionTarget.action === "approve" && list.find((item) => item.id === actionTarget.id) && (
+        <WithdrawApproveModal
+          withdraw={list.find((item) => item.id === actionTarget.id)!}
+          loading={busy}
+          onClose={() => setActionTarget(null)}
+          onConfirm={async (selectedMethod) => {
+            await approve({ id: actionTarget.id }).unwrap();
+            setActionTarget(null);
+            refetch();
+          }}
+        />
+      )}
+      {actionTarget && actionTarget.action !== "approve" && (
         <ConfirmModal
           title={actionTarget.action === "direct" ? "Process Direct Payment?" : `${actionTarget.action.charAt(0).toUpperCase() + actionTarget.action.slice(1)} Withdraw?`}
           description={actionTarget.action === "direct" ? "Are you sure you want to process a direct payment?" : `Are you sure you want to ${actionTarget.action} this withdraw request?`}
-          confirmText={actionTarget.action === "delete" ? "Delete" : actionTarget.action === "approve" ? "Approve" : actionTarget.action === "direct" ? "Process" : "Reject"}
-          confirmStyle={actionTarget.action === "approve" || actionTarget.action === "direct" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : "bg-red-500 hover:bg-red-600 text-white"}
+          confirmText={actionTarget.action === "delete" ? "Delete" : actionTarget.action === "direct" ? "Process" : "Reject"}
+          confirmStyle={actionTarget.action === "direct" ? "bg-emerald-500 hover:bg-emerald-600 text-white" : "bg-red-500 hover:bg-red-600 text-white"}
           loading={busy}
           onClose={() => setActionTarget(null)}
           onConfirm={async () => {
-            if (actionTarget.action === "approve") await approve({ id: actionTarget.id }).unwrap();
-            else if (actionTarget.action === "direct") await direct(actionTarget.payload).unwrap();
+            if (actionTarget.action === "direct") await direct(actionTarget.payload).unwrap();
             else if (actionTarget.action === "reject") {
               const reason = window.prompt("Reason for rejection?", "Invalid details");
               if (reason !== null) await reject({ id: actionTarget.id, reason }).unwrap();
@@ -554,20 +738,6 @@ export default function WithdrawManager(): React.JSX.Element {
                         </button>
                         {m.status === "pending" && (
                           <>
-                            <button disabled={busy} onClick={() => {
-                              const body: any = { studentId: Number(m.raw?.user?.id) };
-                              if (m.raw?.product?.id) body.productId = Number(m.raw.product.id);
-                              if (m.raw?.enrollment?.id) body.enrollmentId = Number(m.raw.enrollment.id);
-                              if (m.raw?.percentage?.id) body.percentageId = Number(m.raw.percentage.id);
-                              
-                              setActionTarget({
-                                id: m.id,
-                                action: "direct",
-                                payload: body
-                              });
-                            }} className="w-8 h-8 rounded-lg border border-violet-200 bg-violet-50 flex items-center justify-center text-violet-700 hover:bg-violet-100 transition-colors disabled:opacity-50" title="Direct Payment">
-                              <Wallet size={14} />
-                            </button>
                             <button disabled={busy} onClick={() => setActionTarget({ id: m.id, action: "approve" })} className="w-8 h-8 rounded-lg border border-emerald-200 bg-emerald-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-50" title="Approve">
                               <Check size={14} />
                             </button>
