@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
-import { usePublicCoursesAllQuery } from "@/lib/api/admin/course";
+import { useGetPublicCoursesQuery } from "@/lib/api/courseApi";
 import { useAdminCategoriesQuery } from "@/lib/api/admin/category";
 import { Course, EarningTier, SortKey } from "./types";
 import { extractCategories, extractCourses, CATEGORY_PALETTE } from "./utils";
@@ -26,7 +26,7 @@ import MobileFilterSheet from "./MobileFilterSheet";
 const PAGE_SIZE = 8; // renamed from _paginationPage
 
 export default function CourseList() {
-  const { data: allCoursesData } = usePublicCoursesAllQuery();
+  const { data: allCoursesData } = useGetPublicCoursesQuery({ page: 1, limit: 100 });
   const { data: catData } = useAdminCategoriesQuery();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -116,10 +116,24 @@ export default function CourseList() {
     return map;
   }, [categoriesFromApi]);
 
-  const courses: Course[] = useMemo(
-    () => extractCourses(allCoursesData) as Course[],
-    [allCoursesData],
-  );
+  const courses: Course[] = useMemo(() => {
+    const rawItems = allCoursesData?.items || [];
+    return rawItems.map((c: any) => ({
+      id: c.id,
+      title: c.title ?? "Untitled",
+      desc: c.description ?? "",
+      image: c.thumbnail ?? "/placeholder.jpg",
+      price: Number(c.price ?? 0),
+      category: c.category?.name ?? "Uncategorized",
+      potential: Number(c.price) > 100 ? "$10k+/mo Potential" : "$2k+/mo Potential",
+      potentialVal: Number(c.price) > 100 ? 10000 : 2000,
+      commission: "0%",
+      commissionVal: 0,
+      earnings: "Beginner",
+      rating: 4.9,
+      reviews: "1.2k"
+    }));
+  }, [allCoursesData]);
 
   const filtered = courses
     .filter((c) => {

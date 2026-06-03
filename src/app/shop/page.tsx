@@ -2,7 +2,11 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { COURSES, type Category } from "@/lib/courses";
+import { type Category } from "@/lib/courses";
+import { useGetShopItemsQuery, useBuyShopItemMutation } from "@/lib/api/shopApi";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { toast } from "sonner";
 import {
   ArrowRight,
   BadgeCheck,
@@ -14,9 +18,48 @@ import {
 export default function ShopPage() {
   type CategoryFilter = "All" | Category;
 
+  const { data: shopData, isLoading } = useGetShopItemsQuery({ page: 1, limit: 100 });
+  const [buyShopItem, { isLoading: isBuying }] = useBuyShopItemMutation();
+  const authUser = useSelector((state: RootState) => state.auth.user);
+
+  const handleBuy = async (shopId: number, price: number) => {
+    if (!authUser) {
+      toast.error("Please login to purchase");
+      return;
+    }
+    
+    try {
+      const res = await buyShopItem({
+        userId: authUser.id,
+        shopId: shopId,
+        amount: price,
+      }).unwrap();
+
+      if (res.paymentUrl) {
+        window.location.href = res.paymentUrl;
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to initiate payment");
+    }
+  };
+
+  const shopItems = useMemo(() => {
+    const rawItems = shopData?.items || [];
+    return rawItems.map((c: any) => ({
+      id: c.id,
+      title: c.name ?? "Untitled Shop Item",
+      desc: c.gmail ?? "Digital Asset",
+      image: c.logo ?? "/placeholder.jpg",
+      price: Number(c.price ?? 0),
+      category: "Digital Asset",
+      rating: 4.9,
+      reviews: "1k+",
+      earnings: "High Potential",
+    }));
+  }, [shopData]);
+
   const filters = useMemo<CategoryFilter[]>(() => {
-    const unique = Array.from(new Set(COURSES.map((c) => c.category)));
-    return ["All", ...unique] as CategoryFilter[];
+    return ["All", "Digital Asset"] as CategoryFilter[];
   }, []);
 
   const [query, setQuery] = useState<string>("");
@@ -25,21 +68,21 @@ export default function ShopPage() {
   const filteredCourses = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    return COURSES.filter((c) => {
+    return shopItems.filter((c) => {
       if (activeCategory !== "All" && c.category !== activeCategory)
         return false;
 
       if (!q) return true;
 
       const haystack =
-        `${c.title} ${c.desc} ${c.category} ${c.earnings}`.toLowerCase();
+        `${c.title} ${c.desc} ${c.category}`.toLowerCase();
       return haystack.includes(q);
     });
-  }, [activeCategory, query]);
+  }, [activeCategory, query, shopItems]);
 
   const popularCourses = useMemo(() => {
-    return [...COURSES].sort((a, b) => b.rating - a.rating).slice(0, 3);
-  }, []);
+    return [...shopItems].sort((a, b) => b.rating - a.rating).slice(0, 3);
+  }, [shopItems]);
 
   return (
     <div className="min-h-screen bg-slate-50 mt-10 font-sans">
@@ -115,10 +158,10 @@ export default function ShopPage() {
 
               <div className="mt-5 space-y-3">
                 {popularCourses.map((c) => (
-                  <Link
+                  <div
                     key={c.id}
-                    href={`/courses/${c.id}`}
-                    className="block rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+                    onClick={() => handleBuy(c.id, c.price)}
+                    className="cursor-pointer block rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -149,7 +192,7 @@ export default function ShopPage() {
                         </p>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>
@@ -260,18 +303,13 @@ export default function ShopPage() {
                   </div>
 
                   <div className="mt-5 flex gap-2">
-                    <Link
-                      href={`/courses/${c.id}`}
-                      className="flex-1 inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-black text-slate-900 hover:bg-slate-50 active:scale-[0.98] transition-all"
+                    <button
+                      onClick={() => handleBuy(c.id, c.price)}
+                      disabled={isBuying}
+                      className="w-full inline-flex items-center justify-center rounded-2xl bg-blue-600 px-4 py-2.5 text-[12px] font-black text-white shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50"
                     >
-                      Details
-                    </Link>
-                    <Link
-                      href={`/shop/shopCard?title=${encodeURIComponent(c.title)}&price=${encodeURIComponent(price)}`}
-                      className="flex-1 inline-flex items-center justify-center rounded-2xl bg-blue-600 px-4 py-2.5 text-[12px] font-black text-white shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all"
-                    >
-                      Buy Now
-                    </Link>
+                      {isBuying ? "Processing..." : "Buy Now"}
+                    </button>
                   </div>
 
                   <p className="mt-4 text-[11px] text-slate-400 font-semibold">

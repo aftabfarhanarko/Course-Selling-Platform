@@ -2,25 +2,33 @@
 
 import { BookOpen, Calendar, TrendingUp, Users, Wallet, ArrowUpRight } from "lucide-react";
 
+import { useGetStudentDashboardStatsQuery } from "@/lib/api/statsApi";
+
 export const DashBoardBalcnes = () => {
-  const dashboardStats = {
+  const { data, isLoading } = useGetStudentDashboardStatsQuery();
+
+  if (isLoading) {
+    return <div className="h-48 flex items-center justify-center text-gray-500">Loading balances...</div>;
+  }
+
+  const dashboardStats = data?.dashboardStats || {
     currentBalance: {
-      amount: 12450.0,
+      amount: 0,
       currency: "USD",
-      percentageChange: 12,
+      percentageChange: 0,
       label: "CURRENT WALLET BALANCE",
     },
     affiliateEarnings: {
-      amount: 4820.5,
+      amount: 0,
       currency: "USD",
       lifetime: true,
-      nextPayoutDate: "Oct 15",
+      nextPayoutDate: "End of Month",
       label: "TOTAL AFFILIATE EARNINGS",
     },
     coursesEnrolled: {
-      activeModules: 18,
+      activeModules: 0,
       label: "TOTAL COURSES ENROLLED",
-      subtext: "Students in your cohorts",
+      subtext: "Total active courses",
     },
   };
 

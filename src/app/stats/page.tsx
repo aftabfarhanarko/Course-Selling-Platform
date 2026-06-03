@@ -10,13 +10,14 @@ import {
   ShoppingCart,
   Users,
 } from "lucide-react";
+import { useGetStatsQuery } from "@/lib/api/statsApi";
 
 type Kpi = {
   label: string;
   value: string;
   delta: string;
   trend: "up" | "down";
-  icon: React.ComponentType<{ className?: string }>;
+  icon: string;
   hint: string;
 };
 
@@ -38,95 +39,28 @@ function formatPct(pct: number) {
   return `${pct}%`;
 }
 
+const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  DollarSign,
+  ShoppingCart,
+  Users,
+  GraduationCap,
+};
+
 export default function StatsPage() {
-  const kpis: Kpi[] = [
-    {
-      label: "Total Revenue",
-      value: "$48,920",
-      delta: "+12.4%",
-      trend: "up",
-      icon: DollarSign,
-      hint: "Last 30 days",
-    },
-    {
-      label: "Course Sales",
-      value: "1,284",
-      delta: "+8.1%",
-      trend: "up",
-      icon: ShoppingCart,
-      hint: "Payments completed",
-    },
-    {
-      label: "Active Students",
-      value: "9,612",
-      delta: "+3.6%",
-      trend: "up",
-      icon: Users,
-      hint: "Unique learners",
-    },
-    {
-      label: "Published Courses",
-      value: "42",
-      delta: "-1",
-      trend: "down",
-      icon: GraduationCap,
-      hint: "Live in marketplace",
-    },
-  ];
+  const { data, isLoading, isError } = useGetStatsQuery();
 
-  const salesTrend = [
-    { label: "Mon", value: 38 },
-    { label: "Tue", value: 52 },
-    { label: "Wed", value: 46 },
-    { label: "Thu", value: 71 },
-    { label: "Fri", value: 64 },
-    { label: "Sat", value: 58 },
-    { label: "Sun", value: 79 },
-  ];
+  if (isLoading || !data) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <p className="text-slate-500 font-bold">
+          {isError ? "Failed to load stats." : "Loading stats..."}
+        </p>
+      </div>
+    );
+  }
+
+  const { kpis, salesTrend, topCourses, sources } = data;
   const maxSales = Math.max(...salesTrend.map((d) => d.value));
-
-  const topCourses: TopCourse[] = [
-    {
-      title: "Full-Stack MERN Bootcamp",
-      category: "Development",
-      price: "$49",
-      students: 1832,
-      revenue: "$89,768",
-      rating: 4.8,
-    },
-    {
-      title: "UI/UX Design Masterclass",
-      category: "Design",
-      price: "$39",
-      students: 1410,
-      revenue: "$54,990",
-      rating: 4.7,
-    },
-    {
-      title: "Digital Marketing Blueprint",
-      category: "Marketing",
-      price: "$29",
-      students: 2106,
-      revenue: "$61,074",
-      rating: 4.6,
-    },
-    {
-      title: "Affiliate Income System",
-      category: "Business",
-      price: "$59",
-      students: 742,
-      revenue: "$43,778",
-      rating: 4.9,
-    },
-  ];
-
-  const sources: Source[] = [
-    { name: "Organic Search", pct: 42 },
-    { name: "Social Media", pct: 23 },
-    { name: "Affiliates", pct: 18 },
-    { name: "Email", pct: 11 },
-    { name: "Direct", pct: 6 },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -166,7 +100,7 @@ export default function StatsPage() {
 
         <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {kpis.map((kpi) => {
-            const Icon = kpi.icon;
+            const Icon = ICONS[kpi.icon];
             const isUp = kpi.trend === "up";
             const DeltaIcon = isUp ? ArrowUpRight : ArrowDownRight;
 

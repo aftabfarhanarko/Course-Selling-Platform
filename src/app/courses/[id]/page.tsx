@@ -2,7 +2,7 @@
 
 import { notFound, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useAdminCourseQuery } from "@/lib/api/admin/course";
+import { useGetPublicCourseQuery } from "@/lib/api/courseApi";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { useAdminEnrollmentsPayBkashPaymentMutation } from "@/lib/api/admin/enrollments";
@@ -33,23 +33,21 @@ export default function CourseDetailsPage({
   const authUser = useSelector((state: RootState) => state.auth.user);
   const [payBkash, { isLoading: isPaying }] = useAdminEnrollmentsPayBkashPaymentMutation();
 
-  const { data, isLoading, isError, error } = useAdminCourseQuery(id);
-
-  const raw = (data as any)?.data ?? data;
+  const { data: raw, isLoading, isError, error } = useGetPublicCourseQuery(id);
 
   const course = raw
     ? {
         id: raw.id ?? id,
-        title: raw.name ?? raw.title ?? "Untitled",
-        desc: raw.description ?? raw.desc ?? "",
-        image: raw.image ?? raw.thumbnail ?? "/placeholder.jpg",
+        title: raw.title ?? "Untitled",
+        desc: raw.description ?? "",
+        image: raw.thumbnail ?? "/placeholder.jpg",
         price: Number(raw.price ?? 0),
-        category: raw.category?.name ?? raw.categoryName ?? "Uncategorized",
-        potential: raw.potential ?? "High Potential",
-        commission: raw.commission ?? "0%",
-        rating: Number(raw.rating ?? 4.5),
-        reviews: Number(raw.reviews ?? 0),
-        duration: raw.duration ?? "14.5 Hours On‑Demand",
+        category: raw.category?.name ?? "Uncategorized",
+        potential: "$10k+/mo Potential",
+        commission: "0%",
+        rating: 4.9,
+        reviews: "1.2k",
+        duration: "14.5 Hours On‑Demand",
       }
     : null;
 

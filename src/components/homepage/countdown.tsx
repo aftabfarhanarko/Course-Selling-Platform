@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, animate } from "framer-motion";
-import { Users, DollarSign, TrendingUp, BookOpen } from "lucide-react";
+import { Users, DollarSign, TrendingUp, BookOpen, Star } from "lucide-react";
+import Image from "next/image";
+import { useGetStatsQuery } from "@/lib/api/statsApi";
 import type { ReactNode } from "react";
 
 // ── types ────────────────────────────────────────────────────────────────────
@@ -124,11 +126,23 @@ const CountDownTrust = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
 
+  const { data: statsData } = useGetStatsQuery();
+
+  const parseNumber = (val: string) => parseFloat(val.replace(/[^0-9.-]+/g, "")) || 0;
+
+  const totalStudents = statsData ? parseNumber(statsData.kpis.find(k => k.label === "Active Students")?.value || "0") : 50000;
+  const rawRevenue = statsData ? parseNumber(statsData.kpis.find(k => k.label === "Total Revenue")?.value || "0") : 12400000;
+  const totalCourses = statsData ? parseNumber(statsData.kpis.find(k => k.label === "Published Courses")?.value || "0") : 120;
+  
+  const revValue = rawRevenue > 1000000 ? rawRevenue / 1000000 : rawRevenue;
+  const revSuffix = rawRevenue > 1000000 ? "M+" : "+";
+  const revDecimals = rawRevenue > 1000000 ? 1 : 0;
+
   const stats: StatItem[] = [
     {
       id: 1,
       label: "Total Students",
-      value: 50000,
+      value: totalStudents || 50000,
       suffix: "+",
       icon: <Users className="w-5 h-5" />,
       iconBg: "#EEF2FF",
@@ -137,10 +151,10 @@ const CountDownTrust = () => {
     {
       id: 2,
       label: "Total Earnings",
-      value: 12.4,
+      value: revValue || 12.4,
       prefix: "$",
-      suffix: "M+",
-      decimals: 1,
+      suffix: revSuffix || "M+",
+      decimals: revDecimals || 1,
       icon: <DollarSign className="w-5 h-5" />,
       iconBg: "rgba(16,185,129,0.28)",
       borderColor: "#34D399",
@@ -158,7 +172,7 @@ const CountDownTrust = () => {
     {
       id: 4,
       label: "Total Courses",
-      value: 120,
+      value: totalCourses || 120,
       suffix: "+",
       icon: <BookOpen className="w-5 h-5" />,
       iconBg: "rgba(168,85,247,0.20)",

@@ -5,69 +5,12 @@ import { motion, useInView } from "framer-motion";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { ArrowRight, Star, Users, Clock } from "lucide-react";
+import { useGetPublicCoursesQuery } from "@/lib/api/courseApi";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
-
-// ── data ─────────────────────────────────────────────────────────────────────
-const courses = [
-  {
-    id: 1,
-    tag: "$2k+/mo Potential",
-    tagColor: "#15803d",
-    tagBg: "#dcfce7",
-    category: "DESIGN & STRATEGY",
-    categoryColor: "#0052CC",
-    title: "High Income Skill: UI/UX Architecture",
-    price: "$499",
-    rating: "4.9",
-    students: "12.4k",
-    duration: "48h",
-    imageBg: "#f0ece4",
-    imageUrl:
-      "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=700&q=85",
-    imageAlt: "UI/UX design on mobile",
-    accent: "#0052CC",
-  },
-  {
-    id: 2,
-    tag: "$5k+/mo Potential",
-    tagColor: "#15803d",
-    tagBg: "#dcfce7",
-    category: "MARKETING & SCALE",
-    categoryColor: "#0052CC",
-    title: "High Income Skill: Growth Systems",
-    price: "$699",
-    rating: "4.9",
-    students: "9.1k",
-    duration: "56h",
-    imageBg: "#d1fae5",
-    imageUrl:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&q=85",
-    imageAlt: "Growth marketing charts",
-    accent: "#006E2A",
-  },
-  {
-    id: 3,
-    tag: "$10k+/mo Potential",
-    tagColor: "#15803d",
-    tagBg: "#dcfce7",
-    category: "BUSINESS DEVELOPMENT",
-    categoryColor: "#0052CC",
-    title: "High Income Skill: Elite Tech Sales",
-    price: "$899",
-    rating: "5.0",
-    students: "6.8k",
-    duration: "64h",
-    imageBg: "#0d9488",
-    imageUrl:
-      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=700&q=85",
-    imageAlt: "Tech sales professional",
-    accent: "#705D00",
-  },
-];
 
 // ── card ─────────────────────────────────────────────────────────────────────
 function CourseCard({
@@ -75,7 +18,7 @@ function CourseCard({
   index,
   isInView,
 }: {
-  course: (typeof courses)[0];
+  course: any;
   index: number;
   isInView: boolean;
 }) {
@@ -192,6 +135,39 @@ const CourseSection = () => {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
+  const { data, isLoading } = useGetPublicCoursesQuery({ page: 1, limit: 3 });
+
+  const mappedCourses = data?.items?.map((c, idx) => {
+    const colors = [
+      { tagColor: "#15803d", tagBg: "#dcfce7", imageBg: "#f0ece4", accent: "#0052CC" },
+      { tagColor: "#15803d", tagBg: "#dcfce7", imageBg: "#d1fae5", accent: "#006E2A" },
+      { tagColor: "#15803d", tagBg: "#dcfce7", imageBg: "#0d9488", accent: "#705D00" },
+    ];
+    const colorSet = colors[idx % colors.length];
+
+    return {
+      id: c.id,
+      tag: Number(c.price) > 100 ? "$10k+/mo Potential" : "$2k+/mo Potential",
+      tagColor: colorSet.tagColor,
+      tagBg: colorSet.tagBg,
+      category: c.category?.name || "GENERAL",
+      categoryColor: "#0052CC",
+      title: c.title,
+      price: `$${c.price}`,
+      rating: "4.9",
+      students: c.enrollmentCount
+        ? `${(c.enrollmentCount / 1000).toFixed(1)}k`
+        : "1.2k",
+      duration: "48h",
+      imageBg: colorSet.imageBg,
+      imageUrl:
+        c.thumbnail ||
+        "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=700&q=85",
+      imageAlt: c.title,
+      accent: colorSet.accent,
+    };
+  }) || [];
+
   return (
     <section
       ref={ref}
@@ -246,16 +222,22 @@ const CourseSection = () => {
         </motion.div>
 
         {/* ── cards ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {courses.map((course, idx) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              index={idx}
-              isInView={isInView}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <div className="w-8 h-8 border-4 border-[#0052CC] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {mappedCourses.map((course, idx) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                index={idx}
+                isInView={isInView}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

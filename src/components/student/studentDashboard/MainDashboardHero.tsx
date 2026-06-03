@@ -1,24 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useGetStudentDashboardStatsQuery } from "@/lib/api/statsApi";
 
 export const MainDashboard = () => {
-  const [progressData, setProgressData] = useState({
-    percentage: 85,
-    label: "Course Progress",
-    status: "Almost there!",
-  });
+  const { data, isLoading, error } = useGetStudentDashboardStatsQuery();
 
-  useEffect(() => {
-    const fetchProgressFromBackend = async () => {
-      const backendData = {
-        percentage: 65,
-        label: "Module 3: Advanced Topics",
-        status: "Keep going!",
-      };
-      setProgressData(backendData);
-    };
-    fetchProgressFromBackend();
-  }, []);
+  if (isLoading) {
+    return <div className="h-64 flex items-center justify-center text-gray-500">Loading dashboard...</div>;
+  }
+
+  const progressData = data?.progressData || {
+    percentage: 0,
+    label: "No Active Courses",
+    status: "Enroll to start learning!",
+  };
 
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">

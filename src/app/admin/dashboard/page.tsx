@@ -24,98 +24,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-/* ─────────────────────────── data ─────────────────────────── */
-
-const dailyData = [
-  { day: "01", value: 60 },
-  { day: "05", value: 85 },
-  { day: "10", value: 110 },
-  { day: "15", value: 145 },
-  { day: "20", value: 90 },
-  { day: "25", value: 125 },
-  { day: "30", value: 160 },
-];
-
-const weeklyData = [
-  { day: "W1", value: 80 },
-  { day: "W2", value: 130 },
-  { day: "W3", value: 105 },
-  { day: "W4", value: 170 },
-];
-
-const transactions = [
-  {
-    id: "TX-0091823",
-    user: "John Doe",
-    initials: "JD",
-    product: "Enterprise Suite",
-    amount: "$2,499.00",
-    date: "Oct 24, 2023",
-    status: "Success",
-  },
-  {
-    id: "TX-0091824",
-    user: "Sara Kim",
-    initials: "SK",
-    product: "Pro Bundle",
-    amount: "$1,199.00",
-    date: "Oct 23, 2023",
-    status: "Success",
-  },
-  {
-    id: "TX-0091825",
-    user: "Mark Evans",
-    initials: "ME",
-    product: "Starter Pack",
-    amount: "$299.00",
-    date: "Oct 22, 2023",
-    status: "Failed",
-  },
-];
-
-const activities = [
-  {
-    icon: <UserPlus size={14} />,
-    color: "#3B82F6",
-    bg: "#EFF6FF",
-    title: "New User Registered",
-    desc: "Alex Rivera joined the platform",
-    time: "2 MINS AGO",
-  },
-  {
-    icon: <Tag size={14} />,
-    color: "#10B981",
-    bg: "#ECFDF5",
-    title: "Premium Sale",
-    desc: "Wealth Pack #402 purchased ($299)",
-    time: "14 MINS AGO",
-  },
-  {
-    icon: <AlertCircle size={14} />,
-    color: "#EF4444",
-    bg: "#FEF2F2",
-    title: "Withdrawal Request",
-    desc: "Admin review required for #WTR-90",
-    time: "1 HOUR AGO",
-  },
-  {
-    icon: <Settings size={14} />,
-    color: "#8B5CF6",
-    bg: "#F5F3FF",
-    title: "System Update",
-    desc: "Node cluster automated scaling",
-    time: "4 HOURS AGO",
-  },
-  {
-    icon: <Award size={14} />,
-    color: "#F59E0B",
-    bg: "#FFFBEB",
-    title: "Milestone Reached",
-    desc: "Monthly revenue goal exceeded 110%",
-    time: "YESTERDAY",
-  },
-];
-
 const reportTypes = [
   {
     id: "revenue",
@@ -147,6 +55,8 @@ const reportTypes = [
 
 const LineChart = ({ data, animated }: any) => {
   const [progress, setProgress] = useState(animated ? 0 : 1);
+
+  if (!data || data.length === 0) return null;
 
   useEffect(() => {
     setProgress(0);
@@ -572,13 +482,24 @@ function CreateReportModal({ onClose }: { onClose: () => void }) {
 
 /* ─────────────────────── Dashboard Page ───────────────────── */
 
+import { useGetAdminDashboardStatsQuery } from "@/lib/api/statsApi";
+import * as Icons from "lucide-react";
+
 export default function Dashboard() {
+  const { data: statsData, isLoading } = useGetAdminDashboardStatsQuery();
+
   const [chartView, setChartView] = useState("Weekly");
   const [searchTx, setSearchTx] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("All");
   const [chartKey, setChartKey] = useState(0);
+
+  const transactions = statsData?.transactions || [];
+  const dailyData = statsData?.dailyData || [];
+  const weeklyData = statsData?.weeklyData || [];
+  const activities = statsData?.activities || [];
+  const kpis = statsData?.kpis || { totalActiveUsers: 0, revenueMTD: "$0", completedTransactions: 0 };
 
   const chartData = chartView === "Daily" ? dailyData : weeklyData;
 
@@ -595,6 +516,19 @@ export default function Dashboard() {
     const matchStatus = statusFilter === "All" || t.status === statusFilter;
     return matchSearch && matchStatus;
   });
+
+  const renderIcon = (iconName: string) => {
+    const IconComponent = (Icons as any)[iconName] || Icons.Activity;
+    return <IconComponent size={14} />;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin text-indigo-500" size={32} />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -627,25 +561,25 @@ export default function Dashboard() {
               icon: <Users size={17} className="text-blue-600" />,
               bg: "bg-blue-50",
               label: "Total Active Users",
-              value: "24,892",
-              badge: "+12%",
+              value: kpis.totalActiveUsers.toLocaleString(),
+              badge: "Live",
               up: true,
             },
             {
               icon: <DollarSign size={17} className="text-emerald-600" />,
               bg: "bg-emerald-50",
-              label: "Revenue (MTD)",
-              value: "$142,500",
-              badge: "+28%",
+              label: "Revenue",
+              value: kpis.revenueMTD,
+              badge: "All time",
               up: true,
             },
             {
               icon: <ShoppingCart size={17} className="text-orange-500" />,
               bg: "bg-orange-50",
               label: "Completed Transactions",
-              value: "8,210",
-              badge: "-2.4%",
-              up: false,
+              value: kpis.completedTransactions.toLocaleString(),
+              badge: "Total",
+              up: true,
             },
           ].map((c, i) => (
             <div
@@ -710,7 +644,7 @@ export default function Dashboard() {
                   Peak
                 </p>
                 <p className="text-[15px] font-extrabold text-gray-900">
-                  {Math.max(...chartData.map((d) => d.value))}
+                  {Math.max(...(chartData?.length ? chartData.map((d: any) => d.value) : [0]))}
                 </p>
               </div>
               <div className="w-px h-8 bg-gray-100" />
@@ -719,10 +653,10 @@ export default function Dashboard() {
                   Avg
                 </p>
                 <p className="text-[15px] font-extrabold text-gray-900">
-                  {Math.round(
-                    chartData.reduce((s, d) => s + d.value, 0) /
+                  {chartData?.length ? Math.round(
+                    chartData.reduce((s: number, d: any) => s + d.value, 0) /
                     chartData.length,
-                  )}
+                  ) : 0}
                 </p>
               </div>
               <div className="w-px h-8 bg-gray-100" />
@@ -731,7 +665,7 @@ export default function Dashboard() {
                   Low
                 </p>
                 <p className="text-[15px] font-extrabold text-gray-900">
-                  {Math.min(...chartData.map((d) => d.value))}
+                  {Math.min(...(chartData?.length ? chartData.map((d: any) => d.value) : [0]))}
                 </p>
               </div>
               <div className="ml-auto flex items-center gap-1.5">
@@ -751,23 +685,25 @@ export default function Dashboard() {
               Recent Activity
             </h2>
             <div className="space-y-3">
-              {activities.map((a, i) => (
-                <div key={i} className="flex gap-2.5 group cursor-pointer">
-                  <div
-                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
-                    style={{ background: a.bg, color: a.color }}
-                  >
-                    {a.icon}
+              {activities.map((act: any, i: number) => (
+                <div key={i} className="flex gap-4">
+                  <div className="relative z-10 flex-shrink-0">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
+                      style={{ backgroundColor: act.bg || "#EFF6FF", color: act.color || "#3B82F6" }}
+                    >
+                      {renderIcon(act.icon)}
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[12px] font-semibold text-gray-800 leading-tight">
-                      {a.title}
+                  <div className="pb-4">
+                    <p className="text-[12px] font-bold text-gray-900 leading-tight">
+                      {act.title}
                     </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5 truncate">
-                      {a.desc}
+                    <p className="text-[11px] text-gray-500 mt-0.5">
+                      {act.desc}
                     </p>
-                    <p className="text-[9px] text-gray-300 mt-0.5 font-bold tracking-widest">
-                      {a.time}
+                    <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                      {act.time}
                     </p>
                   </div>
                 </div>
@@ -876,7 +812,7 @@ export default function Dashboard() {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((tx, i) => (
+                  filtered.map((tx: any, i: number) => (
                     <tr
                       key={i}
                       className="hover:bg-indigo-50/30 transition-colors group"
@@ -922,7 +858,7 @@ export default function Dashboard() {
 
           {/* Mobile Cards */}
           <div className="sm:hidden divide-y divide-gray-100">
-            {filtered.map((tx, i) => (
+            {filtered.map((tx: any, i: number) => (
               <div key={i} className="p-3.5 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[12px] font-bold text-indigo-600">

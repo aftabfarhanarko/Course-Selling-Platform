@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import {
   TrendingUp,
   ShoppingBag,
@@ -8,46 +8,30 @@ import {
   ArrowRight,
   MoreVertical
 } from 'lucide-react'
+import { useGetStudentDashboardStatsQuery } from "@/lib/api/statsApi";
 
 export const DashboardRecentActivity = () => {
-  const [activities] = useState([
-    {
-      id: 1,
-      title: 'Affiliate Commission',
-      subtitle: 'From user @lucas_digital',
-      amount: '+$124.00',
-      type: 'income',
-      icon: TrendingUp,
-      iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
-      iconColor: 'text-emerald-600 dark:text-emerald-400'
-    },
-    {
-      id: 2,
-      title: 'Course Purchase',
-      subtitle: 'The Advanced Wealth Strategy',
-      amount: '-$499.00',
-      type: 'expense',
-      icon: ShoppingBag,
-      iconBg: 'bg-primary/10 dark:bg-primary/20',
-      iconColor: 'text-primary'
-    },
-    {
-      id: 3,
-      title: 'Wallet Withdrawal',
-      subtitle: 'Completed to Bank Account',
-      amount: '-$1,200.00',
-      type: 'withdraw',
-      icon: Landmark,
-      iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
-      iconColor: 'text-emerald-600 dark:text-emerald-400'
-    }
-  ]);
+  const { data, isLoading } = useGetStudentDashboardStatsQuery();
 
-  const continueLearning = {
-    title: 'High-Frequency Income Architecting',
-    module: 'Module 4: Scaling your referral network to 5-figures.',
-    progress: 65
+  if (isLoading) {
+    return <div className="h-64 flex items-center justify-center text-gray-500">Loading activity...</div>;
   }
+
+  const activities = data?.activities || [];
+  const continueLearning = data?.continueLearning || {
+    title: 'Explore our courses',
+    module: 'Visit the store to start learning.',
+    progress: 0
+  };
+
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'TrendingUp': return TrendingUp;
+      case 'ShoppingBag': return ShoppingBag;
+      case 'Landmark': return Landmark;
+      default: return TrendingUp;
+    }
+  };
 
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 sm:gap-5 lg:gap-6">
@@ -64,8 +48,10 @@ export const DashboardRecentActivity = () => {
         </div>
 
         <div className="space-y-3">
-          {activities.map((activity) => {
-            const Icon = activity.icon
+          {activities.length === 0 ? (
+            <div className="text-center text-gray-500 text-sm py-8">No recent activity.</div>
+          ) : activities.map((activity: any) => {
+            const Icon = getIcon(activity.icon);
             return (
               <div
                 key={activity.id}

@@ -31,7 +31,7 @@ const navLinks = [
   { name: "Courses", href: "/courses", icon: GraduationCap },
   { name: "Shop", href: "/shop", icon: ShoppingBag },
   { name: "Stats", href: "/stats", icon: BarChart2 },
-  { name: "Affiliate", href: "/affiliate", icon: Users },
+  // { name: "Affiliate", href: "/affiliate", icon: Users },
 ];
 
 function Header() {
@@ -121,20 +121,19 @@ function Header() {
 
   const initials = String(displayName).trim().slice(0, 1).toUpperCase();
 
-  const dashboardHref = isAdminRole 
-    ? "/admin/dashboard" 
-    : isAffiliateRole 
-      ? "/affiliate/dashboard" 
+  const dashboardHref = isAdminRole
+    ? "/admin/dashboard"
+    : isAffiliateRole
+      ? "/affiliate/dashboard"
       : "/student/dashboard";
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${scrolled
             ? "bg-[#dde0f5] backdrop-blur-xl shadow-sm py-2"
             : "bg-[#DFE2FF] py-2.5"
-        }`}
+          }`}
         style={{ fontFamily: "var(--font-bai-jamjuree)" }}
       >
         <div className="max-w-[1400px] mx-auto px-6">
@@ -161,11 +160,10 @@ function Header() {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${
-                      isActive(link.href)
+                    className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${isActive(link.href)
                         ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
                         : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {link.name}
@@ -388,19 +386,17 @@ function Header() {
       </header>
 
       <div
-        className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
-          isOpen
+        className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-        }`}
+          }`}
         onClick={() => setIsOpen(false)}
       />
 
       <div
         ref={drawerRef}
-        className={`fixed top-0 left-0 z-[200] h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 z-[200] h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
           <Link
@@ -428,11 +424,10 @@ function Header() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${
-                  isActive(link.href)
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${isActive(link.href)
                     ? "bg-[#0047FF] text-white shadow-lg shadow-blue-200"
                     : "text-slate-700 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 {link.name}

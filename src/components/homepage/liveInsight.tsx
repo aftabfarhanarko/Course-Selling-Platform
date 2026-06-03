@@ -3,8 +3,9 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { DollarSign, Landmark } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useLandingWithdrawLiveQuery } from "@/lib/api/landing/withdraw-live";
+import { useLandingEarningLiveQuery } from "@/lib/api/landing/earning-live";
 import Image from "next/image";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -90,11 +91,47 @@ function normalizeWithdrawLiveItem(
     (typeof user?.avatar === "string" && user.avatar.trim()) ||
     (typeof o.avatar === "string" && o.avatar.trim()) ||
     (typeof o.photo === "string" && o.photo.trim()) ||
+    (typeof o.userPhoto === "string" && o.userPhoto.trim()) ||
     `https://i.pravatar.cc/80?img=${(idx % 60) + 1}`;
 
   const amount = normalizeWithdrawAmount(o.amount);
 
   return { name, status, amount, avatar };
+}
+
+function normalizeEarningLiveItem(
+  raw: unknown,
+  idx: number,
+): Omit<EarningItem, "id"> | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const o = raw as Record<string, unknown>;
+  const user = (o.user as Record<string, unknown> | null) ?? null;
+
+  const name =
+    (typeof user?.name === "string" && user.name.trim()) ||
+    (typeof o.name === "string" && o.name.trim()) ||
+    (typeof o.userName === "string" && o.userName.trim()) ||
+    (typeof o.username === "string" && o.username.trim()) ||
+    "Someone";
+
+  const course =
+    (typeof o.course === "string" && o.course.trim()) ||
+    (typeof o.product === "string" && o.product.trim()) ||
+    "Course/Product";
+
+  const avatar =
+    (typeof user?.photo === "string" && user.photo.trim()) ||
+    (typeof user?.avatar === "string" && user.avatar.trim()) ||
+    (typeof o.avatar === "string" && o.avatar.trim()) ||
+    (typeof o.photo === "string" && o.photo.trim()) ||
+    (typeof o.userPhoto === "string" && o.userPhoto.trim()) ||
+    `https://i.pravatar.cc/80?img=${(idx % 60) + 1}`;
+
+  let amount = normalizeWithdrawAmount(o.amount);
+  if (!amount.startsWith("+")) amount = `+${amount}`;
+
+  return { name, course, amount, avatar };
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -216,34 +253,31 @@ function useConveyorFeed<T extends { id: number }>(initial: T[]) {
   const [offset, setOffset] = useState(0);
   const busy = useRef(false);
 
-  const push = (item: T) => {
+  const push = useCallback((item: T) => {
     if (busy.current) return;
     busy.current = true;
 
-    // Prepend new row; container is now VISIBLE+1 rows tall but hidden by clip
     setRows((prev) => [item, ...prev].slice(0, VISIBLE + 1));
-    // Instantly shift inner UP so new row is off-screen above
     setOffset(-(ROW_H + GAP));
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // Transition back to 0 → new row slides INTO view, old rows slide down
         setOffset(0);
         setTimeout(() => {
-          setRows((prev) => prev.slice(0, VISIBLE)); // trim stale tail
+          setRows((prev) => prev.slice(0, VISIBLE));
           busy.current = false;
         }, 580);
       });
     });
-  };
+  }, []);
 
-  const reset = (next: T[]) => {
+  const reset = useCallback((next: T[]) => {
     setRows(next);
     setOffset(0);
     busy.current = false;
-  };
+  }, []);
 
-  return { rows, offset, push, reset };
+  return useMemo(() => ({ rows, offset, push, reset }), [rows, offset, push, reset]);
 }
 
 // ─── Row Components ───────────────────────────────────────────────────────────
@@ -343,14 +377,25 @@ function Feed({
 let _idCtr = 100;
 
 const LiveInsight = () => {
+  const earningLive = useLandingEarningLiveQuery();
   const withdrawLive = useLandingWithdrawLiveQuery();
+  
   const apiWithdrawers = useMemo(() => {
     const list = extractWithdrawLiveList(withdrawLive.data);
     return list
       .map((x, idx) => normalizeWithdrawLiveItem(x, idx))
       .filter((x): x is Omit<WithdrawalItem, "id"> => Boolean(x));
   }, [withdrawLive.data]);
+  
+  const apiEarners = useMemo(() => {
+    const list = extractWithdrawLiveList(earningLive.data);
+    return list
+      .map((x, idx) => normalizeEarningLiveItem(x, idx))
+      .filter((x): x is Omit<EarningItem, "id"> => Boolean(x));
+  }, [earningLive.data]);
+
   const withdrawersRef = useRef<Omit<WithdrawalItem, "id">[]>(allWithdrawers);
+  const earnersRef = useRef<Omit<EarningItem, "id">[]>(allEarners);
 
   const earningFeed = useConveyorFeed<EarningItem>(
     allEarners.slice(0, VISIBLE).map((d, i) => ({ ...d, id: i + 1 })),
@@ -373,12 +418,27 @@ const LiveInsight = () => {
         .map((d, i) => ({ ...d, id: i + 1 })),
     );
     wIdxRef.current = VISIBLE;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiWithdrawers]);
+
+  useEffect(() => {
+    if (apiEarners.length === 0) return;
+    earnersRef.current = apiEarners;
+    earningFeed.reset(
+      apiEarners
+        .slice(0, VISIBLE)
+        .map((d, i) => ({ ...d, id: i + 1 })),
+    );
+    eIdxRef.current = VISIBLE;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiEarners]);
 
   useEffect(() => {
     const t = setInterval(() => {
       const id = ++_idCtr;
-      const newE = { ...allEarners[eIdxRef.current % allEarners.length], id };
+      const earners = earnersRef.current.length > 0 ? earnersRef.current : allEarners;
+      const newE = { ...earners[eIdxRef.current % earners.length], id };
+      
       const withdrawers =
         withdrawersRef.current.length > 0
           ? withdrawersRef.current
