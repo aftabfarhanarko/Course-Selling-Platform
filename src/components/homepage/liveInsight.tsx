@@ -452,7 +452,7 @@ const LiveInsight = () => {
       earningFeed.push(newE);
       withdrawalFeed.push(newW);
 
-      setTotal((prev) => prev + parseFloat(newE.amount.replace("+$", "")));
+      setTotal((prev) => prev + parseFloat(newE.amount.replace(/[^0-9.-]+/g, "")));
       setTotalKey((k) => k + 1);
       eIdxRef.current++;
       wIdxRef.current++;

@@ -76,10 +76,11 @@ function HomeHero() {
       {
         id: 1,
         text: "Start Learning",
-        href: "/student/courses",
+        href: "/signup",
         primary: true,
+        icon: <ArrowRightCircle className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />,
       },
-      { id: 2, text: "Earn as Affiliate", href: "/affiliate", primary: false },
+      { id: 2, text: "Earn as Affiliate", href: "/signup", primary: false },
     ],
     card: { title: "Weekly Payout", amount: "+$4,290.00" },
   };

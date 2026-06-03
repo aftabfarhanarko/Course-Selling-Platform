@@ -92,7 +92,7 @@ function CourseCard({
         <div className="flex items-center gap-4 text-[12px] text-gray-400 font-medium mb-5">
           <span className="flex items-center gap-1">
             <Users className="w-3.5 h-3.5" />
-            {course.students} students
+            {course.enrollmentCount || 0} students
           </span>
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />

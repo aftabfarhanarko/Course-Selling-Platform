@@ -58,6 +58,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "imgbb.com",
       },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+      },
     ],
   },
 
