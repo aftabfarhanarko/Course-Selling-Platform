@@ -8,6 +8,7 @@ export type RegisterRequest = {
   password: string;
   photo?: File | Blob | string | null;
   referralCode?: string;
+  role?: string;
 };
 
 export type LoginRequest = {

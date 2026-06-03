@@ -80,7 +80,7 @@ function HomeHero() {
         primary: true,
         icon: <ArrowRightCircle className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />,
       },
-      { id: 2, text: "Earn as Affiliate", href: "/signup", primary: false },
+      { id: 2, text: "Earn as Affiliate", href: "/signup?role=affiliate", primary: false },
     ],
     card: { title: "Weekly Payout", amount: "+$4,290.00" },
   };

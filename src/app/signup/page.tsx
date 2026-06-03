@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Link from "next/link";
 import SignupLotti from "@/components/signup/Lotti";
@@ -150,6 +150,10 @@ export default function SignupPage(): React.JSX.Element {
     try {
       const photoUrl = await uploadImageToImgBB(selectedPhoto);
 
+      const searchParams = new URLSearchParams(window.location.search);
+      const requestedRole = searchParams.get('role');
+      const finalRole = requestedRole === 'affiliate' ? 'AFFILIATE' : 'STUDENT';
+
       await registerUser({
         name: data.fullName,
         email: data.email,
@@ -157,6 +161,7 @@ export default function SignupPage(): React.JSX.Element {
         country: data.country,
         password: data.password,
         photo: photoUrl,
+        role: finalRole,
       }).unwrap();
 
       setSuccess(true);
@@ -164,7 +169,7 @@ export default function SignupPage(): React.JSX.Element {
     } catch (err) {
       const message =
         typeof err === "object" && err && "data" in err
-          ? JSON.stringify((err as any).data)
+          ? (err as any).data?.message || "Registration failed"
           : err instanceof Error
             ? err.message
             : "Registration failed";
