@@ -15,7 +15,7 @@ export default function AdminShopPage() {
   const [createItem, { isLoading: isCreating }] = useCreateShopItemMutation();
   const [deleteItem, { isLoading: isDeleting }] = useDeleteShopItemMutation();
 
-  const shopItems = shopData?.items || shopData?.data?.items || [];
+  const shopItems = shopData?.items || [];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
