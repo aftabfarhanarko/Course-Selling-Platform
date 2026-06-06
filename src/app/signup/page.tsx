@@ -152,7 +152,7 @@ export default function SignupPage(): React.JSX.Element {
 
       const searchParams = new URLSearchParams(window.location.search);
       const requestedRole = searchParams.get('role');
-      const finalRole = requestedRole === 'affiliate' ? 'AFFILIATE' : 'STUDENT';
+      const finalRole = requestedRole === 'affiliate' ? 'affiliate' : 'student';
 
       await registerUser({
         name: data.fullName,
