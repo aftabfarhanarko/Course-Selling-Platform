@@ -3,16 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  GraduationCap,
   HandCoins,
   LayoutDashboard,
   LogOut,
-  Package,
-  Users,
   Wallet,
   CreditCard,
   X,
-  UserRound,
   Sparkles,
 } from "lucide-react";
 import Image from "next/image";
@@ -23,15 +19,33 @@ import { baseApi } from "@/lib/api/baseApi";
 import { toast } from "sonner";
 import type { RootState } from "@/store";
 
-const menuItems = [
-  { name: "Dashboard", href: "/affiliate/dashboard", icon: LayoutDashboard },
-  { name: "Wallet", href: "/affiliate/dashboard/wallet", icon: Wallet },
+const menuGroups = [
   {
-    name: "Payment Methods",
-    href: "/affiliate/dashboard/payment-methods",
-    icon: CreditCard,
+    label: "OVERVIEW",
+    items: [
+      {
+        name: "Dashboard",
+        href: "/affiliate/dashboard",
+        icon: LayoutDashboard,
+      },
+    ],
   },
-  { name: "Withdraw", href: "/affiliate/dashboard/withdraw", icon: HandCoins },
+  {
+    label: "FINANCE",
+    items: [
+      { name: "Wallet", href: "/affiliate/dashboard/wallet", icon: Wallet },
+      {
+        name: "Payment Methods",
+        href: "/affiliate/dashboard/payment-methods",
+        icon: CreditCard,
+      },
+      {
+        name: "Withdraw",
+        href: "/affiliate/dashboard/withdraw",
+        icon: HandCoins,
+      },
+    ],
+  },
 ];
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
@@ -55,7 +69,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       : null;
 
   const roleRaw = String(authUser?.role ?? "affiliate");
-  const badge = roleRaw.replace(/_/g, " ").toUpperCase();
+  const badge = roleRaw.replace(/_/g, " ");
 
   const pathname = usePathname();
   const router = useRouter();
@@ -63,121 +77,104 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   return (
-    <aside className="relative h-screen w-full border-r border-slate-200 bg-white overflow-hidden px-4 sm:px-5 py-6">
-      {/* Subtle background texture */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.03]">
-        <svg
-          className="h-full w-full"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-        >
-          <defs>
-            <pattern
-              id="grid"
-              width="32"
-              height="32"
-              patternUnits="userSpaceOnUse"
-            >
-              <circle cx="2" cy="2" r="1.5" fill="currentColor" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-
+    <aside className="relative h-screen w-full border-r border-slate-200 bg-white overflow-y-auto overflow-x-hidden px-3 py-5 flex flex-col">
       {/* Close button (mobile) */}
       {onClose && (
-        <div className="relative z-20 flex justify-end mb-4 md:hidden">
+        <div className="flex justify-end mb-3 md:hidden">
           <button
             onClick={onClose}
-            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+            className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
       )}
 
-      {/* Profile card – premium white version */}
-      <div className="relative z-10 mb-8 sm:mb-10">
-        <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-slate-200 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-            {/* Avatar with subtle glow */}
-            <div className="relative shrink-0">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 opacity-30 blur-md" />
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white border-2 border-slate-200 text-xl font-bold text-slate-700 overflow-hidden">
-                {avatarUrl ? (
-                  <Image
-                    src={avatarUrl}
-                    alt={displayName}
-                    className="h-full w-full object-cover"
-                    width={56}
-                    height={56}
-                  />
-                ) : (
-                  <span>{displayName.charAt(0)}</span>
-                )}
-              </div>
+      {/* Profile card */}
+      <div className="mb-6 px-2">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700 overflow-hidden border border-slate-300">
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt={displayName}
+                  className="h-full w-full object-cover"
+                  width={40}
+                  height={40}
+                />
+              ) : (
+                <span>{displayName.charAt(0).toUpperCase()}</span>
+              )}
             </div>
+            {/* Online dot */}
+            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-white" />
+          </div>
 
-            <div className="flex flex-col items-center sm:items-start min-w-0 flex-1">
-              <h2 className="text-sm font-bold text-slate-900 truncate max-w-full">
-                {displayName}
-              </h2>
-              <p className="text-xs text-slate-500 truncate max-w-full">
-                {email || "Logged in"}
-              </p>
-              <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-white shadow-lg shadow-blue-500/30">
-                <Sparkles size={10} />
-                {badge}
-              </span>
-            </div>
+          <div className="flex flex-col min-w-0 flex-1">
+            <h2 className="text-sm font-semibold text-slate-900 truncate leading-tight">
+              {displayName}
+            </h2>
+            <p className="text-xs text-slate-500 truncate">
+              {email || "Logged in"}
+            </p>
+            <span className="mt-1 inline-flex items-center gap-1 self-start rounded-full bg-blue-600 px-2 py-0.5 text-[9px] font-bold tracking-widest text-white uppercase">
+              <Sparkles size={8} />
+              {badge}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="relative z-10 flex flex-col gap-1.5">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          // Dashboard only active on exact match; others on prefix match
-          const isActive =
-            item.name === "Dashboard"
-              ? pathname === item.href
-              : pathname === item.href || pathname?.startsWith(item.href + "/");
+      {/* Navigation groups */}
+      <nav className="flex flex-col gap-5 flex-1">
+        {menuGroups.map((group) => (
+          <div key={group.label}>
+            {/* Section label */}
+            <p className="mb-1.5 px-3 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
+              {group.label}
+            </p>
 
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={onClose}
-              className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <Icon
-                size={18}
-                className={`transition-transform ${
-                  isActive
-                    ? "text-white"
-                    : "text-slate-400 group-hover:text-slate-600"
-                }`}
-              />
-              <span className="truncate">{item.name}</span>
-              {isActive && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
-              )}
-            </Link>
-          );
-        })}
+            <div className="flex flex-col gap-0.5">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive =
+                  item.name === "Dashboard"
+                    ? pathname === item.href
+                    : pathname === item.href ||
+                      pathname?.startsWith(item.href + "/");
+
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={onClose}
+                    className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                      isActive
+                        ? "bg-blue-50 text-blue-600 border-l-[3px] border-blue-600"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-l-[3px] border-transparent"
+                    }`}
+                  >
+                    <Icon
+                      size={16}
+                      className={`shrink-0 ${
+                        isActive
+                          ? "text-blue-600"
+                          : "text-slate-400 group-hover:text-slate-600"
+                      }`}
+                    />
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Divider */}
-      <div className="relative z-10 my-6 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-
       {/* Sign out */}
-      <div className="relative z-10">
+      <div className="mt-4 pt-4 border-t border-slate-200">
         <button
           onClick={async () => {
             if (isLoggingOut) return;
@@ -194,9 +191,9 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             }
           }}
           disabled={isLoggingOut}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 disabled:opacity-70 disabled:pointer-events-none"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 disabled:opacity-70 disabled:pointer-events-none"
         >
-          <LogOut size={18} />
+          <LogOut size={16} className="shrink-0" />
           <span className="truncate">
             {isLoggingOut ? "Signing out..." : "Sign Out"}
           </span>
