@@ -15,7 +15,7 @@ import {
   Mail,
 } from "lucide-react";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { useGetStatsQuery } from "@/lib/api/statsApi"; // ← API hook
+import { useGetStatsQuery } from "@/lib/api/statsApi";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -57,7 +57,7 @@ function Footer() {
 
   const { data: statsData } = useGetStatsQuery();
 
-  // Extract real values from API (with fallbacks identical to CountDownTrust)
+  // Extract real values from API
   const totalStudents = statsData
     ? parseNumber(
         statsData.kpis.find((k) => k.label === "Active Students")?.value || "0",
@@ -77,14 +77,12 @@ function Footer() {
       )
     : 120;
 
-  // Same rating logic: either from API or default 4.9
   const avgRating = statsData
     ? parseFloat(
         statsData.kpis.find((k) => k.label === "Avg. Rating")?.value || "4.9",
       )
     : 4.9;
 
-  // Format revenue for display
   const revenueDisplay =
     rawRevenue > 1000000
       ? `$${(rawRevenue / 1000000).toFixed(1)}M+`
@@ -108,7 +106,7 @@ function Footer() {
 
   return (
     <footer
-      className={`${plusJakarta.className} bg-[#DFE2FF] border-t border-indigo-200/40 `}
+      className={`${plusJakarta.className} bg-[#DFE2FF] border-t border-indigo-200/40`}
     >
       {/* ── Top Grid ── */}
       <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-5 sm:px-8 py-8 sm:py-10 border-b border-indigo-200/30">
@@ -148,9 +146,8 @@ function Footer() {
           </ul>
         </div>
 
-        {/* Stats (now live) */}
+        {/* Stats */}
         <div className="sm:col-span-2 lg:col-span-1">
-          {/* Live badge */}
           <div className="inline-flex items-center gap-1.5 bg-indigo-100/60 border border-indigo-200/40 rounded-full px-3 py-1 mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_0_3px_rgba(34,197,94,.2)] animate-pulse" />
             <span className="text-[10px] font-bold tracking-[.04em] text-indigo-700">
@@ -177,39 +174,53 @@ function Footer() {
       </div>
 
       {/* ── Bottom Bar ── */}
-      <div className="max-w-[1400px] mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 px-5 sm:px-8 py-3.5">
-        <p className="text-[11.5px] text-gray-500 font-medium order-3 sm:order-1">
-          © {new Date().getFullYear()}{" "}
-          <strong className="text-gray-700 font-bold">IncomeArchitect</strong>.
-          All rights reserved.
-        </p>
+      <div className="max-w-[1400px] mx-auto w-full px-5 sm:px-8 py-4 border-t border-indigo-200/30">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[11.5px] text-gray-500 font-medium">
+            © {new Date().getFullYear()}{" "}
+            <strong className="text-gray-700 font-bold">IncomeArchitect</strong>.
+            All rights reserved.
+          </p>
 
-        {/* Trust badges */}
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-medium order-2">
-          <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center">
-            <Lock className="w-2.5 h-2.5 text-green-600" />
+          <a
+            href="https://www.jevxo.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11.5px] text-gray-500 font-medium hover:text-indigo-600 transition-colors duration-200"
+          >
+            Developed by{" "}
+            <span className="font-bold text-gray-700 hover:text-indigo-600">
+              Jevxo
+            </span>
+          </a>
+
+          {/* Trust badges */}
+          <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-medium">
+            <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center">
+              <Lock className="w-2.5 h-2.5 text-green-600" />
+            </div>
+            SSL Secured
+            <span className="w-1 h-1 rounded-full bg-gray-300 mx-0.5" />
+            GDPR Compliant
+            <span className="w-1 h-1 rounded-full bg-gray-300 mx-0.5" />
+            256-bit Encryption
           </div>
-          SSL Secured
-          <span className="w-1 h-1 rounded-full bg-gray-300 mx-0.5" />
-          GDPR Compliant
-          <span className="w-1 h-1 rounded-full bg-gray-300 mx-0.5" />
-          256-bit Encryption
-        </div>
 
-        {/* Socials */}
-        <div className="flex items-center gap-2 order-1 sm:order-3">
-          {socials.map(({ label, href, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              aria-label={label}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-8 h-8 rounded-full bg-white/50 border border-indigo-200/30 flex items-center justify-center text-indigo-600 hover:bg-white hover:-translate-y-0.5 transition-all duration-200"
-            >
-              <Icon className="w-3.5 h-3.5" />
-            </a>
-          ))}
+          {/* Socials */}
+          <div className="flex items-center gap-2">
+            {socials.map(({ label, href, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/50 border border-indigo-200/30 flex items-center justify-center text-indigo-600 hover:bg-white hover:-translate-y-0.5 transition-all duration-200"
+              >
+                <Icon className="w-3.5 h-3.5" />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

@@ -10,6 +10,7 @@ export type Percentage = {
   id: number | string;
   percentage: number;
   name?: string;
+  type?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -20,6 +21,7 @@ export type AdminPercentageResponse = Record<string, unknown>;
 export type AdminCreatePercentageRequest = {
   percentage: number;
   name?: string;
+  type?: string;
 };
 
 export type AdminUpdatePercentageRequest = Partial<AdminCreatePercentageRequest>;

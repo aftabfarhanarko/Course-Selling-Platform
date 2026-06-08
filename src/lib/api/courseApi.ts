@@ -18,6 +18,7 @@ export interface Course {
     name: string;
   };
   enrollmentCount?: number;
+  metadata?: { level?: string; is_premium?: boolean; [key: string]: any; };
 }
 
 export interface PaginatedResponse<T> {

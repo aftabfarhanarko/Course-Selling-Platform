@@ -221,14 +221,12 @@ function StatCard({
   isError,
 }: {
   label: string;
-  value: number | null;
-  currency: string;
+  value: string | number | null;
   icon: React.ElementType;
   iconClassName: string;
   valueClassName: string;
   isFetching: boolean;
   isError: boolean;
-  currency: string;
 }) {
   return (
     <div className="bg-zinc-100 dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800">
@@ -363,8 +361,7 @@ export const WalletDashboard = () => {
       <div className="grid grid-cols-2 gap-3 mb-5">
         <StatCard
           label="Pending"
-          value={formatMoney(pending, currency) as any}
-          currency={currency}
+          value={formatMoney(pending, currency)}
           icon={Clock}
           iconClassName="text-amber-500"
           valueClassName="text-amber-600 dark:text-amber-400"
@@ -373,8 +370,7 @@ export const WalletDashboard = () => {
         />
         <StatCard
           label="Lifetime Earnings"
-          value={formatMoney(lifetime, currency) as any}
-          currency={currency}
+          value={formatMoney(lifetime, currency)}
           icon={TrendingUp}
           iconClassName="text-emerald-500"
           valueClassName="text-emerald-600 dark:text-emerald-400"

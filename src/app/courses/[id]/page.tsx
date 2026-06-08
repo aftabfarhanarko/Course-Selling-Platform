@@ -237,7 +237,7 @@ export default function CourseDetailsPage({
               <p className="mt-5 text-slate-400 text-[13px]">
                 Instructor:{" "}
                 <span className="text-white font-semibold">
-                  {course.instructor}
+                  {course.instructor.name}
                 </span>
               </p>
             )}
