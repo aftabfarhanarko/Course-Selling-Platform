@@ -18,6 +18,11 @@ import {
   Trash2,
   TrendingUp,
   X,
+  Calendar,
+  DollarSign,
+  Tag,
+  MapPin,
+  User,
 } from "lucide-react";
 import {
   useAdminApproveProductMutation,
@@ -46,6 +51,8 @@ type UiProduct = {
 type Tab = "all" | "my";
 
 const PAGE_SIZE = 10;
+
+const STATUS_OPTIONS = ["pending", "approved", "paid", "rejected"] as const;
 
 function formatDate(value: unknown): string {
   if (!value) return "—";
@@ -165,7 +172,58 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-function JsonBodyModal({
+/* ─── Field wrapper ─── */
+function Field({
+  label,
+  icon: Icon,
+  required,
+  children,
+  hint,
+}: {
+  label: string;
+  icon?: React.ElementType;
+  required?: boolean;
+  children: React.ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+        {Icon && <Icon size={11} className="text-slate-400" />}
+        {label}
+        {required && <span className="text-red-400">*</span>}
+      </label>
+      {children}
+      {hint && <p className="text-[10px] text-slate-400">{hint}</p>}
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full px-3 py-2.5 text-[12px] font-semibold border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder:text-slate-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all";
+
+/* ─── Create Product Modal ─── */
+type CreateForm = {
+  botName: string;
+  totalAmount: string;
+  status: (typeof STATUS_OPTIONS)[number];
+  countryCodes: string; // comma-separated in UI
+  approvedByName: string;
+  approvalDate: string;
+  rejectReason: string;
+};
+
+const defaultForm: CreateForm = {
+  botName: "",
+  totalAmount: "",
+  status: "pending",
+  countryCodes: "",
+  approvedByName: "",
+  approvalDate: "",
+  rejectReason: "",
+};
+
+function CreateProductModal({
   loading,
   onClose,
   onSubmit,
@@ -174,74 +232,248 @@ function JsonBodyModal({
   onClose: () => void;
   onSubmit: (body: any) => void;
 }) {
-  const [text, setText] = useState("{}");
-  const [error, setError] = useState<string | null>(null);
-  const submit = () => {
-    try {
-      const parsed = JSON.parse(text);
-      setError(null);
-      onSubmit(parsed);
-    } catch {
-      setError("Invalid JSON — please fix before submitting");
-    }
+  const [form, setForm] = useState<CreateForm>(defaultForm);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof CreateForm, string>>
+  >({});
+
+  const set =
+    (key: keyof CreateForm) =>
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >,
+    ) => {
+      setForm((f) => ({ ...f, [key]: e.target.value }));
+      setErrors((er) => ({ ...er, [key]: undefined }));
+    };
+
+  const validate = (): boolean => {
+    const errs: typeof errors = {};
+    if (!form.botName.trim()) errs.botName = "Bot name is required";
+    if (!form.totalAmount.trim()) errs.totalAmount = "Amount is required";
+    else if (isNaN(Number(form.totalAmount)))
+      errs.totalAmount = "Must be a number";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
+
+  const submit = () => {
+    if (!validate()) return;
+
+    const codes = form.countryCodes
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const body: Record<string, any> = {
+      botName: form.botName.trim(),
+      totalAmount: form.totalAmount.trim(),
+      status: form.status,
+      countryCodes: codes,
+    };
+
+    if (form.approvedByName.trim())
+      body.approvedByName = form.approvedByName.trim();
+    if (form.approvalDate.trim())
+      body.approvalDate = new Date(form.approvalDate).toISOString();
+    if (form.rejectReason.trim()) body.rejectReason = form.rejectReason.trim();
+
+    onSubmit(body);
+  };
+
+  const isRejected = form.status === "rejected";
+  const isApproved = form.status === "approved" || form.status === "paid";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div>
-            <h2 className="text-[15px] font-black text-slate-900">
-              Create Product
-            </h2>
-            <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
-              POST /products
-            </p>
+      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[92vh]">
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-violet-600 to-indigo-600 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+              <Package size={16} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-[15px] font-black text-white">
+                Create Product
+              </h2>
+              <p className="text-[11px] text-violet-200 mt-0.5">
+                POST /products
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-9 h-9 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-all disabled:opacity-60"
+            className="w-9 h-9 rounded-2xl flex items-center justify-center text-white/70 hover:bg-white/20 transition-all disabled:opacity-60"
           >
             <X size={15} />
           </button>
         </div>
-        <div className="px-6 py-6 space-y-4">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className={`w-full min-h-[260px] px-4 py-3 text-[12px] border-2 rounded-2xl font-mono focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 resize-none transition-all ${error ? "border-red-300 bg-red-50/50" : "border-slate-200 bg-slate-50 hover:border-slate-300"}`}
-          />
-          {error && (
-            <p className="text-[11px] text-red-500 font-semibold flex items-center gap-1">
-              <AlertTriangle size={11} />
-              {error}
-            </p>
+
+        {/* Body */}
+        <div className="px-6 py-6 overflow-y-auto flex-1 space-y-4">
+          {/* botName */}
+          <Field label="Bot Name" icon={Tag} required>
+            <input
+              value={form.botName}
+              onChange={set("botName")}
+              placeholder="e.g. hj"
+              className={`${inputCls} ${errors.botName ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-100" : ""}`}
+            />
+            {errors.botName && (
+              <p className="text-[10px] text-red-500 font-semibold flex items-center gap-1">
+                <AlertTriangle size={10} /> {errors.botName}
+              </p>
+            )}
+          </Field>
+
+          {/* totalAmount */}
+          <Field label="Total Amount" icon={DollarSign} required>
+            <input
+              value={form.totalAmount}
+              onChange={set("totalAmount")}
+              placeholder="e.g. 666.00"
+              type="number"
+              step="0.01"
+              min="0"
+              className={`${inputCls} ${errors.totalAmount ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-100" : ""}`}
+            />
+            {errors.totalAmount && (
+              <p className="text-[10px] text-red-500 font-semibold flex items-center gap-1">
+                <AlertTriangle size={10} /> {errors.totalAmount}
+              </p>
+            )}
+          </Field>
+
+          {/* status */}
+          <Field label="Status" icon={Shield}>
+            <select
+              value={form.status}
+              onChange={set("status")}
+              className={inputCls}
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          {/* countryCodes */}
+          <Field
+            label="Country Codes"
+            icon={MapPin}
+            hint="Comma separated — e.g. BD, US, UK"
+          >
+            <input
+              value={form.countryCodes}
+              onChange={set("countryCodes")}
+              placeholder="e.g. hgh, BD, US"
+              className={inputCls}
+            />
+          </Field>
+
+          {/* approvedByName — show when approved/paid */}
+          {isApproved && (
+            <Field label="Approved By Name" icon={User}>
+              <input
+                value={form.approvedByName}
+                onChange={set("approvedByName")}
+                placeholder="e.g. ovi"
+                className={inputCls}
+              />
+            </Field>
           )}
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-60"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={submit}
-              disabled={loading}
-              className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-violet-200 transition-all disabled:opacity-60"
-            >
-              {loading ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <Check size={13} />
+
+          {/* approvalDate — show when approved/paid */}
+          {isApproved && (
+            <Field label="Approval Date" icon={Calendar}>
+              <input
+                value={form.approvalDate}
+                onChange={set("approvalDate")}
+                type="datetime-local"
+                className={inputCls}
+              />
+            </Field>
+          )}
+
+          {/* rejectReason — show when rejected */}
+          {isRejected && (
+            <Field label="Reject Reason" icon={AlertTriangle}>
+              <textarea
+                value={form.rejectReason}
+                onChange={set("rejectReason")}
+                placeholder="Reason for rejection..."
+                rows={3}
+                className={`${inputCls} resize-none`}
+              />
+            </Field>
+          )}
+
+          {/* Preview JSON */}
+          <div className="bg-slate-900 rounded-2xl p-4 mt-2">
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+              Preview Payload
+            </p>
+            <pre className="text-[11px] text-emerald-400 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
+              {JSON.stringify(
+                {
+                  botName: form.botName || "…",
+                  totalAmount: form.totalAmount || "…",
+                  status: form.status,
+                  countryCodes: form.countryCodes
+                    ? form.countryCodes
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                    : [],
+                  ...(isApproved && form.approvedByName
+                    ? { approvedByName: form.approvedByName }
+                    : {}),
+                  ...(isApproved && form.approvalDate
+                    ? {
+                        approvalDate: new Date(form.approvalDate).toISOString(),
+                      }
+                    : {}),
+                  ...(isRejected && form.rejectReason
+                    ? { rejectReason: form.rejectReason }
+                    : {}),
+                },
+                null,
+                2,
               )}
-              Submit
-            </button>
+            </pre>
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-5 border-t border-slate-100 bg-slate-50/80 flex gap-3 flex-shrink-0">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-white hover:border-slate-300 transition-all disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            disabled={loading}
+            className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-violet-200 transition-all disabled:opacity-60"
+          >
+            {loading ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Plus size={14} />
+            )}
+            Create Product
+          </button>
         </div>
       </div>
     </div>
@@ -313,11 +545,15 @@ function PaymentConfirmModal({
     search: product.ownerEmail,
   });
 
-  const [selectedMethodId, setSelectedMethodId] = useState<string | number | null>(null);
+  const [selectedMethodId, setSelectedMethodId] = useState<
+    string | number | null
+  >(null);
 
   const paymentMethods = useMemo(() => extractList(data), [data]);
   const selectedMethod = useMemo(() => {
-    return paymentMethods.find(pm => (pm.id ?? pm._id ?? pm.paymentMethodId) === selectedMethodId);
+    return paymentMethods.find(
+      (pm) => (pm.id ?? pm._id ?? pm.paymentMethodId) === selectedMethodId,
+    );
   }, [paymentMethods, selectedMethodId]);
 
   return (
@@ -346,9 +582,10 @@ function PaymentConfirmModal({
         </div>
 
         <div className="px-6 py-6 overflow-y-auto">
-          <p className="text-[12px] text-slate-500 mb-4 leading-relaxed bg-amber-50 text-amber-700 p-3 rounded-xl border border-amber-200">
-            <strong>Note:</strong> Select a payment method below. Clicking confirm will{" "}
-            <strong>automatically approve</strong> this product and then process the direct payment.
+          <p className="text-[12px] text-amber-700 mb-4 leading-relaxed bg-amber-50 p-3 rounded-xl border border-amber-200">
+            <strong>Note:</strong> Select a payment method below. Clicking
+            confirm will <strong>automatically approve</strong> this product and
+            then process the direct payment.
           </p>
 
           <h4 className="text-[12px] font-black text-slate-900 mb-3 uppercase tracking-wider">
@@ -358,7 +595,9 @@ function PaymentConfirmModal({
           {isFetching ? (
             <div className="flex items-center justify-center py-6 text-slate-400 gap-2">
               <Loader2 size={16} className="animate-spin" />
-              <span className="text-[12px] font-semibold">Loading methods...</span>
+              <span className="text-[12px] font-semibold">
+                Loading methods...
+              </span>
             </div>
           ) : paymentMethods.length === 0 ? (
             <div className="py-6 text-center rounded-xl bg-slate-50 border border-slate-100 border-dashed">
@@ -383,8 +622,12 @@ function PaymentConfirmModal({
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-[12px] font-black text-slate-800 uppercase flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full border flex items-center justify-center ${isSelected ? "border-violet-600 bg-violet-600" : "border-slate-300"}`}>
-                          {isSelected && <span className="w-1 h-1 rounded-full bg-white" />}
+                        <span
+                          className={`w-3 h-3 rounded-full border flex items-center justify-center ${isSelected ? "border-violet-600 bg-violet-600" : "border-slate-300"}`}
+                        >
+                          {isSelected && (
+                            <span className="w-1 h-1 rounded-full bg-white" />
+                          )}
                         </span>
                         {pm.provider || pm.type || "Method"}
                       </span>
@@ -399,11 +642,19 @@ function PaymentConfirmModal({
                       </span>
                     </div>
                     <div className="text-[12px] text-slate-600 bg-slate-50/50 p-2 rounded-xl border border-slate-100 mt-1 font-mono flex flex-col gap-1">
-                      {(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) && (
+                      {(pm.accountNumber ||
+                        pm.account ||
+                        pm.phone ||
+                        pm.walletNumber ||
+                        pm.number) && (
                         <div className="flex justify-between">
                           <span className="text-slate-400">Account:</span>
                           <span className="font-bold text-slate-800">
-                            {pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number}
+                            {pm.accountNumber ||
+                              pm.account ||
+                              pm.phone ||
+                              pm.walletNumber ||
+                              pm.number}
                           </span>
                         </div>
                       )}
@@ -418,26 +669,40 @@ function PaymentConfirmModal({
                       {pm.bankName && (
                         <div className="flex justify-between">
                           <span className="text-slate-400">Bank:</span>
-                          <span className="font-bold text-slate-800">{pm.bankName}</span>
+                          <span className="font-bold text-slate-800">
+                            {pm.bankName}
+                          </span>
                         </div>
                       )}
                       {pm.branchName && (
                         <div className="flex justify-between">
                           <span className="text-slate-400">Branch:</span>
-                          <span className="font-bold text-slate-800">{pm.branchName}</span>
+                          <span className="font-bold text-slate-800">
+                            {pm.branchName}
+                          </span>
                         </div>
                       )}
                       {pm.binanceId && (
                         <div className="flex justify-between">
                           <span className="text-slate-400">Binance ID:</span>
-                          <span className="font-bold text-slate-800">{pm.binanceId}</span>
+                          <span className="font-bold text-slate-800">
+                            {pm.binanceId}
+                          </span>
                         </div>
                       )}
-                      {!(pm.accountNumber || pm.account || pm.phone || pm.walletNumber || pm.number) &&
+                      {!(
+                        pm.accountNumber ||
+                        pm.account ||
+                        pm.phone ||
+                        pm.walletNumber ||
+                        pm.number
+                      ) &&
                         !(pm.accountHolderName || pm.nameOnAccount) &&
                         !pm.bankName &&
                         !pm.binanceId && (
-                          <div className="text-slate-400">No details provided</div>
+                          <div className="text-slate-400">
+                            No details provided
+                          </div>
                         )}
                     </div>
                   </div>
@@ -460,7 +725,11 @@ function PaymentConfirmModal({
             disabled={loading || !selectedMethodId}
             className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-violet-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? <Loader2 size={14} className="animate-spin" /> : <Check size={13} />}
+            {loading ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Check size={13} />
+            )}
             Approve &amp; Pay
           </button>
         </div>
@@ -518,8 +787,7 @@ export default function ProductsManager(): React.JSX.Element {
     useAdminCreateProductMutation();
   const [approve, { isLoading: isApproving }] =
     useAdminApproveProductMutation();
-  const [reject, { isLoading: isRejecting }] =
-    useAdminRejectProductMutation();
+  const [reject, { isLoading: isRejecting }] = useAdminRejectProductMutation();
   const [remove, { isLoading: isDeleting }] = useAdminDeleteProductMutation();
   const [direct, { isLoading: isDirecting }] = useAdminDirectWithdrawMutation();
   const busy = isCreating || isApproving || isDeleting || isDirecting;
@@ -527,7 +795,7 @@ export default function ProductsManager(): React.JSX.Element {
   return (
     <>
       {createOpen && (
-        <JsonBodyModal
+        <CreateProductModal
           loading={isCreating}
           onClose={() => setCreateOpen(false)}
           onSubmit={async (body) => {
@@ -554,14 +822,19 @@ export default function ProductsManager(): React.JSX.Element {
           onClose={() => setPaymentTarget(null)}
           onConfirm={async (selectedMethod) => {
             try {
-              // 1. Approve product first
-              if (paymentTarget.status.toLowerCase() !== "approved" && paymentTarget.status.toLowerCase() !== "active") {
+              if (
+                paymentTarget.status.toLowerCase() !== "approved" &&
+                paymentTarget.status.toLowerCase() !== "active"
+              ) {
                 await approve(paymentTarget.id).unwrap();
               }
-              // 2. Direct payment
               const body = {
-                studentId: Number(paymentTarget.raw?.user?.id ?? paymentTarget.raw?.seller?.id ?? paymentTarget.raw?.owner?.id),
-                productId: Number(paymentTarget.id)
+                studentId: Number(
+                  paymentTarget.raw?.user?.id ??
+                    paymentTarget.raw?.seller?.id ??
+                    paymentTarget.raw?.owner?.id,
+                ),
+                productId: Number(paymentTarget.id),
               };
               await direct(body).unwrap();
             } finally {
@@ -571,7 +844,7 @@ export default function ProductsManager(): React.JSX.Element {
         />
       )}
 
-      <div className="min-h-screen bg-[#f5f6fa] p-4 lg:p-6">
+      <div className="min-h-screen p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -857,7 +1130,6 @@ export default function ProductsManager(): React.JSX.Element {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
-                          {/* Navigate to details page */}
                           <button
                             onClick={() =>
                               router.push(`/admin/products/${p.id}`)

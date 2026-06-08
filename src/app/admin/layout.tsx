@@ -49,9 +49,7 @@ export default function AdminLayout({
   if (!isAuthenticated) return null;
 
   return (
-    <div
-      className={`${baiJamjuree.className} flex min-h-screen bg-zinc-50 dark:bg-zinc-950`}
-    >
+    <div className={`${baiJamjuree.className} flex min-h-screen `}>
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden backdrop-blur-sm"

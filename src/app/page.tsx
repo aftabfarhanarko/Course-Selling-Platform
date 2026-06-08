@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Main_Index_For_Call_Files from "../main";
 
 export default function Home() {

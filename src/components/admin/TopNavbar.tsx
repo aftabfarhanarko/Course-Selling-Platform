@@ -153,10 +153,8 @@ export default function TopNavbar({
 
       {/* ── Right: Actions ── */}
       <div className="flex items-center gap-1">
-        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1.5" />
-
         {/* Theme */}
-        <Button
+        {/* <Button
           variant="ghost"
           size="sm"
           onClick={toggleTheme}
@@ -164,7 +162,7 @@ export default function TopNavbar({
           className="h-8 w-8 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0"
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
+        </Button> */}
 
         {/* Fullscreen */}
         <Button
@@ -181,7 +179,7 @@ export default function TopNavbar({
           )}
         </Button>
 
-        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1.5" />
+        {/* <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1.5" /> */}
 
         {/* ── Avatar Dropdown ── */}
         <div className="relative ml-0.5" ref={dropdownRef}>
@@ -255,7 +253,7 @@ export default function TopNavbar({
                   Profile
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => {
                     setDropdownOpen(false);
                     router.push("/dashboard/settings");
@@ -264,7 +262,7 @@ export default function TopNavbar({
                 >
                   <Settings className="w-4 h-4 text-zinc-400" />
                   Settings
-                </button>
+                </button> */}
               </div>
 
               <div className="border-t border-zinc-100 dark:border-zinc-800 py-1">

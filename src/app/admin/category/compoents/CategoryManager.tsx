@@ -149,7 +149,7 @@ export default function CategoryManager(): React.JSX.Element {
       )}
 
       {/* ── Page content ── */}
-      <div className="min-h-screen bg-gray-50 p-3 sm:p-5 lg:p-7">
+      <div className="min-h-screen  p-3 sm:p-5 lg:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">

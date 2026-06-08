@@ -37,17 +37,8 @@ const Loading = () => {
         />
       </div>
 
-      {/* ── Center content ── */}
+      {/* ── Center content (brand removed, only loading indicator) ── */}
       <div className="flex flex-col items-center gap-8 select-none">
-        {/* Brand */}
-        <span
-          className="text-2xl font-extrabold tracking-tight"
-          style={{ fontFamily: "'Syne', sans-serif" }}
-        >
-          <span className="text-[#1a1a2e]">JEV</span>
-          <span className="text-[#4f46e5]">XO</span>
-        </span>
-
         {/* Spinner ring */}
         <div className="relative w-14 h-14">
           {/* Outer track */}

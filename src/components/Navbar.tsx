@@ -9,15 +9,14 @@ import {
   GraduationCap,
   ShoppingBag,
   BarChart2,
-  Users,
-  LogIn,
-  UserPlus,
   Menu,
   X,
-  SignalIcon,
+  LogIn,
+  UserPlus,
   Shield,
   LayoutDashboard,
   LogOut,
+  SignalIcon,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
@@ -31,11 +30,10 @@ const navLinks = [
   { name: "Courses", href: "/courses", icon: GraduationCap },
   { name: "Shop", href: "/shop", icon: ShoppingBag },
   { name: "Stats", href: "/stats", icon: BarChart2 },
-  // { name: "Affiliate", href: "/affiliate", icon: Users },
 ];
 
 function Header() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // mobile drawer
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -57,6 +55,7 @@ function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // lock body scroll when drawer open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
@@ -64,6 +63,7 @@ function Header() {
     };
   }, [isOpen]);
 
+  // close drawers on outside click
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       if (
@@ -73,7 +73,6 @@ function Header() {
       ) {
         setIsOpen(false);
       }
-
       if (
         profileOpen &&
         profileRef.current &&
@@ -93,6 +92,7 @@ function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  // hide on dashboard pages
   if (
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/student") ||
@@ -129,15 +129,18 @@ function Header() {
 
   return (
     <>
+      {/* ───── TOP HEADER ───── */}
       <header
-        className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${scrolled
+        className={`fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ${
+          scrolled
             ? "bg-[#dde0f5] backdrop-blur-xl shadow-sm py-2"
             : "bg-[#DFE2FF] py-2.5"
-          }`}
+        }`}
         style={{ fontFamily: "var(--font-bai-jamjuree)" }}
       >
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-center justify-between">
+            {/* ── Mobile hamburger ── */}
             <button
               onClick={() => setIsOpen(true)}
               className="lg:hidden p-2 -ml-2 text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
@@ -146,257 +149,180 @@ function Header() {
               <Menu className="w-6 h-6" />
             </button>
 
-            <Link
-              href="/"
-              className="text-2xl font-black text-[#0F172A] tracking-tighter flex items-center gap-2"
-            >
-              <span className="hidden sm:inline">JEVXO</span>
-            </Link>
+            {/* ── Desktop: Logo (left) + Nav (center) + Auth (right) ── */}
+            <div className="hidden lg:flex items-center justify-between w-full">
+              {/* Logo left */}
+              <Link
+                href="/"
+                className="text-2xl font-black text-[#0F172A] tracking-tighter flex-shrink-0"
+              >
+                MARUF TECH
+              </Link>
 
-            <nav className="hidden lg:flex items-center gap-1  rounded-2xl px-2 py-1.5">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${isActive(link.href)
-                        ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
-                        : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
+              {/* Center nav */}
+              <nav className="flex items-center gap-1 rounded-2xl px-2 py-1.5">
+                {navLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={`flex items-center gap-2 text-[14px] font-semibold px-4 py-2 rounded-xl transition-all ${
+                        isActive(link.href)
+                          ? "bg-[#0047FF] text-white shadow-md shadow-blue-200"
+                          : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
                       }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {link.name}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <div className="hidden lg:flex items-center gap-4">
-              {!isAuthenticated ? (
-                <>
-                  <Link
-                    href="/login"
-                    className="flex items-center gap-1.5 text-[14px] font-bold text-slate-700 transition-colors px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Login
-                  </Link>
-                  <Link href="/signup">
-                    <Button className="rounded-full bg-[#0047FF] hover:bg-blue-700 px-6 py-5 text-white text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2">
-                      Sign Up
-                      <UserPlus className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href={dashboardHref}
-                    className="flex items-center gap-1.5 text-[14px] font-bold text-slate-700 transition-colors px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200"
-                    aria-label="Dashboard"
-                  >
-                    {isAdminRole ? (
-                      <Shield className="w-4 h-4" />
-                    ) : (
-                      <LayoutDashboard className="w-4 h-4" />
-                    )}
-                    {isAdminRole ? "Admin" : isAffiliateRole ? "Affiliate" : "Student"}
-                  </Link>
-
-                  <div className="relative" ref={profileRef}>
-                    <button
-                      type="button"
-                      onClick={() => setProfileOpen((v) => !v)}
-                      className="w-9 h-9 rounded-full border-2 border-white shadow-md overflow-hidden hover:scale-105 transition-transform bg-slate-100 flex items-center justify-center"
-                      aria-label="Account menu"
                     >
-                      {typeof avatarUrl === "string" && avatarUrl.length > 0 ? (
-                        <img
-                          src={avatarUrl}
-                          alt={displayName}
-                          className="w-full h-full object-cover"
-                        />
+                      <Icon className="w-4 h-4" />
+                      {link.name}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Right auth / profile */}
+              <div className="flex items-center gap-4 flex-shrink-0">
+                {!isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/login"
+                      className="flex items-center gap-1.5 text-[14px] font-bold text-slate-700 transition-colors px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      Login
+                    </Link>
+                    <Link href="/signup">
+                      <Button className="rounded-full bg-[#0047FF] hover:bg-blue-700 px-6 py-5 text-white text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2">
+                        Sign Up
+                        <UserPlus className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href={dashboardHref}
+                      className="flex items-center gap-1.5 text-[14px] font-bold text-slate-700 transition-colors px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200"
+                    >
+                      {isAdminRole ? (
+                        <Shield className="w-4 h-4" />
                       ) : (
-                        <span className="text-[12px] font-black text-slate-700">
-                          {initials}
-                        </span>
+                        <LayoutDashboard className="w-4 h-4" />
                       )}
-                    </button>
+                      {isAdminRole
+                        ? "Admin"
+                        : isAffiliateRole
+                          ? "Affiliate"
+                          : "Student"}
+                    </Link>
 
-                    {profileOpen && (
-                      <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
-                        <div className="px-4 py-3 border-b border-slate-100">
-                          <p className="text-[13px] font-black text-slate-900 truncate">
-                            {displayName}
-                          </p>
-                          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide truncate">
-                            {role || "user"}
-                          </p>
-                        </div>
-                        <div className="py-1">
-                          <Link
-                            href={dashboardHref}
-                            className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:bg-slate-50"
-                          >
-                            <LayoutDashboard className="w-4 h-4 text-slate-500" />
-                            Dashboard
-                          </Link>
+                    {/* Profile dropdown (desktop) */}
+                    <div className="relative" ref={profileRef}>
+                      <button
+                        type="button"
+                        onClick={() => setProfileOpen((v) => !v)}
+                        className="w-9 h-9 rounded-full border-2 border-white shadow-md overflow-hidden hover:scale-105 transition-transform bg-slate-100 flex items-center justify-center"
+                        aria-label="Account menu"
+                      >
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt={displayName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[12px] font-black text-slate-700">
+                            {initials}
+                          </span>
+                        )}
+                      </button>
 
-                          {!isAdminRole && (
+                      {profileOpen && (
+                        <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden z-50">
+                          <div className="px-4 py-3 border-b border-slate-100">
+                            <p className="text-[13px] font-black text-slate-900 truncate">
+                              {displayName}
+                            </p>
+                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide truncate">
+                              {role || "user"}
+                            </p>
+                          </div>
+                          <div className="py-1">
                             <Link
-                              href="/student/dashboard"
+                              href={dashboardHref}
                               className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:bg-slate-50"
                             >
-                              <SignalIcon className="w-4 h-4 text-slate-500" />
-                              Profile
+                              <LayoutDashboard className="w-4 h-4 text-slate-500" />
+                              Dashboard
                             </Link>
-                          )}
-
-                          <button
-                            type="button"
-                            disabled={isLoggingOut}
-                            onClick={async () => {
-                              if (isLoggingOut) return;
-                              const toastId = toast.loading("Signing out...");
-                              try {
-                                await logoutApi().unwrap();
-                              } catch {
-                              } finally {
-                                dispatch(logout());
-                                dispatch(baseApi.util.resetApiState());
-                                toast.success("Signed out", { id: toastId });
-                                setProfileOpen(false);
-                                router.replace("/");
-                              }
-                            }}
-                            className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-red-600 hover:bg-red-50 disabled:opacity-70 disabled:pointer-events-none"
-                          >
-                            <LogOut className="w-4 h-4" />
-                            {isLoggingOut ? "Signing out..." : "Sign Out"}
-                          </button>
+                            {!isAdminRole && (
+                              <Link
+                                href="/student/dashboard"
+                                className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:bg-slate-50"
+                              >
+                                <SignalIcon className="w-4 h-4 text-slate-500" />
+                                Profile
+                              </Link>
+                            )}
+                            <button
+                              type="button"
+                              disabled={isLoggingOut}
+                              onClick={async () => {
+                                if (isLoggingOut) return;
+                                const toastId = toast.loading("Signing out...");
+                                try {
+                                  await logoutApi().unwrap();
+                                } catch {
+                                } finally {
+                                  dispatch(logout());
+                                  dispatch(baseApi.util.resetApiState());
+                                  toast.success("Signed out", { id: toastId });
+                                  setProfileOpen(false);
+                                  router.replace("/");
+                                }
+                              }}
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-red-600 hover:bg-red-50 disabled:opacity-70 disabled:pointer-events-none"
+                            >
+                              <LogOut className="w-4 h-4" />
+                              {isLoggingOut ? "Signing out..." : "Sign Out"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="lg:hidden flex items-center gap-2">
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    href={dashboardHref}
-                    className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
-                    aria-label="Dashboard"
-                  >
-                    {isAdminRole ? (
-                      <Shield className="w-5 h-5 text-slate-600" />
-                    ) : (
-                      <LayoutDashboard className="w-5 h-5 text-slate-600" />
-                    )}
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => setProfileOpen((v) => !v)}
-                    className="w-9 h-9 rounded-full border-2 border-white shadow-md overflow-hidden bg-slate-100 flex items-center justify-center"
-                    aria-label="Account menu"
-                  >
-                    {typeof avatarUrl === "string" && avatarUrl.length > 0 ? (
-                      <img
-                        src={avatarUrl}
-                        alt={displayName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-[12px] font-black text-slate-700">
-                        {initials}
-                      </span>
-                    )}
-                  </button>
-
-                  {profileOpen && (
-                    <div className="absolute right-4 top-[64px] w-[220px] rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
-                      <div className="px-4 py-3 border-b border-slate-100">
-                        <p className="text-[13px] font-black text-slate-900 truncate">
-                          {displayName}
-                        </p>
-                        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide truncate">
-                          {role || "user"}
-                        </p>
-                      </div>
-                      <div className="py-1">
-                        <Link
-                          href={dashboardHref}
-                          onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:bg-slate-50"
-                        >
-                          <LayoutDashboard className="w-4 h-4 text-slate-500" />
-                          Dashboard
-                        </Link>
-                        <button
-                          type="button"
-                          disabled={isLoggingOut}
-                          onClick={async () => {
-                            if (isLoggingOut) return;
-                            const toastId = toast.loading("Signing out...");
-                            try {
-                              await logoutApi().unwrap();
-                            } catch {
-                            } finally {
-                              dispatch(logout());
-                              dispatch(baseApi.util.resetApiState());
-                              toast.success("Signed out", { id: toastId });
-                              setProfileOpen(false);
-                              router.replace("/");
-                            }
-                          }}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] font-bold text-red-600 hover:bg-red-50 disabled:opacity-70 disabled:pointer-events-none"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          {isLoggingOut ? "Signing out..." : "Sign Out"}
-                        </button>
-                      </div>
+                      )}
                     </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
-                    aria-label="Login"
-                  >
-                    <LogIn className="w-5 h-5 text-slate-600" />
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
-                    aria-label="Sign up"
-                  >
-                    <UserPlus className="w-5 h-5 text-slate-600" />
-                  </Link>
-                </>
-              )}
+                  </>
+                )}
+              </div>
             </div>
+
+            {/* ── Mobile: brand on the right ── */}
+            <Link
+              href="/"
+              className="lg:hidden text-2xl font-black text-[#0F172A] tracking-tighter"
+            >
+              MARUF TECH
+            </Link>
           </div>
         </div>
       </header>
 
+      {/* ───── MOBILE SIDE DRAWER ───── */}
+      {/* overlay */}
       <div
-        className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isOpen
+        className={`fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          isOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-          }`}
+        }`}
         onClick={() => setIsOpen(false)}
       />
 
+      {/* drawer */}
       <div
         ref={drawerRef}
-        className={`fixed top-0 left-0 z-[200] h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 z-[200] h-full w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
           <Link
@@ -405,7 +331,7 @@ function Header() {
             className="flex items-center gap-2"
           >
             <span className="font-black text-[#0F172A] text-lg tracking-tight">
-              JEVXO
+              MARUF TECH
             </span>
           </Link>
           <button
@@ -424,10 +350,11 @@ function Header() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${isActive(link.href)
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${
+                  isActive(link.href)
                     ? "bg-[#0047FF] text-white shadow-lg shadow-blue-200"
                     : "text-slate-700 hover:bg-slate-50"
-                  }`}
+                }`}
               >
                 <Icon className="w-5 h-5" />
                 {link.name}
@@ -436,6 +363,7 @@ function Header() {
           })}
         </nav>
 
+        {/* drawer bottom: auth actions */}
         <div className="px-4 py-5 border-t border-slate-100 flex flex-col gap-3">
           {!isAuthenticated ? (
             <>
@@ -491,7 +419,37 @@ function Header() {
         </div>
       </div>
 
+      {/* ───── MOBILE BOTTOM NAVIGATION (routes) ───── */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-slate-200 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] pb-safe">
+        <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 rounded-xl transition-colors ${
+                  active
+                    ? "text-[#0047FF]"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <Icon className="w-5 h-5" strokeWidth={active ? 2.5 : 2} />
+                <span className="text-[10px] font-bold">{link.name}</span>
+                {active && (
+                  <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-[#0047FF]" />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Spacer for fixed header */}
       <div className="h-16 lg:h-[68px]" />
+      {/* Spacer for mobile bottom nav */}
+      <div className="lg:hidden h-20" />
     </>
   );
 }

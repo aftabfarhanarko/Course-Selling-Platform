@@ -1,22 +1,32 @@
 ﻿"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Pencil, Save, Shield, UserRound } from "lucide-react";
+import {
+  Camera,
+  Lock,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Save,
+  Shield,
+  User,
+  UserRound,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { uploadImageToImgBB } from "@/lib/images.upload";
-import {
-  useProfileQuery,
-  useUpdateProfileMutation,
-} from "@/lib/api/usersApi";
+import { useProfileQuery, useUpdateProfileMutation } from "@/lib/api/usersApi";
 import { useChangePasswordMutation } from "@/lib/api/authApi";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { setUser } from "@/store/slices/authSlice";
 
 function normalizeProfile(payload: any): any {
-  return payload?.user ?? payload?.data?.user ?? payload?.data ?? payload ?? null;
+  return (
+    payload?.user ?? payload?.data?.user ?? payload?.data ?? payload ?? null
+  );
 }
 
 const AUTH_STORAGE_KEY = "course_platform_auth";
@@ -66,7 +76,8 @@ export default function StudentProfilePage(): React.JSX.Element {
     try {
       const raw = localStorage.getItem(AUTH_STORAGE_KEY);
       const parsed = raw ? (JSON.parse(raw) as any) : {};
-      const token = updated?.token ?? parsed?.token ?? parsed?.user?.token ?? null;
+      const token =
+        updated?.token ?? parsed?.token ?? parsed?.user?.token ?? null;
       const userToStore = token ? { ...updated, token } : updated;
       localStorage.setItem(
         AUTH_STORAGE_KEY,
@@ -138,19 +149,21 @@ export default function StudentProfilePage(): React.JSX.Element {
   const country = String(profile?.country ?? "");
 
   return (
-    <div className="min-h-screen bg-[#f5f5fb] px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-start justify-between gap-4">
+    <div className="min-h-screen  px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <div className="mx-auto ">
+        {/* Header */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#111827]">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
               Profile
             </h1>
-            <p className="mt-1 text-sm text-zinc-500">
-              Update your name, photo, and password
+            <p className="text-sm text-gray-500">
+              Manage your name, photo, and security
             </p>
           </div>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => refetch()}
             disabled={isFetching}
           >
@@ -159,22 +172,25 @@ export default function StudentProfilePage(): React.JSX.Element {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
+          {/* Left column - Photo & Name */}
           <div className="lg:col-span-1">
-            <div className="rounded-[24px] border border-[#ececf5] bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[#111827]">Photo</h2>
+                <h2 className="text-sm font-semibold text-gray-900">
+                  Profile picture
+                </h2>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
                 >
-                  <Pencil className="h-4 w-4" />
+                  <Camera className="h-3.5 w-3.5" />
                   Change
                 </button>
               </div>
 
-              <div className="mt-5 flex items-center justify-center">
-                <div className="h-32 w-32 rounded-[28px] border-4 border-white bg-[#f7f7fb] shadow-sm overflow-hidden flex items-center justify-center">
+              <div className="mt-4 flex justify-center">
+                <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-white bg-gray-50 shadow-sm">
                   {photoPreview ? (
                     <img
                       src={photoPreview}
@@ -182,7 +198,9 @@ export default function StudentProfilePage(): React.JSX.Element {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <UserRound className="h-12 w-12 text-zinc-400" />
+                    <div className="flex h-full w-full items-center justify-center">
+                      <UserRound className="h-10 w-10 text-gray-400" />
+                    </div>
                   )}
                 </div>
               </div>
@@ -192,20 +210,17 @@ export default function StudentProfilePage(): React.JSX.Element {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] ?? null;
-                  setSelectedPhoto(file);
-                }}
+                onChange={(e) => setSelectedPhoto(e.target.files?.[0] ?? null)}
               />
 
-              <div className="mt-6">
-                <label className="text-xs font-bold tracking-wider text-zinc-500">
-                  FULL NAME
+              <div className="mt-5">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Full name
                 </label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-2"
+                  className="mt-1 text-sm"
                   placeholder="Your name"
                 />
               </div>
@@ -213,85 +228,100 @@ export default function StudentProfilePage(): React.JSX.Element {
               <Button
                 onClick={onSaveProfile}
                 disabled={isUpdating}
-                className="mt-5 w-full"
+                className="mt-5 w-full text-sm"
               >
-                <Save className="mr-2 h-4 w-4" />
-                {isUpdating ? "Saving..." : "Save Profile"}
+                <Save className="mr-2 h-3.5 w-3.5" />
+                {isUpdating ? "Saving..." : "Save changes"}
               </Button>
             </div>
           </div>
 
+          {/* Right column - Info & Password */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-[24px] border border-[#ececf5] bg-[#f7f7fc] p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-[#111827]">
+            {/* Personal Information */}
+            <div className="rounded-2xl border border-gray-100 bg-gray-50/40 p-5 shadow-sm">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                <User className="h-4 w-4 text-blue-500" />
                 Personal Information
               </h2>
 
-              <div className="mt-6 grid gap-6 sm:grid-cols-2">
-                <Info label="FULL NAME" value={String(profile?.name ?? "-")} />
-                <Info label="EMAIL" value={email || "-"} />
-                <Info label="PHONE" value={phone || "-"} />
-                <Info label="COUNTRY" value={country || "-"} />
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <InfoField
+                  icon={User}
+                  label="Full name"
+                  value={String(profile?.name ?? "-")}
+                />
+                <InfoField icon={Mail} label="Email" value={email || "-"} />
+                <InfoField icon={Phone} label="Phone" value={phone || "-"} />
+                <InfoField
+                  icon={MapPin}
+                  label="Country"
+                  value={country || "-"}
+                />
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-[#ececf5] bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-                  <Shield className="h-5 w-5" />
+            {/* Change Password */}
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                  <Shield className="h-4 w-4" />
                 </div>
-                <h2 className="text-xl font-bold text-[#111827]">
-                  Change Password
+                <h2 className="text-base font-semibold text-gray-900">
+                  Change password
                 </h2>
               </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-bold tracking-wider text-zinc-500">
-                    CURRENT PASSWORD
+              <div className="mt-4 space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Current password
                   </label>
                   <Input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="mt-2"
-                    placeholder="Current password"
+                    className="mt-1 text-sm"
+                    placeholder="••••••••"
                   />
                 </div>
 
-                <div>
-                  <label className="text-xs font-bold tracking-wider text-zinc-500">
-                    NEW PASSWORD
-                  </label>
-                  <Input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-2"
-                    placeholder="New password"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold tracking-wider text-zinc-500">
-                    CONFIRM PASSWORD
-                  </label>
-                  <Input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-2"
-                    placeholder="Confirm new password"
-                  />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      New password
+                    </label>
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="mt-1 text-sm"
+                      placeholder="New password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Confirm password
+                    </label>
+                    <Input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="mt-1 text-sm"
+                      placeholder="Confirm new password"
+                    />
+                  </div>
                 </div>
               </div>
 
               <Button
                 onClick={onChangePassword}
                 disabled={isChangingPassword}
-                className="mt-5"
+                variant="outline"
+                className="mt-5 text-sm"
               >
-                {isChangingPassword ? "Updating..." : "Update Password"}
+                <Lock className="mr-2 h-3.5 w-3.5" />
+                {isChangingPassword ? "Updating..." : "Update password"}
               </Button>
             </div>
           </div>
@@ -301,13 +331,29 @@ export default function StudentProfilePage(): React.JSX.Element {
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+// Helper component with icon for each info row
+function InfoField({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}) {
   return (
-    <div>
-      <p className="mb-2 text-[10px] font-bold tracking-[0.2em] text-gray-400">
-        {label}
-      </p>
-      <p className="break-words text-lg font-semibold text-[#111827]">{value}</p>
+    <div className="flex items-start gap-3 rounded-lg border border-gray-50 bg-white p-3">
+      <div className="mt-0.5">
+        <Icon className="h-4 w-4 text-gray-500" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+          {label}
+        </p>
+        <p className="truncate text-sm font-medium text-gray-800">
+          {value || "—"}
+        </p>
+      </div>
     </div>
   );
 }

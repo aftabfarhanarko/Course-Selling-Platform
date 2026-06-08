@@ -38,7 +38,9 @@ function formatDate(input: any): string {
 }
 
 function normalizeType(v: any): string {
-  const s = String(v ?? "").toLowerCase().trim();
+  const s = String(v ?? "")
+    .toLowerCase()
+    .trim();
   if (s === "bkash") return "bkash";
   if (s === "nagad") return "nagad";
   if (s === "bank") return "bank";
@@ -48,7 +50,9 @@ function normalizeType(v: any): string {
 }
 
 function normalizeStatus(v: any): string {
-  const s = String(v ?? "").toLowerCase().trim();
+  const s = String(v ?? "")
+    .toLowerCase()
+    .trim();
   if (s === "pending" || s === "approved" || s === "rejected") return s;
   return s || "unknown";
 }
@@ -286,7 +290,9 @@ export default function page() {
               </label>
               <select
                 value={createType}
-                onChange={(e) => setCreateType(e.target.value as PaymentMethodType)}
+                onChange={(e) =>
+                  setCreateType(e.target.value as PaymentMethodType)
+                }
                 className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-[12px] font-semibold text-zinc-800 dark:text-zinc-200"
               >
                 <option value="bkash">Bkash</option>
@@ -438,7 +444,9 @@ export default function page() {
               )}
             </button>
 
-            <div className="text-[11px] text-zinc-400">Required: account + name</div>
+            <div className="text-[11px] text-zinc-400">
+              Required: account + name
+            </div>
           </div>
         </div>
 
@@ -514,7 +522,9 @@ export default function page() {
                     Page {pageNum} / {totalPages}
                   </span>
                   <button
-                    onClick={() => setPageNum((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      setPageNum((p) => Math.min(totalPages, p + 1))
+                    }
                     disabled={pageNum >= totalPages}
                     className="disabled:opacity-40"
                     title="Next"
@@ -551,7 +561,8 @@ export default function page() {
                     <tr>
                       <td colSpan={6} className="px-4 py-10">
                         <div className="flex items-center justify-center gap-2 text-[12px] text-zinc-500 font-semibold">
-                          <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+                          <Loader2 className="h-4 w-4 animate-spin" />{" "}
+                          Loading...
                         </div>
                       </td>
                     </tr>

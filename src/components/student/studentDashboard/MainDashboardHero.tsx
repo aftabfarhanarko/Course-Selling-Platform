@@ -1,12 +1,16 @@
 "use client";
+
 import { useGetStudentDashboardStatsQuery } from "@/lib/api/statsApi";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 export const MainDashboard = () => {
-  const { data, isLoading, error } = useGetStudentDashboardStatsQuery();
+  const { data, isLoading } = useGetStudentDashboardStatsQuery();
+  const authUser = useSelector((state: RootState) => state.auth.user);
 
-  if (isLoading) {
-    return <div className="h-64 flex items-center justify-center text-gray-500">Loading dashboard...</div>;
-  }
+  const displayName =
+    String(authUser?.name ?? authUser?.fullName ?? authUser?.username ?? "").trim() || "Student";
+  const firstName = displayName.split(" ")[0];
 
   const progressData = data?.progressData || {
     percentage: 0,
@@ -14,62 +18,75 @@ export const MainDashboard = () => {
     status: "Enroll to start learning!",
   };
 
+  if (isLoading) {
+    return (
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+        <div className="h-[160px] sm:h-[180px] rounded-2xl bg-slate-100 animate-pulse" />
+        <div className="h-[160px] sm:h-[180px] rounded-2xl bg-slate-100 animate-pulse" />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
-      {/* LEFT CARD */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 transition-all duration-300 hover:shadow-md group">
-        <p className="text-[9px] sm:text-[10px] tracking-[0.2em] text-gray-400 dark:text-gray-500 uppercase font-bold">
-          WELCOME BACK, ALEX
+    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+
+      {/* LEFT — Welcome card */}
+      <div className="relative bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 overflow-hidden group hover:shadow-md transition-all duration-300">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #4f8ef7 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+
+        <p className="text-[9px] tracking-[0.2em] text-slate-400 uppercase font-bold">
+          WELCOME BACK, {firstName.toUpperCase()}
         </p>
 
-        <h1 className="text-xl sm:text-2xl lg:text-[28px] font-extrabold mt-3 leading-tight sm:leading-snug text-slate-900 dark:text-white">
+        <h1 className="text-[18px] sm:text-[22px] font-extrabold mt-2.5 leading-snug text-slate-900">
           Fueling your journey to{" "}
-          <span className="text-primary dark:text-blue-500 bg-primary/10 dark:bg-blue-900/20 px-2 py-0.5 rounded-lg">
+          <span className="text-[#4f8ef7] bg-blue-50 px-1.5 py-0.5 rounded-lg">
             precision prosperity.
           </span>
         </h1>
 
-        <p className="text-gray-500 dark:text-gray-400 mt-4 text-[11px] sm:text-[12.5px] leading-relaxed max-w-md">
-          Track your progress, manage your earnings, and expand your portfolio  
-          from your personal architectural hub.
+        <p className="text-slate-500 mt-3 text-[11px] sm:text-[12px] leading-relaxed max-w-sm">
+          Track your progress, manage your earnings, and expand your portfolio from your personal hub.
         </p>
       </div>
 
-      {/* RIGHT CARD - Dynamic Progress */}
-      <div className="bg-primary text-primary-foreground rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-primary/20 relative overflow-hidden group transition-all duration-300 hover:scale-[1.01]">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-all"></div>
+      {/* RIGHT — Progress card */}
+      <div className="relative bg-[#4f8ef7] text-white rounded-2xl p-5 sm:p-6 overflow-hidden shadow-lg shadow-blue-400/20 group hover:shadow-blue-400/30 transition-all duration-300">
+        {/* Glow orbs */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/15 transition-all" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 blur-2xl" />
 
-        <div className="relative z-10">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-            <h2 className="text-sm sm:text-[15px] font-bold tracking-tight">    
+        <div className="relative z-10 flex flex-col h-full justify-between gap-4">
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="text-[13px] sm:text-[14px] font-bold leading-tight">
               {progressData.label}
             </h2>
-            <span className="text-[10px] sm:text-[11px] font-black bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+            <span className="shrink-0 text-[10px] font-black bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/20">
               {progressData.percentage}% Complete
             </span>
           </div>
 
-          <p className="text-[11px] sm:text-[12.5px] text-white/90 mt-3 leading-relaxed font-medium">
-            {progressData.status} You've completed {progressData.percentage}% of
-            your goal.
+          <p className="text-[11px] sm:text-[12px] text-white/80 leading-relaxed">
+            {progressData.status} You've completed {progressData.percentage}% of your goal.
           </p>
 
-          {/* Progress Bar */}
-          <div className="mt-5 space-y-2">
-            <div className="relative bg-white/10 w-full h-2 rounded-full overflow-hidden backdrop-blur-sm">
+          {/* Progress bar */}
+          <div className="space-y-1.5">
+            <div className="relative bg-white/15 w-full h-2 rounded-full overflow-hidden">
               <div
-                className="absolute top-0 left-0 bg-[#4ADE80] h-full rounded-full transition-all duration-1000 ease-in-out shadow-[0_0_12px_rgba(74,222,128,0.5)]"
+                className="absolute top-0 left-0 bg-[#4ADE80] h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(74,222,128,0.6)]"
                 style={{ width: `${progressData.percentage}%` }}
-              ></div>
+              />
             </div>
           </div>
 
-          {/* Action Button */}
           <button
             onClick={() => alert("Loading growth analytics...")}
-            className="mt-6 w-full sm:w-auto bg-white text-primary font-bold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-all active:scale-95 text-[11px] sm:text-[12px] shadow-sm uppercase tracking-wider"
+            className="w-full sm:w-auto self-start bg-white text-[#4f8ef7] font-bold px-5 py-2 rounded-xl hover:bg-blue-50 active:scale-95 transition-all text-[11px] uppercase tracking-wider shadow-sm"
           >
-            view your growth
+            View Your Growth
           </button>
         </div>
       </div>

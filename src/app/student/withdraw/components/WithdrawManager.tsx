@@ -2,20 +2,25 @@
 
 import React, { useMemo, useState } from "react";
 import {
+  ArrowDownCircle,
+  Calendar,
   ChevronLeft,
   ChevronRight,
-  Eye,
+  Hash,
+  Info,
   Loader2,
-  Plus,
   Search,
+  Tag,
   Trash2,
   X,
+  Banknote,
 } from "lucide-react";
 import {
   useStudentWithdrawDeleteMutation,
-  useStudentWithdrawRequestMutation,
   useStudentWithdrawsMyQuery,
 } from "@/lib/api/student/withdraw";
+
+// ─── Types ──────────────────────────────────────────────────────────────
 
 type UiWithdraw = {
   id: number | string;
@@ -36,6 +41,8 @@ type StatusFilter =
   | "completed";
 
 const PAGE_SIZE = 10;
+
+// ─── Helpers ────────────────────────────────────────────────────────────
 
 function formatDate(value: unknown): string {
   if (!value) return "—";
@@ -110,67 +117,106 @@ function toUi(raw: any): UiWithdraw | null {
   return { id, amount, method, status, createdAt, raw };
 }
 
-function StatusPill({ status }: { status: string }) {
+// ─── Status Badge (compact) ─────────────────────────────────────────────
+
+function StatusBadge({ status }: { status: string }) {
   const v = status.toLowerCase();
   const cls =
     v === "approved" || v === "paid" || v === "completed"
-      ? "bg-emerald-50 text-emerald-700"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
       : v === "pending" || v === "processing"
-        ? "bg-amber-50 text-amber-700"
+        ? "bg-amber-50 text-amber-700 border-amber-200"
         : v === "rejected"
-          ? "bg-red-50 text-red-700"
-          : "bg-gray-50 text-gray-600";
+          ? "bg-red-50 text-red-700 border-red-200"
+          : "bg-gray-100 text-gray-600 border-gray-200";
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${cls}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${cls}`}
     >
       {status}
     </span>
   );
 }
 
-function ModalShell({
-  title,
-  subtitle,
-  loading,
+// ─── Details Modal (compact) ────────────────────────────────────────────
+
+function DetailsModal({
+  item,
   onClose,
-  children,
 }: {
-  title: string;
-  subtitle: string;
-  loading?: boolean;
+  item: UiWithdraw;
   onClose: () => void;
-  children: React.ReactNode;
 }) {
+  const fields = useMemo(() => {
+    if (!item.raw) return [];
+    const result: { label: string; value: string }[] = [];
+    const flatten = (obj: any, prefix = "") => {
+      for (const [key, val] of Object.entries(obj)) {
+        const label = prefix ? `${prefix} › ${key}` : key;
+        if (val && typeof val === "object" && !Array.isArray(val)) {
+          flatten(val, label);
+        } else {
+          result.push({ label, value: String(val ?? "—") });
+        }
+      }
+    };
+    flatten(item.raw);
+    return result;
+  }, [item.raw]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h2 className="text-[14px] font-extrabold text-gray-900">
-              {title}
+      <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ArrowDownCircle className="h-4 w-4 text-indigo-500" />
+            <h2 className="text-sm font-bold text-gray-900">
+              Withdraw Details
             </h2>
-            <p className="text-[11px] text-gray-400 mt-0.5">{subtitle}</p>
+            <span className="text-[10px] font-mono text-gray-400">
+              #{String(item.id).slice(0, 8)}
+            </span>
           </div>
           <button
             onClick={onClose}
-            disabled={loading}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-60 disabled:pointer-events-none"
+            className="text-gray-400 hover:text-gray-600"
           >
-            <X size={15} />
+            <X size={14} />
           </button>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="p-4 space-y-1 overflow-y-auto">
+          {fields.map((f, i) => (
+            <div
+              key={i}
+              className="flex justify-between gap-4 py-1.5 border-b border-gray-50 text-xs"
+            >
+              <span className="font-medium text-gray-500 truncate">
+                {f.label}
+              </span>
+              <span className="font-mono text-gray-800 text-right break-all">
+                {f.value}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-3 py-1 text-xs font-semibold bg-gray-900 text-white rounded-lg"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-
+// ─── Confirm Modal (compact) ────────────────────────────────────────────
 
 function ConfirmModal({
   title,
@@ -188,57 +234,48 @@ function ConfirmModal({
   onConfirm: () => void;
 }) {
   return (
-    <ModalShell
-      title={title}
-      subtitle={description}
-      loading={loading}
-      onClose={onClose}
-    >
-      <div className="space-y-4">
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800 font-semibold">
-          This action can’t be undone.
-        </div>
-        <div className="flex gap-2.5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-sm bg-white rounded-xl shadow-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-[12px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+            className="text-gray-400 hover:text-gray-600"
           >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2.5 text-[12px] font-bold text-white hover:bg-red-700 disabled:opacity-60"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {confirmText}
+            <X size={14} />
           </button>
         </div>
+        <div className="p-4">
+          <p className="text-xs text-gray-600">{description}</p>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 rounded-lg border border-gray-200 bg-white py-2 text-xs font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={loading}
+              className="flex-1 rounded-lg bg-red-600 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60 flex items-center justify-center gap-1"
+            >
+              {loading && <Loader2 className="h-3 w-3 animate-spin" />}
+              {confirmText}
+            </button>
+          </div>
+        </div>
       </div>
-    </ModalShell>
+    </div>
   );
 }
 
-function DetailsModal({
-  item,
-  onClose,
-}: {
-  item: UiWithdraw;
-  onClose: () => void;
-}) {
-  return (
-    <ModalShell
-      title="Withdraw Details"
-      subtitle="From /withdraw/my"
-      onClose={onClose}
-    >
-      <pre className="text-[11px] text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-auto max-h-[420px]">
-        {JSON.stringify(item.raw ?? null, null, 2)}
-      </pre>
-    </ModalShell>
-  );
-}
+// ─── Main Component (compact & clean) ───────────────────────────────────
 
 export default function WithdrawManager() {
   const [search, setSearch] = useState("");
@@ -269,97 +306,103 @@ export default function WithdrawManager() {
     total === null
       ? Math.max(1, page)
       : Math.max(1, Math.ceil(total / PAGE_SIZE));
-
   const canPrev = page > 1;
   const canNext = page < totalPages;
 
-  const anyLoading = deleteState.isLoading;
-
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-10">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">
-              Student
-            </p>
-            <h1 className="mt-2 text-2xl sm:text-3xl font-black text-gray-900">
-              Withdraw
+    <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto ">
+        {/* Simplified header */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-3">
+          <div className="flex items-center gap-2">
+            <Banknote className="h-5 w-5 text-emerald-600" />
+            <h1 className="text-xl font-bold tracking-tight text-gray-900">
+              Withdrawals
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Request a withdrawal and manage your withdraw history.
-            </p>
+            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-600">
+              Student
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+            <span>Secure transactions</span>
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-5 border-b border-gray-100">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 w-full sm:w-[360px]">
-                  <Search className="h-4 w-4 text-gray-400" />
-                  <input
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Search..."
-                    className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none"
-                  />
-                </div>
-
-                <select
-                  value={status}
-                  onChange={(e) => {
-                    setStatus(e.target.value as StatusFilter);
+        {/* Table card */}
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border-b border-gray-100">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+              <input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search by ID, method..."
+                className="w-full rounded-lg border border-gray-200 py-1.5 pl-8 pr-8 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+              {search && (
+                <button
+                  onClick={() => {
+                    setSearch("");
                     setPage(1);
                   }}
-                  className="h-[46px] rounded-2xl border border-gray-200 bg-white px-4 text-[12px] font-bold text-gray-700"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
                 >
-                  <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="approved">Approved</option>
-                  <option value="paid">Paid</option>
-                  <option value="completed">Completed</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </div>
-
-              <div className="flex items-center justify-between lg:justify-end gap-2">
-                <button
-                  onClick={() => canPrev && setPage((p) => p - 1)}
-                  disabled={!canPrev}
-                  className="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Prev
+                  <X size={12} className="text-gray-400 hover:text-gray-600" />
                 </button>
-                <div className="text-[12px] font-bold text-gray-700">
-                  Page {page} / {totalPages}
-                </div>
-                <button
-                  onClick={() => canNext && setPage((p) => p + 1)}
-                  disabled={!canNext}
-                  className="inline-flex items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
+              )}
+            </div>
+            <select
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value as StatusFilter);
+                setPage(1);
+              }}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium"
+            >
+              <option value="all">All status</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="approved">Approved</option>
+              <option value="paid">Paid</option>
+              <option value="completed">Completed</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <div className="flex items-center gap-1 ml-auto">
+              <button
+                onClick={() => canPrev && setPage((p) => p - 1)}
+                disabled={!canPrev}
+                className="rounded-lg border border-gray-200 px-2 py-1 text-xs font-medium disabled:opacity-40"
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </button>
+              <span className="text-xs text-gray-600 px-2">
+                {page} / {totalPages}
+              </span>
+              <button
+                onClick={() => canNext && setPage((p) => p + 1)}
+                disabled={!canNext}
+                className="rounded-lg border border-gray-200 px-2 py-1 text-xs font-medium disabled:opacity-40"
+              >
+                <ChevronRight className="h-3 w-3" />
+              </button>
             </div>
           </div>
 
+          {/* Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-100">
-              <thead className="bg-gray-50">
+            <table className="min-w-full">
+              <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
                   {["ID", "Amount", "Method", "Status", "Created", ""].map(
                     (h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-left text-[11px] font-black uppercase tracking-wider text-gray-500 whitespace-nowrap"
+                        className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500"
                       >
                         {h}
                       </th>
@@ -367,73 +410,71 @@ export default function WithdrawManager() {
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 bg-white">
+              <tbody className="divide-y divide-gray-50">
                 {isFetching ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-14 text-center">
-                      <div className="inline-flex items-center gap-2 text-[12px] font-semibold text-gray-500">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-                      </div>
+                    <td colSpan={6} className="px-3 py-10 text-center">
+                      <Loader2 className="inline h-4 w-4 animate-spin text-gray-400" />
                     </td>
                   </tr>
                 ) : isError ? (
                   <tr>
                     <td
                       colSpan={6}
-                      className="px-4 py-14 text-center text-[12px] font-semibold text-red-600"
+                      className="px-3 py-10 text-center text-xs text-red-500"
                     >
-                      Failed to load withdraws
+                      Failed to load withdrawals
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
                     <td
                       colSpan={6}
-                      className="px-4 py-14 text-center text-[12px] font-semibold text-gray-500"
+                      className="px-3 py-10 text-center text-xs text-gray-400"
                     >
-                      No withdraws found
+                      No withdrawals found
                     </td>
                   </tr>
                 ) : (
                   items.map((w) => (
                     <tr
                       key={String(w.id)}
-                      className="hover:bg-gray-50/60 transition-colors"
+                      className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-4 py-3 text-[12px] font-bold text-gray-700 whitespace-nowrap">
-                        {w.id}
+                      <td className="px-3 py-2.5 text-xs font-mono text-gray-500">
+                        #{String(w.id).slice(0, 8)}
                       </td>
-                      <td className="px-4 py-3 text-[12px] font-bold text-gray-900 whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-xs font-bold text-gray-900">
                         {w.amount}
                       </td>
-                      <td className="px-4 py-3 text-[12px] font-semibold text-gray-700 whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-xs text-gray-600">
                         {w.method}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <StatusPill status={w.status} />
+                      <td className="px-3 py-2.5">
+                        <StatusBadge status={w.status} />
                       </td>
-                      <td className="px-4 py-3 text-[12px] font-semibold text-gray-600 whitespace-nowrap">
-                        {w.createdAt}
+                      <td className="px-3 py-2.5 text-xs text-gray-500 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" /> {w.createdAt}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-3 py-2.5 text-right">
+                        <div className="flex justify-end gap-1">
                           <button
                             onClick={() =>
                               setModal({ type: "details", item: w })
                             }
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                            title="View"
+                            className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-indigo-600"
+                            title="Details"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Info className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() =>
                               setModal({ type: "delete", item: w })
                             }
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 bg-white text-red-600 hover:bg-red-50"
+                            className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-red-600"
                             title="Delete"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </td>
@@ -446,18 +487,17 @@ export default function WithdrawManager() {
         </div>
       </div>
 
-
-      {modal.type === "details" ? (
+      {/* Modals */}
+      {modal.type === "details" && (
         <DetailsModal
           item={modal.item}
           onClose={() => setModal({ type: "none" })}
         />
-      ) : null}
-
-      {modal.type === "delete" ? (
+      )}
+      {modal.type === "delete" && (
         <ConfirmModal
-          title="Delete Withdraw"
-          description={`DELETE /withdraw/${modal.item.id}`}
+          title="Delete withdrawal"
+          description={`Request #${String(modal.item.id).slice(0, 8)} will be permanently removed.`}
           confirmText="Delete"
           loading={deleteState.isLoading}
           onClose={() => setModal({ type: "none" })}
@@ -466,15 +506,7 @@ export default function WithdrawManager() {
             setModal({ type: "none" });
           }}
         />
-      ) : null}
-
-      {anyLoading ? (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60]">
-          <div className="rounded-2xl bg-gray-900 text-white px-4 py-2.5 text-[12px] font-semibold shadow-xl">
-            Processing...
-          </div>
-        </div>
-      ) : null}
+      )}
     </div>
   );
 }

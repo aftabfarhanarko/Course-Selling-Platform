@@ -14,13 +14,7 @@ import EmptyState from "./EmptyState";
 import CourseGrid from "./CourseGrid";
 import Pagination from "./Pagination";
 import MobileFilterSheet from "./MobileFilterSheet";
-// import FilterPanel from "./components/FilterPanel";
-// import MobileFilterSheet from "./components/MobileFilterSheet";
-// import SearchAndSortBar from "./components/SearchAndSortBar";
-// import ActiveFiltersBar from "./components/ActiveFiltersBar";
-// import CourseGrid from "./components/CourseGrid";
-// import EmptyState from "./components/EmptyState";
-// import Pagination from "./components/Pagination";
+
 
 
 const PAGE_SIZE = 8; // renamed from _paginationPage

@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Loader2, Wallet, X, TrendingUp, Clock, CreditCard as CardIcon } from "lucide-react";
+import {
+  Loader2,
+  Wallet,
+  TrendingUp,
+  Clock,
+  CreditCard,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Building2,
+  Smartphone,
+} from "lucide-react";
 import { useStudentWalletMyQuery } from "@/lib/api/student/wallet";
 
 function extractRoot(payload: any): any {
@@ -46,6 +56,202 @@ function formatMoney(amount: number | null, currency: string): string {
   return `${c}${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function getActivityClass(a: any): "credit" | "debit" | "pending" | "other" {
+  const t = String(a?.type ?? a?.title ?? a?.name ?? "").toLowerCase();
+  const status = String(a?.status ?? "").toLowerCase();
+  const amt = Number(a?.amount ?? a?.value ?? 0);
+  if (
+    t.includes("credit") ||
+    t.includes("deposit") ||
+    t.includes("earn") ||
+    status === "credit" ||
+    amt > 0
+  )
+    return "credit";
+  if (
+    t.includes("debit") ||
+    t.includes("withdraw") ||
+    t.includes("payment") ||
+    status === "debit" ||
+    amt < 0
+  )
+    return "debit";
+  if (t.includes("pending") || status === "pending") return "pending";
+  return "other";
+}
+
+function getPmIcon(m: any) {
+  const t = String(m?.type ?? "").toLowerCase();
+  if (t.includes("bank")) return Building2;
+  if (t.includes("mobile") || t.includes("bkash") || t.includes("nagad"))
+    return Smartphone;
+  return CreditCard;
+}
+
+function getPmStatusClasses(status: string): string {
+  const s = status.toLowerCase();
+  if (s === "active" || s === "verified")
+    return "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300";
+  if (s === "pending")
+    return "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300";
+  return "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400";
+}
+
+function formatDate(d: any): string {
+  if (!d) return "—";
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return String(d);
+    return dt.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return String(d);
+  }
+}
+
+// ── Prime Card ──────────────────────────────────────────────────────────────
+function PrimeCard({
+  available,
+  currency,
+  isFetching,
+  isError,
+}: {
+  available: number | null;
+  currency: string;
+  isFetching: boolean;
+  isError: boolean;
+}) {
+  return (
+    <div className="relative w-full h-52 rounded-3xl overflow-hidden bg-zinc-900 dark:bg-zinc-950 shadow-2xl shadow-zinc-900/40 mb-5 select-none">
+      {/* decorative circles */}
+      <div className="absolute -top-16 -right-10 w-48 h-48 rounded-full bg-white/5 blur-2xl" />
+      <div className="absolute -bottom-12 -left-8 w-44 h-44 rounded-full bg-blue-500/10 blur-3xl" />
+      {/* ring pattern */}
+      <svg
+        className="absolute inset-0 w-full h-full opacity-5"
+        viewBox="0 0 400 200"
+        aria-hidden
+      >
+        <circle
+          cx="320"
+          cy="60"
+          r="120"
+          stroke="white"
+          strokeWidth="1"
+          fill="none"
+        />
+        <circle
+          cx="320"
+          cy="60"
+          r="80"
+          stroke="white"
+          strokeWidth="1"
+          fill="none"
+        />
+        <circle
+          cx="320"
+          cy="60"
+          r="40"
+          stroke="white"
+          strokeWidth="1"
+          fill="none"
+        />
+        <circle
+          cx="80"
+          cy="160"
+          r="90"
+          stroke="white"
+          strokeWidth="1"
+          fill="none"
+        />
+      </svg>
+
+      <div className="relative z-10 flex flex-col justify-between h-full p-6">
+        {/* top row */}
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/40">
+            Student Prime
+          </span>
+          <div className="w-8 h-6 rounded-sm bg-gradient-to-br from-white/30 to-white/10 border border-white/20" />
+        </div>
+
+        {/* balance */}
+        <div>
+          <p className="text-[11px] uppercase tracking-widest text-white/40 mb-1 font-medium">
+            Available Balance
+          </p>
+          <div className="text-4xl font-black tracking-tight text-white leading-none">
+            {isFetching ? (
+              <span className="text-lg font-semibold text-white/40 flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+              </span>
+            ) : isError ? (
+              <span className="text-lg font-semibold text-red-400">Error</span>
+            ) : (
+              formatMoney(available, currency)
+            )}
+          </div>
+        </div>
+
+        {/* bottom row */}
+        <div className="flex items-end justify-between">
+          <span className="font-mono text-[13px] text-white/30 tracking-widest">
+            •••• •••• •••• ••••
+          </span>
+          <span className="text-[11px] font-bold tracking-widest border border-white/20 rounded-md px-2 py-1 text-white/60 bg-white/5">
+            PRIME
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Stat mini-card ───────────────────────────────────────────────────────────
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  iconClassName,
+  valueClassName,
+  isFetching,
+  isError,
+}: {
+  label: string;
+  value: number | null;
+  currency: string;
+  icon: React.ElementType;
+  iconClassName: string;
+  valueClassName: string;
+  isFetching: boolean;
+  isError: boolean;
+  currency: string;
+}) {
+  return (
+    <div className="bg-zinc-100 dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800">
+      <Icon className={`w-4 h-4 mb-2 ${iconClassName}`} />
+      <p className="text-[11px] uppercase tracking-widest font-bold text-zinc-400 mb-1">
+        {label}
+      </p>
+      <div className={`text-2xl font-black tracking-tight ${valueClassName}`}>
+        {isFetching ? (
+          <span className="text-sm text-zinc-400 flex items-center gap-1">
+            <Loader2 className="h-3 w-3 animate-spin" /> …
+          </span>
+        ) : isError ? (
+          <span className="text-sm text-red-500">Error</span>
+        ) : (
+          value
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
 export const WalletDashboard = () => {
   const { data, isFetching, isError } = useStudentWalletMyQuery();
 
@@ -58,7 +264,7 @@ export const WalletDashboard = () => {
         "balance.currency",
         "available.currency",
         "data.currency",
-      ]) || "",
+      ]) || "$",
     [root],
   );
 
@@ -125,173 +331,177 @@ export const WalletDashboard = () => {
 
   return (
     <div className="w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4 sm:p-6 lg:p-8 font-sans">
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#1447E6] flex items-center justify-center">
-            <Wallet className="w-4.5 h-4.5 text-white" />
+          <div className="w-9 h-9 rounded-xl bg-zinc-900 dark:bg-white flex items-center justify-center">
+            <Wallet className="w-4 h-4 text-white dark:text-zinc-900" />
           </div>
           <div>
             <h1 className="text-sm font-bold text-zinc-900 dark:text-white leading-none">
-              Wallet
+              My Wallet
             </h1>
-            <p className="text-[11px] text-zinc-400 mt-0.5">My Wallet Dashboard</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-[#1447E6] to-[#0A2E99] rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white relative overflow-hidden">
-          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl"></div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 text-blue-100 mb-3">
-              <Wallet className="w-4 h-4" />
-              <p className="text-[12px] font-bold uppercase tracking-widest">
-                Available Balance
-              </p>
-            </div>
-            <div className="text-4xl font-black tracking-tight mt-1">
-              {isFetching ? (
-                <span className="inline-flex items-center gap-2 text-lg font-semibold text-blue-200">
-                  <Loader2 className="h-5 w-5 animate-spin" /> Loading...
-                </span>
-              ) : isError ? (
-                <span className="text-lg font-semibold text-red-300">
-                  Error
-                </span>
-              ) : (
-                formatMoney(available, currency)
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="flex items-center gap-2 text-amber-500 mb-3">
-            <Clock className="w-4 h-4" />
-            <p className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-              Pending
+            <p className="text-[11px] text-zinc-400 mt-0.5">
+              Student Dashboard
             </p>
           </div>
-          <div className="text-3xl font-black text-zinc-900 dark:text-white mt-1">
-            {isFetching ? (
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-400">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-              </span>
-            ) : isError ? (
-              <span className="text-sm font-semibold text-red-500">
-                Error
-              </span>
-            ) : (
-              formatMoney(pending, currency)
-            )}
-          </div>
         </div>
-
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="flex items-center gap-2 text-emerald-500 mb-3">
-            <TrendingUp className="w-4 h-4" />
-            <p className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-              Lifetime Earnings
-            </p>
-          </div>
-          <div className="text-3xl font-black text-zinc-900 dark:text-white mt-1">
-            {isFetching ? (
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-400">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-              </span>
-            ) : isError ? (
-              <span className="text-sm font-semibold text-red-500">
-                Error
-              </span>
-            ) : (
-              formatMoney(lifetime, currency)
-            )}
-          </div>
-        </div>
+        <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+          ✦ Secured
+        </span>
       </div>
 
-      {paymentMethods.length > 0 ? (
-        <div className="mt-4 bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
+      {/* Prime Card */}
+      <PrimeCard
+        available={available}
+        currency={currency}
+        isFetching={isFetching}
+        isError={isError}
+      />
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <StatCard
+          label="Pending"
+          value={formatMoney(pending, currency) as any}
+          currency={currency}
+          icon={Clock}
+          iconClassName="text-amber-500"
+          valueClassName="text-amber-600 dark:text-amber-400"
+          isFetching={isFetching}
+          isError={isError}
+        />
+        <StatCard
+          label="Lifetime Earnings"
+          value={formatMoney(lifetime, currency) as any}
+          currency={currency}
+          icon={TrendingUp}
+          iconClassName="text-emerald-500"
+          valueClassName="text-emerald-600 dark:text-emerald-400"
+          isFetching={isFetching}
+          isError={isError}
+        />
+      </div>
+
+      {/* Payment Methods */}
+      {paymentMethods.length > 0 && (
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 mb-3">
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-zinc-400" />
             Payment Methods
           </h3>
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full divide-y divide-zinc-100 dark:divide-zinc-800">
-              <thead className="bg-zinc-50 dark:bg-zinc-950">
-                <tr>
-                  {["Name", "Type", "Account", "Status"].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-[11px] font-black uppercase tracking-wider text-zinc-500 dark:text-zinc-400 whitespace-nowrap"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
-                {paymentMethods.map((m: any, idx: number) => (
-                  <tr key={String(m?.id ?? m?._id ?? idx)}>
-                    <td className="px-4 py-3 text-[12px] font-bold text-zinc-900 dark:text-white whitespace-nowrap">
-                      {String(m?.name ?? m?.title ?? m?.label ?? "—")}
-                    </td>
-                    <td className="px-4 py-3 text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 whitespace-nowrap">
-                      {String(m?.type ?? "—")}
-                    </td>
-                    <td className="px-4 py-3 text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 whitespace-nowrap">
-                      {String(
-                        m?.account ??
-                        m?.accountNumber ??
-                        m?.number ??
-                        m?.walletNumber ??
-                        "—",
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-[12px] font-semibold text-zinc-700 dark:text-zinc-200 whitespace-nowrap">
-                      {String(m?.status ?? "—")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {paymentMethods.map((m: any, idx: number) => {
+              const PmIcon = getPmIcon(m);
+              const name = String(m?.name ?? m?.title ?? m?.label ?? "—");
+              const type = String(m?.type ?? "—");
+              const account = String(
+                m?.account ??
+                  m?.accountNumber ??
+                  m?.number ??
+                  m?.walletNumber ??
+                  "—",
+              );
+              const status = String(m?.status ?? "—");
+              return (
+                <div
+                  key={String(m?.id ?? m?._id ?? idx)}
+                  className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                    <PmIcon className="w-4 h-4 text-zinc-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold text-zinc-900 dark:text-white truncate">
+                      {name}
+                    </p>
+                    <p className="text-[11px] font-mono text-zinc-400">
+                      {type} · {account}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${getPmStatusClasses(status)}`}
+                  >
+                    {status}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
-      ) : null}
+      )}
 
-      {activities.length > 0 ? (
-        <div className="mt-4 bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
-            Activity
+      {/* Activity */}
+      {activities.length > 0 && (
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-zinc-400" />
+            Recent Activity
           </h3>
-          <div className="mt-4 space-y-2">
-            {activities.slice(0, 20).map((a: any, idx: number) => (
-              <div
-                key={String(a?.id ?? a?._id ?? idx)}
-                className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40 px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <div className="text-[12px] font-bold text-zinc-900 dark:text-white truncate">
-                    {String(
-                      a?.title ?? a?.name ?? a?.type ?? a?.status ?? "Activity",
-                    )}
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {activities.slice(0, 20).map((a: any, idx: number) => {
+              const cls = getActivityClass(a);
+              const title = String(
+                a?.title ?? a?.name ?? a?.type ?? a?.status ?? "Activity",
+              );
+              const date = formatDate(a?.date ?? a?.createdAt ?? a?.created_at);
+              const amt =
+                a?.amount !== undefined && a?.amount !== null
+                  ? String(a.amount)
+                  : a?.value !== undefined && a?.value !== null
+                    ? String(a.value)
+                    : "—";
+
+              const amtClass =
+                cls === "credit"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : cls === "debit"
+                    ? "text-red-500 dark:text-red-400"
+                    : "text-zinc-900 dark:text-white";
+
+              const dotClass =
+                cls === "credit"
+                  ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                  : cls === "debit"
+                    ? "bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400"
+                    : cls === "pending"
+                      ? "bg-amber-50 dark:bg-amber-950 text-amber-500"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500";
+
+              const DotIcon =
+                cls === "credit"
+                  ? ArrowDownLeft
+                  : cls === "debit"
+                    ? ArrowUpRight
+                    : Clock;
+
+              return (
+                <div
+                  key={String(a?.id ?? a?._id ?? idx)}
+                  className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dotClass}`}
+                  >
+                    <DotIcon className="w-4 h-4" />
                   </div>
-                  <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 truncate">
-                    {String(a?.date ?? a?.createdAt ?? a?.created_at ?? "—")}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold text-zinc-900 dark:text-white truncate">
+                      {title}
+                    </p>
+                    <p className="text-[11px] text-zinc-400">{date}</p>
                   </div>
+                  <span
+                    className={`text-[13px] font-mono font-semibold whitespace-nowrap ${amtClass}`}
+                  >
+                    {amt}
+                  </span>
                 </div>
-                <div className="text-[12px] font-extrabold text-zinc-900 dark:text-white whitespace-nowrap">
-                  {a?.amount !== undefined && a?.amount !== null
-                    ? String(a.amount)
-                    : a?.value !== undefined && a?.value !== null
-                      ? String(a.value)
-                      : "—"}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 };

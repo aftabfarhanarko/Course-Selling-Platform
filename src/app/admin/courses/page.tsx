@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus,BookOpen } from "lucide-react";
 import {
   useAdminCoursesQuery,
   useAdminCreateCourseMutation,
@@ -81,7 +81,7 @@ export default function AdminCoursesPage(): React.JSX.Element {
           name: String(i?.user?.name ?? i?.name ?? "").trim(),
         }))
         .filter((i: any) => i.id && i.name),
-    [instructorsRaw]
+    [instructorsRaw],
   );
 
   // Process courses
@@ -162,23 +162,38 @@ export default function AdminCoursesPage(): React.JSX.Element {
         />
       )}
 
-      <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-5">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-[18px] font-extrabold text-gray-900 tracking-tight">
-              Course Management
-            </h1>
-            <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
-              Connected APIs: GET /course, GET /course/:id, POST /course, PATCH
-              /course/:id, DELETE /course/:id
-            </p>
+      <div className="min-h-screen  p-3 sm:p-4 lg:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          {/* Left */}
+          <div className="flex items-center gap-4">
+            <div className="relative flex-shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                <BookOpen className="w-7 h-7 text-white" />
+              </div>
+
+              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white animate-pulse" />
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">
+                Course Management
+              </h1>
+
+              <p className="text-sm text-gray-500 font-medium mt-1">
+                Create, organize, and manage your learning content, modules, and
+                course structure from a single dashboard.
+              </p>
+            </div>
           </div>
+
+          {/* Right */}
           <button
             onClick={() => setCreateOpen(true)}
             disabled={isCreating}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-[12px] font-semibold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-70"
+            className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200 hover:opacity-95 active:scale-95 transition-all disabled:opacity-70"
           >
-            <Plus size={14} /> Create Course
+            <Plus size={16} />
+            Create Course
           </button>
         </div>
 

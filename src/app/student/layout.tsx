@@ -34,33 +34,34 @@ export default function StudentLayout({
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
+      {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 z-50 h-screen w-[260px] transition-transform duration-300 ease-in-out md:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        className={`fixed left-0 top-0 z-50 h-screen w-[220px] transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      <div className="flex flex-col min-h-screen md:ml-[260px]">
+      {/* Main content — margin matches sidebar width exactly */}
+      <div className="flex flex-col min-h-screen lg:ml-[220px]">
         <TopNavbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 lg:p-10">
+        <main className="flex-1 flex flex-col p-4 sm:p-6">
           <AppProviders>{children}</AppProviders>
         </main>
 
-        <footer className="border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900 mt-auto">
-          <div className="container mx-auto px-4 text-center text-xs sm:text-sm text-zinc-500">
-            <p>
-              © {new Date().getFullYear()} CoursePlatform. All rights reserved.
-            </p>
+        <footer className="border-t border-zinc-200 bg-white py-4 dark:border-zinc-800 dark:bg-zinc-900 mt-auto">
+          <div className="container mx-auto px-4 text-center text-xs text-zinc-400">
+            © {new Date().getFullYear()} CoursePlatform. All rights reserved.
           </div>
         </footer>
       </div>
