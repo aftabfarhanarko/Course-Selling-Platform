@@ -228,7 +228,7 @@ export default function StudentDashboardPage() {
       {/* ══════════════════════════════════════
           SECTION 2 — STATS GRID (forced 3 cols)
       ══════════════════════════════════════ */}
-      <div className="grid grid-cols-1 md;grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md;grid-cols-3 gap-3 sm:gap-4">
         {/* ── Card 1: Wallet Balance ── */}
         <div className="relative bg-white rounded-2xl border border-slate-100 p-3.5 sm:p-5 overflow-hidden group hover:shadow-lg hover:shadow-blue-100/60 hover:border-blue-200/60 transition-all duration-300">
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-50 rounded-full blur-2xl opacity-70 pointer-events-none" />
