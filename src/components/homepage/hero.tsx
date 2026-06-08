@@ -18,10 +18,10 @@ const fadeUp = {
   show: (delay = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { 
-      duration: 0.65, 
-      ease: [0.22, 1, 0.36, 1] as const, 
-      delay 
+    transition: {
+      duration: 0.65,
+      ease: [0.22, 1, 0.36, 1] as const,
+      delay,
     },
   }),
 };
@@ -30,10 +30,10 @@ const fadeIn = {
   hidden: { opacity: 0 },
   show: (delay = 0) => ({
     opacity: 1,
-    transition: { 
-      duration: 0.55, 
-      ease: [0.25, 0.1, 0.25, 1] as const,   // Replaced "easeOut" with cubic-bezier
-      delay 
+    transition: {
+      duration: 0.55,
+      ease: [0.25, 0.1, 0.25, 1] as const, // Replaced "easeOut" with cubic-bezier
+      delay,
     },
   }),
 };
@@ -43,10 +43,10 @@ const scaleUp = {
   show: (delay = 0) => ({
     opacity: 1,
     scale: 1,
-    transition: { 
-      duration: 0.7, 
-      ease: [0.22, 1, 0.36, 1] as const, 
-      delay 
+    transition: {
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1] as const,
+      delay,
     },
   }),
 };
@@ -78,9 +78,16 @@ function HomeHero() {
         text: "Start Learning",
         href: "/signup",
         primary: true,
-        icon: <ArrowRightCircle className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />,
+        icon: (
+          <ArrowRightCircle className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        ),
       },
-      { id: 2, text: "Earn as Affiliate", href: "/signup?role=affiliate", primary: false },
+      {
+        id: 2,
+        text: "Earn as Affiliate",
+        href: "/signup?role=affiliate",
+        primary: false,
+      },
     ],
     card: { title: "Weekly Payout", amount: "+$4,290.00" },
   };
@@ -244,15 +251,29 @@ function HomeHero() {
                   {/* stat chips */}
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { label: "Total Earned", val: "$18,420", color: "text-emerald-400" },
-                      { label: "This Month", val: "$4,290", color: "text-blue-400" },
-                      { label: "Pending", val: "$830", color: "text-yellow-400" },
+                      {
+                        label: "Total Earned",
+                        val: "$18,420",
+                        color: "text-emerald-400",
+                      },
+                      {
+                        label: "This Month",
+                        val: "$4,290",
+                        color: "text-blue-400",
+                      },
+                      {
+                        label: "Pending",
+                        val: "$830",
+                        color: "text-yellow-400",
+                      },
                     ].map(({ label, val, color }) => (
                       <div
                         key={label}
                         className="bg-white/5 rounded-xl p-3 border border-white/5"
                       >
-                        <p className="text-[10px] text-white/40 mb-1">{label}</p>
+                        <p className="text-[10px] text-white/40 mb-1">
+                          {label}
+                        </p>
                         <p className={`text-sm font-bold ${color}`}>{val}</p>
                       </div>
                     ))}
@@ -276,7 +297,9 @@ function HomeHero() {
                         }}
                       >
                         <div className="flex justify-between items-center">
-                          <span className="text-[11px] text-white/60">{label}</span>
+                          <span className="text-[11px] text-white/60">
+                            {label}
+                          </span>
                           <span className="text-[11px] font-semibold text-white/80">
                             {earn}
                           </span>
@@ -312,7 +335,8 @@ function HomeHero() {
                           key={i}
                           className="flex-1 rounded-t-sm"
                           style={{
-                            background: i === 5 ? "#10B981" : "rgba(255,255,255,0.12)",
+                            background:
+                              i === 5 ? "#10B981" : "rgba(255,255,255,0.12)",
                             height: `${h}%`,
                           }}
                           initial={{ scaleY: 0, originY: 1 }}
@@ -327,7 +351,10 @@ function HomeHero() {
                     </div>
                     <div className="flex justify-between mt-1">
                       {["Dec", "Jan", "Feb", "Mar", "Apr", "May"].map((m) => (
-                        <span key={m} className="text-[9px] text-white/25 flex-1 text-center">
+                        <span
+                          key={m}
+                          className="text-[9px] text-white/25 flex-1 text-center"
+                        >
                           {m}
                         </span>
                       ))}
@@ -354,7 +381,9 @@ function HomeHero() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 font-medium">{card.title}</p>
+                  <p className="text-xs text-gray-400 font-medium">
+                    {card.title}
+                  </p>
                   <p className="text-xl font-extrabold text-emerald-500 tracking-tight">
                     {card.amount}
                   </p>
