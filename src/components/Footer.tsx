@@ -113,9 +113,14 @@ function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[16px] font-extrabold text-indigo-950 tracking-tight">
-              MARUF <span className="text-indigo-600">TECH</span>
-            </span>
+            {/* ── Logo ── */}
+            <Link href="/" className="flex-shrink-0 lg:w-48">
+              <img
+                src="/maruf.png"
+                alt="Maruf Tech"
+                className="h-[50px] w-[300px] -ml-14 md:-ml-8 object-contain"
+              />
+            </Link>
           </div>
           <p className="text-[10px] font-bold tracking-[.06em] text-indigo-500 mb-2.5">
             PRECISION PROSPERITY
@@ -178,8 +183,8 @@ function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[11.5px] text-gray-500 font-medium">
             © {new Date().getFullYear()}{" "}
-            <strong className="text-gray-700 font-bold">IncomeArchitect</strong>.
-            All rights reserved.
+            <strong className="text-gray-700 font-bold">IncomeArchitect</strong>
+            . All rights reserved.
           </p>
 
           <a
