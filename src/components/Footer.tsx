@@ -182,22 +182,22 @@ function Footer() {
       <div className="max-w-[1400px] mx-auto w-full px-5 sm:px-8 py-4 border-t border-indigo-200/30">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[11.5px] text-gray-500 font-medium">
-            © {new Date().getFullYear()}{" "}
-            <strong className="text-gray-700 font-bold">IncomeArchitect</strong>
-            . All rights reserved.
+            © {new Date().getFullYear()} All rights reserved.
+            <strong className="text-gray-700 font-bold">
+              {" "}
+              <a
+                href="https://www.jevxo.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11.5px] text-gray-500 font-medium hover:text-indigo-600 transition-colors duration-200"
+              >
+                Developed by{" "}
+                <span className="font-bold text-gray-700 hover:text-indigo-600">
+                  Jevxo
+                </span>
+              </a>
+            </strong>
           </p>
-
-          <a
-            href="https://www.jevxo.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11.5px] text-gray-500 font-medium hover:text-indigo-600 transition-colors duration-200"
-          >
-            Developed by{" "}
-            <span className="font-bold text-gray-700 hover:text-indigo-600">
-              Jevxo
-            </span>
-          </a>
 
           {/* Trust badges */}
           <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-medium">

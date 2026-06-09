@@ -151,7 +151,7 @@ function HomeHero() {
               <span
                 className="px-4 py-1.5 rounded-full text-xs font-black tracking-widest text-white shadow-md"
                 style={{
-                  background: "linear-gradient(135deg, #4f46e5, #6366f1)",
+                  background: "linear-gradient(135deg, #0047FF, ##0047FF)", 
                 }}
               >
                 FINANCIAL EVOLUTION
@@ -170,7 +170,7 @@ function HomeHero() {
                 Skill to Income
               </motion.h1>
               <motion.h2
-                className="text-4xl lg:text-5xl font-black leading-tight bg-clip-text text-transparent"
+                className="text-4xl lg:text-5xl font-black leading-tight ] bg-clip-text text-transparent"
                 style={{
                   backgroundImage: "linear-gradient(135deg, #4f46e5, #6366f1)",
                 }}

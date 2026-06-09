@@ -52,11 +52,11 @@ export default function AffiliateLayout({
       <div className="flex flex-col min-h-screen md:ml-[260px]">
         <TopNavbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 lg:p-10">
+        <main className="flex-1 flex flex-col ">
           <AppProviders>{children}</AppProviders>
         </main>
 
-        <footer className="border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900 mt-auto">
+        <footer className="border-t border-zinc-200 bg-white py-6  mt-auto">
           <div className="container mx-auto px-4 text-center text-xs sm:text-sm text-zinc-500">
             <p>
               © {new Date().getFullYear()} JEVXO Affiliate Platform. All rights reserved.

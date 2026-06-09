@@ -59,7 +59,7 @@ export default function StudentLayout({
           <AppProviders>{children}</AppProviders>
         </main>
 
-        <footer className="border-t border-zinc-200 bg-white py-4 dark:border-zinc-800 dark:bg-zinc-900 mt-auto">
+        <footer className="border-t border-zinc-200 bg-white py-6.5 mt-auto">
           <div className="container mx-auto px-4 text-center text-xs text-zinc-400">
             © {new Date().getFullYear()} CoursePlatform. All rights reserved.
           </div>

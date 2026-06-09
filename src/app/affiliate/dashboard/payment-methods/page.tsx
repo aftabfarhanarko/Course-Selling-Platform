@@ -152,7 +152,7 @@ export default function AffiliatePaymentMethodsPage() {
   }
 
   return (
-    <div className="min-h-screen  p-3 lg:p-4">
+    <div className="min-h-screen  bg-white pt-6 p-3 lg:p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* ── Header ── */}
         <div>
