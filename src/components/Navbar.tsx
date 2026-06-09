@@ -183,7 +183,7 @@ function Header() {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`relative flex items-center gap-2 text-[13.5px] font-semibold px-4 py-2 rounded-xl transition-all duration-200 ${
+                    className={`relative flex items-center gap-2 text-[13.5px] font-semibold px-4 py-2 rounded-lg transition-all duration-200 ${
                       active
                         ? "bg-[#0047FF] text-white shadow-md shadow-blue-300/40"
                         : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
@@ -202,16 +202,18 @@ function Header() {
                 <>
                   <Link
                     href="/login"
-                    className="flex items-center gap-1.5 text-[13.5px] font-bold text-slate-700 px-4 py-2 rounded-xl bg-black/5 hover:bg-black/10 transition-colors"
+                    className="flex items-center gap-1.5 text-[13.5px] font-bold text-slate-700 px-4 h-10 rounded-xl bg-black/5 hover:bg-black/10 transition-colors"
                   >
                     <LogIn className="w-4 h-4" />
                     Login
                   </Link>
-                  <Link href="/signup">
-                    <button className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#0047FF] hover:bg-blue-700 text-white text-[13.5px] font-bold transition-all hover:shadow-lg hover:shadow-blue-400/30 active:scale-95">
-                      Sign Up
-                      <UserPlus className="w-3.5 h-3.5" />
-                    </button>
+
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center justify-center gap-2 h-10 px-8 rounded-xl bg-[#0047FF] text-white text-[14px] font-bold transition-all duration-300 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/25 active:scale-95"
+                  >
+                    <span>SignUp</span>
+                    <UserPlus className="w-4 h-4 flex-shrink-0" />
                   </Link>
                 </>
               ) : (
