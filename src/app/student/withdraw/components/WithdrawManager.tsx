@@ -646,7 +646,7 @@ export default function WithdrawManager() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50/40 pb-16">
+    <div className="min-h-screen bg-white pb-16">
       {/* ── HEADER ───────────────────────────────────────────────── */}
       <div className="border-b  px-4  py-6">
         <div className=" mx-auto">

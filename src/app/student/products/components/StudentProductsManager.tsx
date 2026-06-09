@@ -806,7 +806,7 @@ export default function StudentProductsManager() {
   }
 
   return (
-    <div className="min-h-screen pb-16">
+    <div className="min-h-screen pb-16 bg-white">
       {/* ── HEADER ─────────────────────────────────────────────────── */}
       <div className="border-b border-gray-200 px-4 sm:px-8 py-6">
         <div className="w-full max-w-[1400px] mx-auto">

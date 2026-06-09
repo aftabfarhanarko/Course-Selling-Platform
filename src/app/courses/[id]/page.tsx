@@ -132,7 +132,7 @@ export default function CourseDetailsPage({
   };
 
   return (
-    <div className="min-h-screen  font-sans pb-24 lg:pb-0  md:mb-6">
+    <div className="min-h-screen bg-white font-sans pb-24 lg:pb-0  ">
       {/* ── Breadcrumb ── */}
       <div className="bg-white border-b border-slate-200/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-1.5 text-[12px] font-semibold text-slate-400 overflow-x-auto whitespace-nowrap">
@@ -290,7 +290,7 @@ export default function CourseDetailsPage({
       </div>
 
       {/* ── Main content ── */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-12 relative z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-12 relative z-20 py-10">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
           {/* ── LEFT column ── */}
           <div className="flex-1 min-w-0 space-y-5">

@@ -34,7 +34,7 @@ const navGroups = [
     icon: MdOutlineSpaceDashboard,
     items: [
       { label: "Dashboard", href: "/student", icon: LayoutDashboard },
-      { label: "Profile", href: "/student/dashboard", icon: UserRound },
+      { label: "Profile", href: "/student/profile", icon: UserRound },
     ],
   },
   {
@@ -103,59 +103,54 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   return (
     <aside
       className="
-        relative z-50 flex h-full w-[220px] flex-col overflow-x-hidden overflow-y-auto
+        relative z-50 flex h-full w-[220px] flex-col
         border-r border-slate-200 bg-white shadow-sm
-        [scrollbar-width:thin] [scrollbar-color:rgba(0,0,0,0.08)_transparent]
-        [&::-webkit-scrollbar]:w-[3px]
-        [&::-webkit-scrollbar-track]:bg-transparent
-        [&::-webkit-scrollbar-thumb]:rounded-full
-        [&::-webkit-scrollbar-thumb]:bg-slate-200
       "
     >
       {/* Subtle top blue tint */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[180px] bg-[radial-gradient(ellipse_at_50%_-10%,rgba(79,142,247,0.06)_0%,transparent_70%)]" />
 
-      <div className="relative flex h-full flex-col px-3 py-4">
-        {/* Close button — mobile only */}
-        {onClose && (
-          <div className="mb-2 flex justify-end lg:hidden">
-            <button
-              onClick={onClose}
-              className="flex cursor-pointer items-center justify-center rounded-lg border-none bg-slate-100 p-1.5 text-slate-400 transition-all duration-200 hover:bg-slate-200 hover:text-slate-600"
-            >
-              <X size={15} />
-            </button>
-          </div>
-        )}
+      {/* Close button — mobile only */}
+      {onClose && (
+        <div className="mb-2 flex justify-end px-3 pt-4 lg:hidden">
+          <button
+            onClick={onClose}
+            className="flex cursor-pointer items-center justify-center rounded-lg border-none bg-slate-100 p-1.5 text-slate-400 transition-all duration-200 hover:bg-slate-200 hover:text-slate-600"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
 
-        {/* User Profile Card */}
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
+      {/* ─── PROFILE CARD (VERTICAL LAYOUT) ─── */}
+      <div className="px-3 md:mt-5 pb-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col items-center text-center gap-3">
+            {/* Avatar – centered on top */}
             <div className="relative flex-shrink-0">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-[#4f8ef7] via-[#7b5cfa] to-[#34d399] p-[2px]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-[#4f8ef7] via-[#7b5cfa] to-[#34d399] p-[2px]">
                 {avatarUrl ? (
                   <Image
                     src={avatarUrl}
                     alt={displayName}
-                    width={48}
-                    height={48}
+                    width={64}
+                    height={64}
                     className="h-full w-full rounded-full bg-white object-cover"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600">
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-xl font-bold text-white">
                       {displayName.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
               </div>
               {/* Online Status */}
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
+              <span className="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400" />
             </div>
 
-            {/* User Info */}
-            <div className="min-w-0 flex-1 overflow-hidden">
+            {/* Name, Role, Email stacked below */}
+            <div className="space-y-0.5 w-full min-w-0">
               <h3 className="truncate text-[13px] font-semibold text-slate-800">
                 {displayName}
               </h3>
@@ -170,104 +165,114 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Navigation */}
-        <nav className="flex-1">
-          {navGroups.map((group) => {
-            const GroupIcon = group.icon;
-            return (
-              <div key={group.label}>
-                {/* Group label with icon */}
-                <div className="mb-1 mt-[18px] flex items-center gap-1.5 px-2.5">
-                  <GroupIcon
-                    size={11}
-                    className="flex-shrink-0 text-[#4f8ef7]"
-                    strokeWidth={2.5}
-                  />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-black">
-                    {group.label}
-                  </span>
-                  <div className="h-px flex-1 bg-slate-100" />
-                </div>
+      {/* Scrollable Navigation */}
+      <nav
+        className="flex-1 overflow-y-auto px-3
+          [scrollbar-width:thin] [scrollbar-color:rgba(0,0,0,0.08)_transparent]
+          [&::-webkit-scrollbar]:w-[3px]
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:bg-slate-200
+        "
+      >
+        {navGroups.map((group) => {
+          const GroupIcon = group.icon;
+          return (
+            <div key={group.label}>
+              {/* Group label with icon */}
+              <div className="mb-1 mt-[18px] flex items-center gap-1.5 px-2.5">
+                <GroupIcon
+                  size={11}
+                  className="flex-shrink-0 text-[#4f8ef7]"
+                  strokeWidth={2.5}
+                />
+                <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-black">
+                  {group.label}
+                </span>
+                <div className="h-px flex-1 bg-slate-100" />
+              </div>
 
-                {/* Items */}
-                <div className="flex flex-col gap-0.5">
-                  {group.items.map((item) => {
-                    // Dashboard only active on exact path match
-                    const isActive =
-                      item.href === "/student"
-                        ? pathname === item.href
-                        : pathname === item.href ||
-                          pathname?.startsWith(item.href + "/");
-                    const Icon = item.icon;
+              {/* Items */}
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const isActive =
+                    item.href === "/student"
+                      ? pathname === item.href
+                      : pathname === item.href ||
+                        pathname?.startsWith(item.href + "/");
+                  const Icon = item.icon;
 
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={onClose}
-                        onMouseEnter={() => setHoveredHref(item.href)}
-                        onMouseLeave={() => setHoveredHref(null)}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      onMouseEnter={() => setHoveredHref(item.href)}
+                      onMouseLeave={() => setHoveredHref(null)}
+                      className={`
+                        group relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 no-underline
+                        transition-all duration-[180ms] ease-[cubic-bezier(.4,0,.2,1)]
+                        ${
+                          isActive
+                            ? "bg-blue-50 text-slate-800"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                        }
+                      `}
+                    >
+                      {/* Active left bar */}
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 h-[60%] w-[3px] -translate-y-1/2 rounded-r-[3px] bg-[#4f8ef7] shadow-[0_0_8px_rgba(79,142,247,0.4)]" />
+                      )}
+
+                      {/* Icon wrapper */}
+                      <span
                         className={`
-                          group relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 no-underline
-                          transition-all duration-[180ms] ease-[cubic-bezier(.4,0,.2,1)]
+                          flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-lg
+                          transition-all duration-[180ms]
                           ${
                             isActive
-                              ? "bg-blue-50 text-slate-800"
-                              : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                              ? "bg-blue-100 text-[#4f8ef7]"
+                              : "bg-slate-100 text-slate-400 group-hover:bg-blue-50 group-hover:text-[#4f8ef7]"
                           }
                         `}
                       >
-                        {/* Active left bar */}
-                        {isActive && (
-                          <span className="absolute left-0 top-1/2 h-[60%] w-[3px] -translate-y-1/2 rounded-r-[3px] bg-[#4f8ef7] shadow-[0_0_8px_rgba(79,142,247,0.4)]" />
-                        )}
+                        <Icon size={14} />
+                      </span>
 
-                        {/* Icon wrapper */}
-                        <span
-                          className={`
-                            flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-lg
-                            transition-all duration-[180ms]
-                            ${
-                              isActive
-                                ? "bg-blue-100 text-[#4f8ef7]"
-                                : "bg-slate-100 text-slate-400 group-hover:bg-blue-50 group-hover:text-[#4f8ef7]"
-                            }
-                          `}
-                        >
-                          <Icon size={14} />
-                        </span>
+                      {/* Label */}
+                      <span
+                        className={`text-[12px] leading-none ${isActive ? "font-semibold" : "font-medium"}`}
+                      >
+                        {item.label}
+                      </span>
 
-                        {/* Label */}
-                        <span
-                          className={`text-[12px] leading-none ${isActive ? "font-semibold" : "font-medium"}`}
-                        >
-                          {item.label}
-                        </span>
-
-                        {/* Chevron */}
-                        <ChevronRight
-                          size={11}
-                          className={`
-                            ml-auto text-[#4f8ef7] transition-all duration-[180ms]
-                            ${
-                              isActive || hoveredHref === item.href
-                                ? "translate-x-0 opacity-100"
-                                : "-translate-x-1 opacity-0"
-                            }
-                          `}
-                        />
-                      </Link>
-                    );
-                  })}
-                </div>
+                      {/* Chevron */}
+                      <ChevronRight
+                        size={11}
+                        className={`
+                          ml-auto text-[#4f8ef7] transition-all duration-[180ms]
+                          ${
+                            isActive || hoveredHref === item.href
+                              ? "translate-x-0 opacity-100"
+                              : "-translate-x-1 opacity-0"
+                          }
+                        `}
+                      />
+                    </Link>
+                  );
+                })}
               </div>
-            );
-          })}
-        </nav>
+            </div>
+          );
+        })}
+      </nav>
 
+      {/* Bottom section (always visible) */}
+      <div className="flex-shrink-0 px-3 pb-4 pt-1">
         {/* Divider */}
-        <div className="my-4 h-px bg-slate-100" />
+        <div className="mb-4 h-px bg-slate-100" />
 
         {/* Logout */}
         <button

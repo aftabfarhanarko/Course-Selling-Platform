@@ -39,11 +39,13 @@ const getIcon = (iconName: string) => {
 };
 
 /* ─────────────────────────────────────────────
-   Skeleton
+   Skeleton – forced white background
 ───────────────────────────────────────────── */
 const Skeleton = ({ className }: { className?: string }) => (
   <div
-    className={`rounded-2xl bg-slate-100 animate-pulse ${className ?? ""}`}
+    className={`rounded-2xl bg-slate-100 dark:bg-white animate-pulse ${
+      className ?? ""
+    }`}
   />
 );
 
@@ -98,7 +100,7 @@ export default function StudentDashboardPage() {
   /* ── Loading ── */
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen bg-[#f7f8fc] pb-10 p-3 sm:p-5 space-y-4">
+      <div className="w-full min-h-screen bg-white dark:bg-white pb-10 p-3 sm:p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Skeleton className="h-[160px]" />
           <Skeleton className="h-[160px]" />
@@ -118,13 +120,13 @@ export default function StudentDashboardPage() {
 
   /* ── Full render ── */
   return (
-    <div className="w-full min-h-screen bg-[#f7f8fc] dark:bg-zinc-950 pb-12 p-3 sm:p-5 space-y-4">
+    <div className="w-full min-h-screen bg-white dark:bg-white pb-12 p-3 sm:p-5 space-y-4">
       {/* ══════════════════════════════════════
           SECTION 1 — HERO ROW
       ══════════════════════════════════════ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Welcome card */}
-        <div className="relative bg-white rounded-2xl border border-slate-100 p-5 sm:p-6 overflow-hidden group hover:shadow-lg hover:shadow-slate-200/60 transition-all duration-300">
+        {/* Welcome card – slightly thicker border */}
+        <div className="relative bg-white dark:bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 overflow-hidden group hover:shadow-lg hover:shadow-slate-200/60 hover:border-blue-300/60 transition-all duration-300">
           {/* Dot grid texture */}
           <div
             className="absolute inset-0 opacity-[0.035] pointer-events-none"
@@ -163,7 +165,7 @@ export default function StudentDashboardPage() {
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                 Active Account
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 text-slate-500 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-100">
+              <div className="flex items-center gap-1.5 bg-slate-50 text-slate-500 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-200">
                 <TbChartBar className="w-3 h-3" />
                 Student Dashboard
               </div>
@@ -171,7 +173,7 @@ export default function StudentDashboardPage() {
           </div>
         </div>
 
-        {/* Progress card */}
+        {/* Progress card – no border change (gradient) */}
         <div className="relative bg-gradient-to-br from-[#4f8ef7] to-[#2c6ce8] text-white rounded-2xl p-5 sm:p-6 overflow-hidden shadow-xl shadow-blue-400/25 group hover:shadow-blue-500/35 transition-all duration-300">
           {/* Orbs */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/15 transition-all" />
@@ -226,11 +228,11 @@ export default function StudentDashboardPage() {
       </div>
 
       {/* ══════════════════════════════════════
-          SECTION 2 — STATS GRID (forced 3 cols)
+          SECTION 2 — STATS GRID (forced white bg, better borders)
       ══════════════════════════════════════ */}
-      <div className="grid grid-cols-2 md;grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         {/* ── Card 1: Wallet Balance ── */}
-        <div className="relative bg-white rounded-2xl border border-slate-100 p-3.5 sm:p-5 overflow-hidden group hover:shadow-lg hover:shadow-blue-100/60 hover:border-blue-200/60 transition-all duration-300">
+        <div className="relative bg-white dark:bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 overflow-hidden group hover:shadow-lg hover:shadow-blue-100/60 hover:border-blue-300/60 transition-all duration-300">
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-50 rounded-full blur-2xl opacity-70 pointer-events-none" />
 
           {/* Icon badge */}
@@ -264,7 +266,7 @@ export default function StudentDashboardPage() {
         </div>
 
         {/* ── Card 2: Affiliate Earnings ── */}
-        <div className="relative bg-white rounded-2xl border border-slate-100 p-3.5 sm:p-5 overflow-hidden group hover:shadow-lg hover:shadow-emerald-100/60 hover:border-emerald-200/60 transition-all duration-300">
+        <div className="relative bg-white dark:bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 overflow-hidden group hover:shadow-lg hover:shadow-emerald-100/60 hover:border-emerald-300/60 transition-all duration-300">
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-emerald-50 rounded-full blur-2xl opacity-70 pointer-events-none" />
 
           {/* Icon badge */}
@@ -288,7 +290,7 @@ export default function StudentDashboardPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 mt-3 sm:mt-4 text-[9.5px] sm:text-[10px] text-slate-500 font-semibold bg-slate-50 border border-slate-100 rounded-xl px-2.5 py-1.5">
+          <div className="flex items-center gap-1.5 mt-3 sm:mt-4 text-[9.5px] sm:text-[10px] text-slate-500 font-semibold bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
             <LuCalendarDays className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-slate-400" />
             <span>
               Payout:{" "}
@@ -300,7 +302,7 @@ export default function StudentDashboardPage() {
         </div>
 
         {/* ── Card 3: Courses Enrolled ── */}
-        <div className="relative bg-white rounded-2xl border border-slate-100 p-3.5 sm:p-5 overflow-hidden group hover:shadow-lg hover:shadow-indigo-100/60 hover:border-indigo-200/60 transition-all duration-300">
+        <div className="relative bg-white dark:bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 overflow-hidden group hover:shadow-lg hover:shadow-indigo-100/60 hover:border-indigo-300/60 transition-all duration-300">
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-indigo-50 rounded-full blur-2xl opacity-70 pointer-events-none" />
 
           {/* Icon badge */}
@@ -356,8 +358,8 @@ export default function StudentDashboardPage() {
           SECTION 3 — ACTIVITY + CONTINUE LEARNING
       ══════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] gap-4">
-        {/* Recent Activity */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+        {/* Recent Activity – better border */}
+        <div className="bg-white dark:bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-[14px] sm:text-[15px] font-black text-slate-900 tracking-tight">
@@ -374,7 +376,7 @@ export default function StudentDashboardPage() {
 
           <div className="space-y-2">
             {activities.length === 0 ? (
-              <div className="text-center text-slate-400 text-[12px] py-10 bg-slate-50 border border-slate-100 rounded-xl">
+              <div className="text-center text-slate-400 text-[12px] py-10 bg-slate-50 border border-slate-200 rounded-xl">
                 <TbSparkles className="w-6 h-6 mx-auto mb-2 text-slate-300" />
                 No recent activity yet.
               </div>
@@ -384,7 +386,7 @@ export default function StudentDashboardPage() {
                 return (
                   <div
                     key={activity.id}
-                    className="flex items-center justify-between bg-slate-50/80 hover:bg-blue-50/60 border border-transparent hover:border-blue-100/60 rounded-xl px-3 py-2.5 transition-all duration-200 group cursor-default"
+                    className="flex items-center justify-between bg-slate-50/80 border border-slate-100 hover:border-blue-200/60 rounded-xl px-3 py-2.5 transition-all duration-200 group cursor-default"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div
@@ -417,7 +419,7 @@ export default function StudentDashboardPage() {
           </div>
         </div>
 
-        {/* Continue Learning */}
+        {/* Continue Learning – gradient, no border change */}
         <div className="relative bg-gradient-to-br from-[#4f8ef7] to-[#2c6ce8] rounded-2xl p-5 sm:p-6 flex flex-col justify-between overflow-hidden shadow-xl shadow-blue-400/20 group hover:shadow-blue-500/30 transition-all duration-300 min-h-[240px]">
           {/* Orbs */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/15 transition-all" />

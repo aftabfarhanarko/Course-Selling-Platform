@@ -149,15 +149,15 @@ export default function StudentProfilePage(): React.JSX.Element {
   const country = String(profile?.country ?? "");
 
   return (
-    <div className="min-h-screen  px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-      <div className="mx-auto ">
+    <div className="min-h-screen bg-white dark:bg-white px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <div className="mx-auto">
         {/* Header */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-100 pb-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-900">
               Profile
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-500">
               Manage your name, photo, and security
             </p>
           </div>
@@ -174,15 +174,15 @@ export default function StudentProfilePage(): React.JSX.Element {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left column - Photo & Name */}
           <div className="lg:col-span-1">
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-2xl border border-gray-100 dark:border-gray-100 bg-white dark:bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-900">
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-900">
                   Profile picture
                 </h2>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-600 hover:text-blue-700"
                 >
                   <Camera className="h-3.5 w-3.5" />
                   Change
@@ -190,7 +190,7 @@ export default function StudentProfilePage(): React.JSX.Element {
               </div>
 
               <div className="mt-4 flex justify-center">
-                <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-white bg-gray-50 shadow-sm">
+                <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-white dark:border-white bg-gray-50 dark:bg-gray-50 shadow-sm">
                   {photoPreview ? (
                     <img
                       src={photoPreview}
@@ -199,7 +199,7 @@ export default function StudentProfilePage(): React.JSX.Element {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <UserRound className="h-10 w-10 text-gray-400" />
+                      <UserRound className="h-10 w-10 text-gray-400 dark:text-gray-400" />
                     </div>
                   )}
                 </div>
@@ -214,7 +214,7 @@ export default function StudentProfilePage(): React.JSX.Element {
               />
 
               <div className="mt-5">
-                <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">
                   Full name
                 </label>
                 <Input
@@ -239,9 +239,9 @@ export default function StudentProfilePage(): React.JSX.Element {
           {/* Right column - Info & Password */}
           <div className="lg:col-span-2 space-y-6">
             {/* Personal Information */}
-            <div className="rounded-2xl border border-gray-100 bg-gray-50/40 p-5 shadow-sm">
-              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900">
-                <User className="h-4 w-4 text-blue-500" />
+            <div className="rounded-2xl border border-gray-100 dark:border-gray-100 bg-gray-50/40 dark:bg-gray-50/40 p-5 shadow-sm">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-gray-900">
+                <User className="h-4 w-4 text-blue-500 dark:text-blue-500" />
                 Personal Information
               </h2>
 
@@ -262,19 +262,19 @@ export default function StudentProfilePage(): React.JSX.Element {
             </div>
 
             {/* Change Password */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-2xl border border-gray-100 dark:border-gray-100 bg-white dark:bg-white p-5 shadow-sm">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-50 text-blue-600 dark:text-blue-600">
                   <Shield className="h-4 w-4" />
                 </div>
-                <h2 className="text-base font-semibold text-gray-900">
+                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-900">
                   Change password
                 </h2>
               </div>
 
               <div className="mt-4 space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">
                     Current password
                   </label>
                   <Input
@@ -288,7 +288,7 @@ export default function StudentProfilePage(): React.JSX.Element {
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">
                       New password
                     </label>
                     <Input
@@ -300,7 +300,7 @@ export default function StudentProfilePage(): React.JSX.Element {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">
                       Confirm password
                     </label>
                     <Input
@@ -342,15 +342,15 @@ function InfoField({
   value: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-gray-50 bg-white p-3">
+    <div className="flex items-start gap-3 rounded-lg border border-gray-50 dark:border-gray-50 bg-white dark:bg-white p-3">
       <div className="mt-0.5">
-        <Icon className="h-4 w-4 text-gray-500" />
+        <Icon className="h-4 w-4 text-gray-500 dark:text-gray-500" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-400">
           {label}
         </p>
-        <p className="truncate text-sm font-medium text-gray-800">
+        <p className="truncate text-sm font-medium text-gray-800 dark:text-gray-800">
           {value || "—"}
         </p>
       </div>

@@ -55,7 +55,7 @@ export default function StudentLayout({
       <div className="flex flex-col min-h-screen lg:ml-[220px]">
         <TopNavbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 flex flex-col p-4 sm:p-6">
+        <main className="flex-1 flex flex-col ">
           <AppProviders>{children}</AppProviders>
         </main>
 

@@ -818,7 +818,7 @@ export default function StudentCoursesManager() {
   const thumbnail = (c: UiCourse) => c.raw?.course?.thumbnail || "";
 
   return (
-    <div className="w-full bg-gradient-to-b from-slate-50 to-gray-50 min-h-screen pb-12">
+    <div className="w-full bg-white min-h-screen pb-12">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="mb-6 sm:mb-8">

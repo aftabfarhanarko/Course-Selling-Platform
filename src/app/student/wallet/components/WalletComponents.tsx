@@ -91,10 +91,10 @@ function getPmIcon(m: any) {
 function getPmStatusClasses(status: string): string {
   const s = status.toLowerCase();
   if (s === "active" || s === "verified")
-    return "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300";
+    return "bg-emerald-50 text-emerald-700";
   if (s === "pending")
-    return "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300";
-  return "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400";
+    return "bg-amber-50 text-amber-700";
+  return "bg-slate-100 text-slate-500";
 }
 
 function formatDate(d: any): string {
@@ -112,7 +112,7 @@ function formatDate(d: any): string {
   }
 }
 
-// ── Prime Card ──────────────────────────────────────────────────────────────
+// ── Prime Card (unchanged, already premium dark) ─────────────────────────────
 function PrimeCard({
   available,
   currency,
@@ -125,7 +125,7 @@ function PrimeCard({
   isError: boolean;
 }) {
   return (
-    <div className="relative w-full h-52 rounded-3xl overflow-hidden bg-zinc-900 dark:bg-zinc-950 shadow-2xl shadow-zinc-900/40 mb-5 select-none">
+    <div className="relative w-full h-52 rounded-3xl overflow-hidden bg-zinc-900 shadow-2xl shadow-zinc-900/40 mb-5 select-none">
       {/* decorative circles */}
       <div className="absolute -top-16 -right-10 w-48 h-48 rounded-full bg-white/5 blur-2xl" />
       <div className="absolute -bottom-12 -left-8 w-44 h-44 rounded-full bg-blue-500/10 blur-3xl" />
@@ -210,7 +210,7 @@ function PrimeCard({
   );
 }
 
-// ── Stat mini-card ───────────────────────────────────────────────────────────
+// ── Stat mini‑card (premium light) ───────────────────────────────────────────
 function StatCard({
   label,
   value,
@@ -229,14 +229,16 @@ function StatCard({
   isError: boolean;
 }) {
   return (
-    <div className="bg-zinc-100 dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800">
-      <Icon className={`w-4 h-4 mb-2 ${iconClassName}`} />
-      <p className="text-[11px] uppercase tracking-widest font-bold text-zinc-400 mb-1">
+    <div className="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300/80 transition-all duration-200">
+      <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center mb-3">
+        <Icon className={`w-4 h-4 ${iconClassName}`} />
+      </div>
+      <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400 mb-1">
         {label}
       </p>
       <div className={`text-2xl font-black tracking-tight ${valueClassName}`}>
         {isFetching ? (
-          <span className="text-sm text-zinc-400 flex items-center gap-1">
+          <span className="text-sm text-slate-400 flex items-center gap-1">
             <Loader2 className="h-3 w-3 animate-spin" /> …
           </span>
         ) : isError ? (
@@ -328,23 +330,24 @@ export const WalletDashboard = () => {
   );
 
   return (
-    <div className="w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4 sm:p-6 lg:p-8 font-sans">
+    // Premium light background with soft gradient
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-white dark:to-white p-4 sm:p-6 lg:p-8 font-sans">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 dark:bg-white flex items-center justify-center">
-            <Wallet className="w-4 h-4 text-white dark:text-zinc-900" />
+          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center">
+            <Wallet className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-zinc-900 dark:text-white leading-none">
+            <h1 className="text-sm font-bold text-slate-900 leading-none">
               My Wallet
             </h1>
-            <p className="text-[11px] text-zinc-400 mt-0.5">
+            <p className="text-[11px] text-slate-400 mt-0.5">
               Student Dashboard
             </p>
           </div>
         </div>
-        <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+        <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700">
           ✦ Secured
         </span>
       </div>
@@ -357,14 +360,14 @@ export const WalletDashboard = () => {
         isError={isError}
       />
 
-      {/* Stats */}
+      {/* Stats Grid – premium white cards */}
       <div className="grid grid-cols-2 gap-3 mb-5">
         <StatCard
           label="Pending"
           value={formatMoney(pending, currency)}
           icon={Clock}
           iconClassName="text-amber-500"
-          valueClassName="text-amber-600 dark:text-amber-400"
+          valueClassName="text-amber-600"
           isFetching={isFetching}
           isError={isError}
         />
@@ -373,20 +376,20 @@ export const WalletDashboard = () => {
           value={formatMoney(lifetime, currency)}
           icon={TrendingUp}
           iconClassName="text-emerald-500"
-          valueClassName="text-emerald-600 dark:text-emerald-400"
+          valueClassName="text-emerald-600"
           isFetching={isFetching}
           isError={isError}
         />
       </div>
 
-      {/* Payment Methods */}
+      {/* Payment Methods – white card */}
       {paymentMethods.length > 0 && (
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 mb-3">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-zinc-400" />
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm mb-3">
+          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-slate-400" />
             Payment Methods
           </h3>
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <div className="divide-y divide-slate-100">
             {paymentMethods.map((m: any, idx: number) => {
               const PmIcon = getPmIcon(m);
               const name = String(m?.name ?? m?.title ?? m?.label ?? "—");
@@ -404,14 +407,14 @@ export const WalletDashboard = () => {
                   key={String(m?.id ?? m?._id ?? idx)}
                   className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                    <PmIcon className="w-4 h-4 text-zinc-500" />
+                  <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0">
+                    <PmIcon className="w-4 h-4 text-slate-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-bold text-zinc-900 dark:text-white truncate">
+                    <p className="text-[13px] font-bold text-slate-900 truncate">
                       {name}
                     </p>
-                    <p className="text-[11px] font-mono text-zinc-400">
+                    <p className="text-[11px] font-mono text-slate-400">
                       {type} · {account}
                     </p>
                   </div>
@@ -427,14 +430,14 @@ export const WalletDashboard = () => {
         </div>
       )}
 
-      {/* Activity */}
+      {/* Recent Activity – white card */}
       {activities.length > 0 && (
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-zinc-400" />
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-slate-400" />
             Recent Activity
           </h3>
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <div className="divide-y divide-slate-100">
             {activities.slice(0, 20).map((a: any, idx: number) => {
               const cls = getActivityClass(a);
               const title = String(
@@ -450,19 +453,19 @@ export const WalletDashboard = () => {
 
               const amtClass =
                 cls === "credit"
-                  ? "text-emerald-600 dark:text-emerald-400"
+                  ? "text-emerald-600"
                   : cls === "debit"
-                    ? "text-red-500 dark:text-red-400"
-                    : "text-zinc-900 dark:text-white";
+                    ? "text-red-500"
+                    : "text-slate-900";
 
               const dotClass =
                 cls === "credit"
-                  ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                  ? "bg-emerald-50 text-emerald-600"
                   : cls === "debit"
-                    ? "bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400"
+                    ? "bg-red-50 text-red-500"
                     : cls === "pending"
-                      ? "bg-amber-50 dark:bg-amber-950 text-amber-500"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500";
+                      ? "bg-amber-50 text-amber-500"
+                      : "bg-slate-100 text-slate-500";
 
               const DotIcon =
                 cls === "credit"
@@ -482,10 +485,10 @@ export const WalletDashboard = () => {
                     <DotIcon className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-bold text-zinc-900 dark:text-white truncate">
+                    <p className="text-[13px] font-bold text-slate-900 truncate">
                       {title}
                     </p>
-                    <p className="text-[11px] text-zinc-400">{date}</p>
+                    <p className="text-[11px] text-slate-400">{date}</p>
                   </div>
                   <span
                     className={`text-[13px] font-mono font-semibold whitespace-nowrap ${amtClass}`}

@@ -378,7 +378,7 @@ export default function PaymentMethodsPage() {
   const rejectedCount = list.filter((m) => m.status === "rejected").length;
 
   return (
-    <div className="min-h-screen bg-slate-50/40 pb-16">
+    <div className="min-h-screen bg-white pb-16">
       {/* ── PAGE HEADER ────────────────────────────────────────────── */}
       <div className="border-b b px-4 sm:px-8 py-6">
         <div className=" mx-auto">
