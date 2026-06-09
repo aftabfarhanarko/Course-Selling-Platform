@@ -283,7 +283,7 @@ export default function AdminUsersApiPage(): React.JSX.Element {
         />
       )}
 
-      <div className="min-h-screen  p-3 sm:p-5 lg:p-6">
+      <div className="min-h-screen bg-white p-3 sm:p-5 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 gap-3">
           <div className="flex items-center gap-3 min-w-0">

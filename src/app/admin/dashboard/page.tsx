@@ -279,7 +279,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen p-3 sm:p-4 lg:p-5 space-y-4">
+    <div className="min-h-screen p-3 bg-white sm:p-4 lg:p-5 space-y-4">
       {/* ── Premium Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">

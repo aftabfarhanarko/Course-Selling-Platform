@@ -49,7 +49,7 @@ export default function AdminLayout({
   if (!isAuthenticated) return null;
 
   return (
-    <div className={`${baiJamjuree.className} flex min-h-screen `}>
+    <div className={`${baiJamjuree.className} flex min-h-screen`}>
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden backdrop-blur-sm"
@@ -57,6 +57,7 @@ export default function AdminLayout({
         />
       )}
 
+      {/* Sidebar – fixed */}
       <div
         className={`fixed left-0 top-0 z-50 h-screen transition-transform duration-300 ease-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -65,10 +66,11 @@ export default function AdminLayout({
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+      {/* Main content – flush against sidebar on desktop */}
+      <div className="flex-1 lg:ml-[220px] flex flex-col min-h-screen">
         <TopNavbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 overflow-x-hidden px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+        <main className="flex-1 overflow-x-hidden">
           <AppProviders>{children}</AppProviders>
         </main>
       </div>

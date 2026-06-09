@@ -422,7 +422,7 @@ export default function InstructorManager(): React.JSX.Element {
         />
       )}
 
-      <div className="min-h-screen  p-3 sm:p-4 lg:p-6">
+      <div className="min-h-screen bg-white  p-3 sm:p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 sm:mb-5 gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">

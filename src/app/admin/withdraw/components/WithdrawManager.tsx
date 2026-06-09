@@ -940,7 +940,7 @@ export default function WithdrawManager(): React.JSX.Element {
         />
       )}
 
-      <div className="min-h-screen p-3 sm:p-4 lg:p-6">
+      <div className="min-h-screen bg-white p-3 sm:p-4 lg:p-6">
         {/* ═══ HEADER — fully updated ═══ */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 sm:mb-5 overflow-hidden">
           {/* Top band */}

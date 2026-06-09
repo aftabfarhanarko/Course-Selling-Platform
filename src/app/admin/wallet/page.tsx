@@ -131,18 +131,49 @@ export default function AdminWalletPage(): React.JSX.Element {
     .reduce((acc, curr) => acc + Number(curr.balance), 0)
     .toFixed(2);
 
+  // Shared pagination controls to avoid duplication
+  const pagination = (
+    <div className="px-4 py-3.5 border-t border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+      <p className="text-[11px] text-gray-400 font-semibold">
+        Showing{" "}
+        <span className="text-gray-700">
+          {list.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0}–
+          {Math.min(page * PAGE_SIZE, total ?? list.length)}
+        </span>{" "}
+        of <span className="text-gray-700">{total ?? list.length}</span>
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page <= 1}
+          className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+        >
+          <ChevronLeft size={15} />
+        </button>
+        <span className="text-[12px] font-bold text-gray-600 px-1">
+          {page} / {totalPages}
+        </span>
+        <button
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={page >= totalPages}
+          className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+        >
+          <ChevronRight size={15} />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen p-3 sm:p-4 lg:p-6 space-y-4">
-      {/* ── Premium Header ── */}
+    <div className="min-h-screen bg-white p-3 sm:p-4 lg:p-6 space-y-4">
+      {/* ── Premium Header (already responsive) ── */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800 px-5 py-5 sm:px-7 sm:py-6 shadow-lg shadow-violet-200">
-        {/* decorative blobs */}
         <div className="pointer-events-none absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-indigo-400/20 blur-xl" />
 
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            {/* icon box */}
-            <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl  border border-white/20 flex items-center justify-center flex-shrink-0 shadow-inner">
+            <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl border border-white/20 flex items-center justify-center flex-shrink-0 shadow-inner">
               <Wallet size={20} className="text-white" />
             </div>
             <div>
@@ -160,7 +191,6 @@ export default function AdminWalletPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* live badge */}
           <div className="flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1.5 w-fit">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,.3)] animate-pulse" />
             <span className="text-[11px] font-bold text-white/90 tracking-wide">
@@ -170,11 +200,9 @@ export default function AdminWalletPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ── Premium Stats Cards ── */}
+      {/* ── Premium Stats Cards (already responsive) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Total Balance */}
         <div className="relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4 group hover:shadow-md transition-shadow">
-          {/* accent bar */}
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-gradient-to-b from-emerald-400 to-emerald-600" />
           <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0">
             <Wallet size={18} className="text-emerald-600" />
@@ -197,7 +225,6 @@ export default function AdminWalletPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Total Wallets */}
         <div className="relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4 group hover:shadow-md transition-shadow">
           <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-gradient-to-b from-violet-400 to-violet-600" />
           <div className="w-11 h-11 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center flex-shrink-0">
@@ -219,10 +246,9 @@ export default function AdminWalletPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ── Premium Search Bar ── */}
+      {/* ── Premium Search Bar (already responsive) ── */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 sm:p-4">
         <div className="relative flex items-center gap-3">
-          {/* icon */}
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center pointer-events-none">
             <Search size={13} className="text-violet-500" />
           </div>
@@ -249,8 +275,8 @@ export default function AdminWalletPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ── Table ── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* ── Desktop Table ── */}
+      <div className="hidden md:block bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -336,37 +362,70 @@ export default function AdminWalletPage(): React.JSX.Element {
             </tbody>
           </table>
         </div>
+        {pagination}
+      </div>
 
-        {/* Pagination */}
-        <div className="px-4 py-3.5 border-t border-gray-100 flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[11px] text-gray-400 font-semibold">
-            Showing{" "}
-            <span className="text-gray-700">
-              {list.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0}–
-              {Math.min(page * PAGE_SIZE, total ?? list.length)}
-            </span>{" "}
-            of <span className="text-gray-700">{total ?? list.length}</span>
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
-            >
-              <ChevronLeft size={15} />
-            </button>
-            <span className="text-[12px] font-bold text-gray-600 px-1">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
-              className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
-            >
-              <ChevronRight size={15} />
-            </button>
+      {/* ── Mobile Cards ── */}
+      <div className="md:hidden space-y-3">
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-5 w-5 animate-spin text-violet-500" />
           </div>
-        </div>
+        ) : isError ? (
+          <div className="text-center py-12 text-red-500 font-semibold">
+            Failed to load wallets
+          </div>
+        ) : list.length === 0 ? (
+          <div className="flex flex-col items-center py-12 gap-2">
+            <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
+              <Wallet size={20} className="text-gray-400" />
+            </div>
+            <p className="text-gray-400 font-semibold">No wallets found.</p>
+          </div>
+        ) : (
+          list.map((m) => (
+            <div
+              key={String(m.id)}
+              className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm space-y-3"
+            >
+              <div className="flex items-center gap-3">
+                <Avatar name={m.user.name} src={m.user.photo} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] font-bold text-gray-900 truncate">
+                    {m.user.name}
+                  </p>
+                  <p className="text-[11px] text-gray-400 truncate">
+                    {m.user.email}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  Balance
+                </span>
+                <span className="inline-flex items-center gap-1 text-[15px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg">
+                  ৳
+                  {Number(m.balance).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  Created
+                </span>
+                <span className="text-[11px] font-semibold text-gray-500">
+                  {m.createdAt}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+
+        {/* Mobile pagination */}
+        {list.length > 0 && <div className="mt-4">{pagination}</div>}
       </div>
     </div>
   );

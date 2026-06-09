@@ -32,10 +32,7 @@ import {
   useAdminProductQuery,
 } from "@/lib/api/admin/products";
 
-interface Props {
-  productId: string | number;
-}
-
+/* ─── helpers ─── */
 function formatDate(value: unknown): string {
   if (!value) return "—";
   const d = new Date(String(value));
@@ -89,12 +86,14 @@ function DeleteConfirmModal({
   onConfirm: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 text-center border border-slate-100">
+      {/* Bottom sheet on mobile, centered modal on sm+ */}
+      <div className="relative w-full sm:max-w-sm bg-white sm:rounded-2xl rounded-t-2xl shadow-xl p-6 text-center border border-slate-100 safe-bottom">
+        <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5 sm:hidden" />
         <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-4">
           <Trash2 size={20} className="text-red-500" />
         </div>
@@ -110,14 +109,14 @@ function DeleteConfirmModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl border border-slate-200 text-[12px] font-semibold text-slate-500 hover:bg-slate-50 transition-colors disabled:opacity-60"
+            className="flex-1 py-3 rounded-xl border border-slate-200 text-[13px] font-semibold text-slate-500 hover:bg-slate-50 active:bg-slate-100 transition-colors disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-60"
+            className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 active:bg-red-700 text-white text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-60"
           >
             {loading && <Loader2 size={12} className="animate-spin" />}Delete
           </button>
@@ -158,12 +157,14 @@ function renderValue(val: JVal): React.ReactNode {
           href={val}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[11px] text-blue-600 underline break-all line-clamp-1 max-w-xs"
+          className="text-[11px] text-blue-600 underline break-all line-clamp-2 max-w-full"
         >
           {val}
         </a>
       );
-    return <span className="text-[12px] text-slate-800">{val}</span>;
+    return (
+      <span className="text-[12px] text-slate-800 break-words">{val}</span>
+    );
   }
   if (Array.isArray(val)) {
     if (!val.length)
@@ -182,7 +183,7 @@ function renderValue(val: JVal): React.ReactNode {
         </div>
       );
     return (
-      <div className="mt-1 space-y-1">
+      <div className="mt-1 space-y-1 w-full">
         {(val as any[]).map((item, i) => (
           <div
             key={i}
@@ -204,7 +205,11 @@ function renderValue(val: JVal): React.ReactNode {
       </div>
     );
   }
-  return <span className="text-[12px] text-slate-800">{String(val)}</span>;
+  return (
+    <span className="text-[12px] text-slate-800 break-words">
+      {String(val)}
+    </span>
+  );
 }
 
 const ICONS: Record<string, React.ElementType> = {
@@ -243,32 +248,32 @@ function fieldLabel(key: string) {
 function PayloadTable({ data }: { data: Record<string, JVal> }) {
   const entries = Object.entries(data);
   return (
-    <table className="w-full text-left border-collapse">
-      <tbody>
-        {entries.map(([key, val]) => {
-          const Icon = ICONS[key] ?? Package;
-          const isComplex = val !== null && typeof val === "object";
-          return (
-            <tr
-              key={key}
-              className="border-b border-slate-100 last:border-0 align-top"
-            >
-              <td className="py-2 pr-3 w-[160px] shrink-0">
-                <div className="flex items-center gap-1.5">
-                  <Icon size={10} className="text-slate-400 shrink-0" />
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
-                    {fieldLabel(key)}
-                  </span>
-                </div>
-              </td>
-              <td className={`py-2 ${isComplex ? "block w-full" : ""}`}>
-                {renderValue(val)}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div className="w-full space-y-0">
+      {entries.map(([key, val]) => {
+        const Icon = ICONS[key] ?? Package;
+        const isComplex = val !== null && typeof val === "object";
+        return (
+          <div
+            key={key}
+            className={`border-b border-slate-100 last:border-0 py-2 ${
+              isComplex ? "flex flex-col gap-1" : "flex items-start gap-2"
+            }`}
+          >
+            {/* Label */}
+            <div className="flex items-center gap-1.5 shrink-0 min-w-[120px] w-[120px]">
+              <Icon size={10} className="text-slate-400 shrink-0" />
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
+                {fieldLabel(key)}
+              </span>
+            </div>
+            {/* Value */}
+            <div className="flex-1 min-w-0 overflow-hidden">
+              {renderValue(val)}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -277,29 +282,28 @@ function ApiPayloadCard({ product }: { product: Record<string, JVal> }) {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-3.5 border-b border-slate-100 bg-slate-50/60">
-        <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
+      <div className="flex items-center gap-3 px-4 py-3.5 border-b border-slate-100 bg-slate-50/60">
+        <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
           <FileJson size={13} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-bold text-slate-800">
             Raw API Payload
           </p>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[10px] text-slate-400 truncate">
             Product #{String(product.id)} · {Object.keys(product).length} fields
           </p>
         </div>
         <button
           onClick={() => setOpen((p) => !p)}
-          className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors shrink-0"
         >
           {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </button>
       </div>
 
       {open && (
-        <div className="p-5">
+        <div className="p-4 overflow-x-auto">
           <PayloadTable data={product} />
         </div>
       )}
@@ -307,6 +311,34 @@ function ApiPayloadCard({ product }: { product: Record<string, JVal> }) {
   );
 }
 
+/* ── Info Row (used in Owner Info table) ── */
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 py-2.5 border-b border-slate-100 last:border-0">
+      <div className="flex items-center gap-1.5 w-24 shrink-0 mt-0.5">
+        <Icon size={10} className="text-slate-400 shrink-0" />
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+          {label}
+        </span>
+      </div>
+      <p className="text-[12px] font-medium text-slate-800 break-all flex-1 min-w-0">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   PRODUCT DETAILS PAGE
+═══════════════════════════════════════════════ */
 export default function ProductDetailsPage({
   params,
 }: {
@@ -342,8 +374,8 @@ export default function ProductDetailsPage({
 
   if (isError || !product)
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="text-center w-full max-w-xs">
           <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-3">
             <AlertTriangle size={22} className="text-red-400" />
           </div>
@@ -355,7 +387,7 @@ export default function ProductDetailsPage({
           </p>
           <button
             onClick={() => router.back()}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
           >
             <ArrowLeft size={13} />
             Go back
@@ -397,6 +429,18 @@ export default function ProductDetailsPage({
     ? user.paymentMethods
     : [];
 
+  const ownerFields = [
+    { icon: Mail, label: "Email", value: userEmail },
+    ...(userPhone ? [{ icon: Phone, label: "Phone", value: userPhone }] : []),
+    ...(userCountry
+      ? [{ icon: MapPin, label: "Country", value: userCountry }]
+      : []),
+    ...(userReferCode
+      ? [{ icon: Shield, label: "Refer", value: userReferCode }]
+      : []),
+    { icon: Hash, label: "User ID", value: `#${user?.id ?? "—"}` },
+  ];
+
   return (
     <>
       {showDeleteModal && (
@@ -411,322 +455,334 @@ export default function ProductDetailsPage({
         />
       )}
 
-      <div className="min-h-screen bg-slate-50 p-4 lg:p-6 space-y-4">
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-slate-50">
+        {/* ── Sticky top bar ── */}
+        <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-sm border-b border-slate-200/70 px-4 py-3 flex items-center justify-between gap-3">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 active:bg-slate-100 transition-colors shadow-sm shrink-0"
           >
             <ArrowLeft size={13} />
-            Back
+            <span className="hidden xs:inline">Back</span>
           </button>
-          <div className="flex items-center gap-2">
+
+          {/* Title truncated in center on mobile */}
+          <p className="text-[13px] font-bold text-slate-700 truncate flex-1 text-center px-2 hidden sm:block">
+            {title}
+          </p>
+
+          <div className="flex items-center gap-2 shrink-0">
             {status.toLowerCase() === "pending" && (
               <button
                 disabled={isApproving}
                 onClick={async () => {
                   await approve(product.id).unwrap();
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-semibold transition-colors shadow-sm disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-[12px] font-semibold transition-colors shadow-sm disabled:opacity-60"
               >
                 {isApproving ? (
                   <Loader2 size={13} className="animate-spin" />
                 ) : (
                   <Check size={13} />
                 )}
-                Approve
+                <span>Approve</span>
               </button>
             )}
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-red-200 hover:bg-red-50 text-red-600 text-[12px] font-semibold transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-red-200 hover:bg-red-50 active:bg-red-100 text-red-600 text-[12px] font-semibold transition-colors"
             >
               <Trash2 size={13} />
-              Delete
+              <span className="hidden xs:inline">Delete</span>
             </button>
           </div>
         </div>
 
-        {/* Hero */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-violet-600 flex items-center justify-center flex-shrink-0">
-                <TrendingUp size={20} className="text-white" />
+        <div className="p-4 space-y-4 max-w-5xl mx-auto">
+          {/* ── Hero Card ── */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+            {/* Title row */}
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-violet-600 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp size={18} className="text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-[16px] sm:text-[20px] font-bold text-slate-900 truncate">
+                    {title}
+                  </h1>
+                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                    ID: #{String(product.id)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-[18px] font-bold text-slate-900">
-                  {title}
-                </h1>
-                <p className="text-[11px] text-slate-400 font-mono">
-                  Product ID: #{String(product.id)}
-                </p>
-              </div>
+              <StatusPill status={status} />
             </div>
-            <StatusPill status={status} />
-          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            {[
-              {
-                label: "Total Amount",
-                value: priceFormatted,
-                cls: "text-violet-700",
-              },
-              {
-                label: "Countries",
-                value: countryCodes.length
-                  ? `${countryCodes.length} countries`
-                  : "—",
-                cls: "text-indigo-700",
-              },
-              { label: "Created", value: createdAt, cls: "text-slate-700" },
-              { label: "Updated", value: updatedAt, cls: "text-slate-700" },
-            ].map(({ label, value, cls }) => (
-              <div
-                key={label}
-                className="bg-slate-50 border border-slate-200 rounded-xl p-3"
-              >
-                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">
-                  {label}
-                </p>
-                <p
-                  className={`text-[13px] font-bold ${cls} mt-0.5 leading-snug`}
+            {/* Stats grid — 2 cols on mobile, 4 on sm+ */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+              {[
+                {
+                  label: "Total Amount",
+                  value: priceFormatted,
+                  cls: "text-violet-700",
+                },
+                {
+                  label: "Countries",
+                  value: countryCodes.length
+                    ? `${countryCodes.length} countries`
+                    : "—",
+                  cls: "text-indigo-700",
+                },
+                { label: "Created", value: createdAt, cls: "text-slate-700" },
+                { label: "Updated", value: updatedAt, cls: "text-slate-700" },
+              ].map(({ label, value, cls }) => (
+                <div
+                  key={label}
+                  className="bg-slate-50 border border-slate-200 rounded-xl p-3"
                 >
-                  {value}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {countryCodes.length > 0 && (
-            <div className="mb-3">
-              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mb-1.5">
-                Available Countries
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {countryCodes.map((cc) => (
-                  <span
-                    key={cc}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200"
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase tracking-wide">
+                    {label}
+                  </p>
+                  <p
+                    className={`text-[12px] sm:text-[13px] font-bold ${cls} mt-0.5 leading-snug break-words`}
                   >
-                    <Globe size={9} />
-                    {cc}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {approvedByName && (
-            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5 mt-2">
-              <Shield size={13} className="text-emerald-600 shrink-0" />
-              <div>
-                <p className="text-[12px] font-semibold text-emerald-700">
-                  Approved by{" "}
-                  <span className="font-bold text-emerald-900">
-                    {approvedByName}
-                  </span>
-                </p>
-                {approvalDate && (
-                  <p className="text-[10px] text-emerald-600">{approvalDate}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {rejectReason && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5 mt-2">
-              <AlertTriangle size={13} className="text-red-500 shrink-0" />
-              <div>
-                <p className="text-[12px] font-semibold text-red-600">
-                  Rejection Reason
-                </p>
-                <p className="text-[11px] text-red-500">{rejectReason}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Owner + Payment */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Owner */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100">
-              <User size={14} className="text-violet-600" />
-              <h2 className="text-[13px] font-bold text-slate-800">
-                Owner Info
-              </h2>
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              {userPhoto ? (
-                <img
-                  src={userPhoto}
-                  alt={userName}
-                  className="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
-                  <span className="text-[15px] font-bold text-violet-600">
-                    {userName.charAt(0).toUpperCase()}
-                  </span>
+                    {value}
+                  </p>
                 </div>
-              )}
-              <div>
-                <p className="text-[13px] font-bold text-slate-900">
-                  {userName}
-                </p>
-                <div className="flex gap-1.5 mt-0.5 flex-wrap">
-                  {userRole && (
-                    <span className="px-1.5 py-0.5 bg-violet-50 text-violet-700 text-[9px] font-bold rounded border border-violet-100">
-                      {userRole}
-                    </span>
-                  )}
-                  {userBanned && (
-                    <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[9px] font-bold rounded border border-red-100">
-                      Banned
-                    </span>
-                  )}
-                  {userActive === false && (
-                    <span className="px-1.5 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-bold rounded border border-slate-200">
-                      Inactive
-                    </span>
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
-            <table className="w-full text-left">
-              <tbody>
-                {[
-                  { icon: Mail, label: "Email", value: userEmail },
-                  ...(userPhone
-                    ? [{ icon: Phone, label: "Phone", value: userPhone }]
-                    : []),
-                  ...(userCountry
-                    ? [{ icon: MapPin, label: "Country", value: userCountry }]
-                    : []),
-                  ...(userReferCode
-                    ? [
-                        {
-                          icon: Shield,
-                          label: "Refer Code",
-                          value: userReferCode,
-                        },
-                      ]
-                    : []),
-                  {
-                    icon: Hash,
-                    label: "User ID",
-                    value: `#${user?.id ?? "—"}`,
-                  },
-                ].map(({ icon: Icon, label, value }) => (
-                  <tr
-                    key={label}
-                    className="border-b border-slate-100 last:border-0"
-                  >
-                    <td className="py-2 pr-3 w-[100px]">
-                      <div className="flex items-center gap-1.5">
-                        <Icon size={10} className="text-slate-400 shrink-0" />
-                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
-                          {label}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-2 text-[12px] font-medium text-slate-800 break-all">
-                      {value}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
 
-          {/* Payment Methods */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100">
-              <CreditCard size={14} className="text-indigo-600" />
-              <h2 className="text-[13px] font-bold text-slate-800">
-                Payment Methods
-              </h2>
-              <span className="ml-auto text-[10px] font-semibold text-slate-400">
-                {paymentMethods.length} method
-                {paymentMethods.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-            {paymentMethods.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-slate-300">
-                <CreditCard size={24} />
-                <p className="text-[12px] text-slate-400 mt-2">
-                  No payment methods
+            {/* Country codes */}
+            {countryCodes.length > 0 && (
+              <div className="mb-3">
+                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mb-1.5">
+                  Available Countries
                 </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {paymentMethods.map((pm: any) => {
-                  const s = String(pm?.status ?? "").toLowerCase();
-                  return (
-                    <div
-                      key={pm?.id}
-                      className="border border-slate-200 rounded-xl p-3 hover:border-indigo-200 transition-colors"
+                <div className="flex flex-wrap gap-1.5">
+                  {countryCodes.map((cc) => (
+                    <span
+                      key={cc}
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200"
                     >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <CreditCard size={12} className="text-indigo-500" />
-                          <span className="text-[12px] font-semibold text-slate-800 capitalize">
-                            {pm?.type ?? "—"}
-                          </span>
-                          {pm?.isDefault && (
-                            <span className="px-1.5 py-0.5 bg-violet-50 text-violet-600 text-[9px] font-bold rounded border border-violet-100">
-                              DEFAULT
-                            </span>
-                          )}
-                        </div>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${s === "approved" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : s === "pending" ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-red-50 text-red-700 border border-red-200"}`}
-                        >
-                          {pm?.status ?? "—"}
-                        </span>
-                      </div>
-                      {pm?.type === "bank" && (
-                        <div className="text-[11px] text-slate-500 space-y-0.5">
-                          {pm?.bankName && (
-                            <p>
-                              {pm.bankName}
-                              {pm?.branchName ? ` · ${pm.branchName}` : ""}
-                            </p>
-                          )}
-                          {pm?.accountNumber && (
-                            <p className="font-mono">
-                              Acct: {pm.accountNumber}
-                            </p>
-                          )}
-                          {pm?.accountHolderName && (
-                            <p>Holder: {pm.accountHolderName}</p>
-                          )}
-                        </div>
-                      )}
-                      {pm?.type === "binance" && pm?.binanceId && (
-                        <p className="text-[11px] text-slate-500 font-mono">
-                          Binance ID: {pm.binanceId}
-                        </p>
-                      )}
-                      {pm?.rejectReason && (
-                        <p className="text-[10px] text-red-500 mt-1 flex items-center gap-1">
-                          <AlertTriangle size={9} />
-                          {pm.rejectReason}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
+                      <Globe size={9} />
+                      {cc}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Approval banner */}
+            {approvedByName && (
+              <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5 mt-2">
+                <Shield
+                  size={13}
+                  className="text-emerald-600 shrink-0 mt-0.5"
+                />
+                <div>
+                  <p className="text-[12px] font-semibold text-emerald-700">
+                    Approved by{" "}
+                    <span className="font-bold text-emerald-900">
+                      {approvedByName}
+                    </span>
+                  </p>
+                  {approvalDate && (
+                    <p className="text-[10px] text-emerald-600 mt-0.5">
+                      {approvalDate}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Rejection banner */}
+            {rejectReason && (
+              <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5 mt-2">
+                <AlertTriangle
+                  size={13}
+                  className="text-red-500 shrink-0 mt-0.5"
+                />
+                <div>
+                  <p className="text-[12px] font-semibold text-red-600">
+                    Rejection Reason
+                  </p>
+                  <p className="text-[11px] text-red-500 mt-0.5">
+                    {rejectReason}
+                  </p>
+                </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* API Payload */}
-        <ApiPayloadCard product={product as Record<string, JVal>} />
+          {/* ── Owner + Payment ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Owner Info */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+              <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100">
+                <User size={14} className="text-violet-600" />
+                <h2 className="text-[13px] font-bold text-slate-800">
+                  Owner Info
+                </h2>
+              </div>
+
+              {/* Avatar row */}
+              <div className="flex items-center gap-3 mb-4">
+                {userPhoto ? (
+                  <img
+                    src={userPhoto}
+                    alt={userName}
+                    className="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+                    <span className="text-[15px] font-bold text-violet-600">
+                      {userName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-bold text-slate-900 truncate">
+                    {userName}
+                  </p>
+                  <div className="flex gap-1.5 mt-0.5 flex-wrap">
+                    {userRole && (
+                      <span className="px-1.5 py-0.5 bg-violet-50 text-violet-700 text-[9px] font-bold rounded border border-violet-100">
+                        {userRole}
+                      </span>
+                    )}
+                    {userBanned && (
+                      <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[9px] font-bold rounded border border-red-100">
+                        Banned
+                      </span>
+                    )}
+                    {userActive === false && (
+                      <span className="px-1.5 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-bold rounded border border-slate-200">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Field rows — single unified layout that works on all sizes */}
+              <div className="space-y-0">
+                {ownerFields.map(({ icon, label, value }) => (
+                  <InfoRow
+                    key={label}
+                    icon={icon}
+                    label={label}
+                    value={value}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Payment Methods */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+              <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100">
+                <CreditCard size={14} className="text-indigo-600" />
+                <h2 className="text-[13px] font-bold text-slate-800">
+                  Payment Methods
+                </h2>
+                <span className="ml-auto text-[10px] font-semibold text-slate-400">
+                  {paymentMethods.length} method
+                  {paymentMethods.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+              {paymentMethods.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-slate-300">
+                  <CreditCard size={24} />
+                  <p className="text-[12px] text-slate-400 mt-2">
+                    No payment methods
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {paymentMethods.map((pm: any) => {
+                    const s = String(pm?.status ?? "").toLowerCase();
+                    return (
+                      <div
+                        key={pm?.id}
+                        className="border border-slate-200 rounded-xl p-3 hover:border-indigo-200 transition-colors"
+                      >
+                        <div className="flex items-center justify-between mb-1.5 gap-2">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <CreditCard
+                              size={12}
+                              className="text-indigo-500 shrink-0"
+                            />
+                            <span className="text-[12px] font-semibold text-slate-800 capitalize truncate">
+                              {pm?.type ?? "—"}
+                            </span>
+                            {pm?.isDefault && (
+                              <span className="px-1.5 py-0.5 bg-violet-50 text-violet-600 text-[9px] font-bold rounded border border-violet-100 shrink-0">
+                                DEFAULT
+                              </span>
+                            )}
+                          </div>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[9px] font-bold shrink-0 ${
+                              s === "approved"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : s === "pending"
+                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                  : "bg-red-50 text-red-700 border border-red-200"
+                            }`}
+                          >
+                            {pm?.status ?? "—"}
+                          </span>
+                        </div>
+                        {pm?.type === "bank" && (
+                          <div className="text-[11px] text-slate-500 space-y-0.5">
+                            {pm?.bankName && (
+                              <p className="truncate">
+                                {pm.bankName}
+                                {pm?.branchName ? ` · ${pm.branchName}` : ""}
+                              </p>
+                            )}
+                            {pm?.accountNumber && (
+                              <p className="font-mono break-all">
+                                Acct: {pm.accountNumber}
+                              </p>
+                            )}
+                            {pm?.accountHolderName && (
+                              <p className="truncate">
+                                Holder: {pm.accountHolderName}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {pm?.type === "binance" && pm?.binanceId && (
+                          <p className="text-[11px] text-slate-500 font-mono break-all">
+                            Binance ID: {pm.binanceId}
+                          </p>
+                        )}
+                        {pm?.rejectReason && (
+                          <p className="text-[10px] text-red-500 mt-1 flex items-start gap-1">
+                            <AlertTriangle
+                              size={9}
+                              className="mt-0.5 shrink-0"
+                            />
+                            <span className="break-words">
+                              {pm.rejectReason}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* API Payload */}
+          <ApiPayloadCard product={product as Record<string, JVal>} />
+
+          {/* Bottom spacing for safe area on iOS */}
+          <div className="h-4 sm:h-0" />
+        </div>
       </div>
     </>
   );

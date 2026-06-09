@@ -47,7 +47,7 @@ export default function CategoryManager(): React.JSX.Element {
       extractItems(data)
         .map(normalizeCategory)
         .filter((x): x is UiCategory => Boolean(x)),
-    [data],
+    [data]
   );
 
   const meta = useMemo(() => extractMeta(data), [data]);
@@ -57,7 +57,7 @@ export default function CategoryManager(): React.JSX.Element {
       statusFilter
         ? categories.filter((c) => c.status === statusFilter)
         : categories,
-    [categories, statusFilter],
+    [categories, statusFilter]
   );
 
   const totalPages =
@@ -148,36 +148,41 @@ export default function CategoryManager(): React.JSX.Element {
         />
       )}
 
-      {/* ── Page content ── */}
-      <div className="min-h-screen  p-3 sm:p-5 lg:p-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+      {/* ── Page Content ── */}
+      <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8 pb-20">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
               <FolderOpen size={22} className="text-white" />
             </div>
             <div>
-              <h1 className="text-[20px] sm:text-[22px] font-black text-gray-900 tracking-tight">
+              <h1 className="text-2xl sm:text-[22px] font-black text-gray-900 tracking-tight">
                 Category Management
               </h1>
-              <p className="text-[11px] text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-500 mt-1 leading-tight">
                 Manage course categories, slugs, photos and SEO metadata.
               </p>
             </div>
           </div>
+
           <button
             onClick={() => setCreateOpen(true)}
             disabled={isCreating}
-            className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-[13px] font-bold px-5 py-3 rounded-2xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-60 w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.97] text-white text-sm font-bold px-6 py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-60 w-full sm:w-auto"
           >
-            <Plus size={15} /> Add Category
+            <Plus size={18} /> Add Category
           </button>
         </div>
 
         <StatCards total={total} active={active} deleted={deleted} />
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-3 mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <Search size={15} className="text-gray-400 shrink-0" />
+        {/* Search + Filter */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-6 flex flex-col sm:flex-row gap-3 sm:items-center">
+          <div className="relative flex-1">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <Search size={18} />
+            </div>
             <input
               value={search}
               onChange={(e) => {
@@ -185,7 +190,7 @@ export default function CategoryManager(): React.JSX.Element {
                 setPage(1);
               }}
               placeholder="Search categories…"
-              className="w-full text-[13px] font-semibold text-gray-700 placeholder:text-gray-300 outline-none bg-transparent"
+              className="w-full pl-11 pr-10 py-3 text-[15px] font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
             />
             {search && (
               <button
@@ -193,19 +198,20 @@ export default function CategoryManager(): React.JSX.Element {
                   setSearch("");
                   setPage(1);
                 }}
-                className="text-gray-300 hover:text-gray-500 transition-colors shrink-0"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <X size={13} />
+                <X size={18} />
               </button>
             )}
           </div>
+
           <select
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value as any);
               setPage(1);
             }}
-            className="h-9 px-3 text-[12px] font-semibold border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 w-full sm:w-auto"
+            className="h-12 sm:h-12 px-4 text-[15px] font-medium border border-gray-200 rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 w-full sm:w-52"
           >
             <option value="">All Status</option>
             <option value="Active">Active</option>
@@ -213,6 +219,7 @@ export default function CategoryManager(): React.JSX.Element {
           </select>
         </div>
 
+        {/* Table Container */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <CategoryTable

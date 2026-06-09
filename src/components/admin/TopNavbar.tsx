@@ -39,7 +39,6 @@ export default function TopNavbar({
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const [isDark, setIsDark] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -75,10 +74,6 @@ export default function TopNavbar({
     .toUpperCase();
 
   useEffect(() => {
-    setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
-
-  useEffect(() => {
     const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handleFsChange);
     return () =>
@@ -98,11 +93,6 @@ export default function TopNavbar({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const toggleTheme = () => {
-    setIsDark((prev) => !prev);
-    document.documentElement.classList.toggle("dark");
-  };
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
@@ -139,38 +129,27 @@ export default function TopNavbar({
       .replace(/\b\w/g, (c) => c.toUpperCase()) ?? "Overview";
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-100 bg-white px-4 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-100 bg-white px-4 sm:px-6">
       {/* ── Left: Brand + Breadcrumb ── */}
       <div className="flex items-center gap-4 min-w-0">
         <button
           onClick={onMenuClick}
-          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-zinc-100 transition-colors"
           aria-label="Open sidebar"
         >
-          <Menu className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+          <Menu className="w-4 h-4 text-zinc-600" />
         </button>
       </div>
 
       {/* ── Right: Actions ── */}
       <div className="flex items-center gap-1">
-        {/* Theme */}
-        {/* <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleTheme}
-          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          className="h-8 w-8 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0"
-        >
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button> */}
-
         {/* Fullscreen */}
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleFullScreen}
           title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          className="hidden lg:flex h-8 w-8 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 p-0 items-center justify-center"
+          className="hidden lg:flex h-8 w-8 rounded-lg text-zinc-500 hover:bg-zinc-100 p-0 items-center justify-center"
         >
           {isFullscreen ? (
             <Minimize className="h-4 w-4" />
@@ -179,19 +158,17 @@ export default function TopNavbar({
           )}
         </Button>
 
-        {/* <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1.5" /> */}
-
         {/* ── Avatar Dropdown ── */}
         <div className="relative ml-0.5" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-lg pl-0.5 pr-2 py-0.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
+            className="flex items-center gap-2 rounded-lg pl-0.5 pr-2 py-0.5 hover:bg-zinc-100 transition-colors group"
             aria-label="Account menu"
             aria-expanded={dropdownOpen}
           >
             {/* Avatar image or initials */}
             <div className="relative h-7 w-7 flex-shrink-0">
-              <div className="h-7 w-7 rounded-[8px] overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-700 group-hover:ring-blue-400 transition-all">
+              <div className="h-7 w-7 rounded-[8px] overflow-hidden ring-1 ring-zinc-200 group-hover:ring-blue-400 transition-all">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
@@ -204,12 +181,12 @@ export default function TopNavbar({
                   </div>
                 )}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 border-2 border-white dark:border-zinc-950 rounded-full" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 border-2 border-white rounded-full" />
             </div>
 
             {/* Name + chevron (desktop only) */}
             <div className="hidden lg:flex items-center gap-1">
-              <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200 max-w-[100px] truncate">
+              <span className="text-[13px] font-medium text-zinc-800 max-w-[100px] truncate">
                 {displayName}
               </span>
               <ChevronDown
@@ -222,19 +199,19 @@ export default function TopNavbar({
 
           {/* Dropdown panel */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900 overflow-hidden z-50">
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-200 bg-white shadow-lg overflow-hidden z-50">
               {/* User info header */}
-              <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-                <p className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate">
+              <div className="px-4 py-3 border-b border-zinc-100">
+                <p className="text-[13px] font-medium text-zinc-900 truncate">
                   {displayName}
                 </p>
                 {email && (
-                  <p className="text-[12px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                  <p className="text-[12px] text-zinc-500 truncate mt-0.5">
                     {email}
                   </p>
                 )}
                 {country && (
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
                     {country}
                   </p>
                 )}
@@ -247,29 +224,18 @@ export default function TopNavbar({
                     setDropdownOpen(false);
                     router.push("/dashboard/profile");
                   }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-zinc-700 hover:bg-zinc-50 transition-colors"
                 >
                   <User className="w-4 h-4 text-zinc-400" />
                   Profile
                 </button>
-
-                {/* <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    router.push("/dashboard/settings");
-                  }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-                >
-                  <Settings className="w-4 h-4 text-zinc-400" />
-                  Settings
-                </button> */}
               </div>
 
-              <div className="border-t border-zinc-100 dark:border-zinc-800 py-1">
+              <div className="border-t border-zinc-100 py-1">
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <LogOut className="w-4 h-4" />
                   {isLoggingOut ? "Signing out…" : "Sign out"}

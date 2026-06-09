@@ -162,7 +162,7 @@ export default function AdminCoursesPage(): React.JSX.Element {
         />
       )}
 
-      <div className="min-h-screen  p-3 sm:p-4 lg:p-5">
+      <div className="min-h-screen bg-white p-3 sm:p-4 lg:p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           {/* Left */}
           <div className="flex items-center gap-4">

@@ -575,7 +575,7 @@ export default function AdminPaymentMethodsPage(): React.JSX.Element {
         />
       )}
 
-      <div className="min-h-screen p-3 sm:p-4 lg:p-6 space-y-4">
+      <div className="min-h-screen p-3 bg-white sm:p-4 lg:p-6 space-y-4">
         {/* ── Premium Header ── */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800 px-5 py-5 sm:px-7 sm:py-6 shadow-lg shadow-violet-200">
           <div className="pointer-events-none absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />

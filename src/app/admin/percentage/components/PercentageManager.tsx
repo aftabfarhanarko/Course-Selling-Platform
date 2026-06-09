@@ -94,7 +94,6 @@ function toUi(raw: ApiPercentage): UiPercentage {
   };
 }
 
-/* ─── Type badge color ─── */
 function typeBadgeColor(type: string) {
   const t = type.toLowerCase();
   if (t === "student") return "bg-violet-50 text-violet-700 border-violet-200";
@@ -123,23 +122,27 @@ function ModalShell({
   icon?: React.ElementType;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
+      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+      {/* Sheet: slides up on mobile, centered card on sm+ */}
+      <div className="relative w-full sm:max-w-md bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[92vh]">
         <div
-          className={`bg-gradient-to-r ${headerColor} px-6 py-5 flex items-center justify-between flex-shrink-0`}
+          className={`bg-gradient-to-r ${headerColor} px-5 py-4 flex items-center justify-between flex-shrink-0`}
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
               <Icon size={16} className="text-white" />
             </div>
             <div>
-              <h2 className="text-[15px] font-black text-white">{title}</h2>
+              <h2 className="text-[15px] font-black text-white leading-tight">
+                {title}
+              </h2>
               {subtitle && (
-                <p className="text-[11px] text-white/60 mt-0.5 font-mono">
+                <p className="text-[10px] text-white/60 mt-0.5 font-mono truncate max-w-[180px]">
                   {subtitle}
                 </p>
               )}
@@ -148,12 +151,12 @@ function ModalShell({
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-9 h-9 rounded-2xl flex items-center justify-center text-white/70 hover:bg-white/20 transition-all disabled:opacity-60"
+            className="w-9 h-9 rounded-2xl flex items-center justify-center text-white/70 hover:bg-white/20 transition-all disabled:opacity-60 flex-shrink-0"
           >
             <X size={15} />
           </button>
         </div>
-        <div className="px-6 py-6 overflow-y-auto flex-1">{children}</div>
+        <div className="px-5 py-5 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );
@@ -204,7 +207,7 @@ function PercentageFormModal({
   };
 
   const inputCls = (hasError?: boolean) =>
-    `w-full px-3 py-2.5 text-[12px] font-semibold border rounded-xl outline-none focus:ring-2 transition-all ${
+    `w-full px-3 py-3 text-[13px] font-semibold border rounded-xl outline-none focus:ring-2 transition-all ${
       hasError
         ? "border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-100"
         : "border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-indigo-100"
@@ -265,7 +268,6 @@ function PercentageFormModal({
               {errors.percentage}
             </p>
           )}
-          {/* Visual bar */}
           {percentage && !isNaN(parseFloat(percentage)) && (
             <div className="mt-1 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
               <div
@@ -282,14 +284,14 @@ function PercentageFormModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-60"
+            className="flex-1 py-3.5 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             onClick={submit}
             disabled={loading}
-            className={`flex-1 py-3 rounded-2xl text-[13px] font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-60 ${
+            className={`flex-1 py-3.5 rounded-2xl text-[13px] font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-60 ${
               isEdit
                 ? "bg-gradient-to-br from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-200"
                 : "bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-indigo-200"
@@ -335,14 +337,14 @@ function ConfirmModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-60"
+            className="flex-1 py-3.5 rounded-2xl border-2 border-slate-200 text-[13px] font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-3 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-200 disabled:opacity-60"
+            className="flex-1 py-3.5 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-200 disabled:opacity-60"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Delete
@@ -412,13 +414,96 @@ function DetailsModal({ id, onClose }: { id: number; onClose: () => void }) {
                     {label}
                   </p>
                 </div>
-                <p className="text-[13px] font-bold text-gray-800">{value}</p>
+                <p className="text-[13px] font-bold text-gray-800 break-words">
+                  {value}
+                </p>
               </div>
             ))}
           </div>
         </div>
       )}
     </ModalShell>
+  );
+}
+
+/* ─── Mobile Card Row ─── */
+function MobileCard({
+  p,
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  p: UiPercentage;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3">
+      {/* Top row */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-[11px] font-bold text-gray-400 font-mono flex-shrink-0">
+            #{p.id}
+          </span>
+          <span
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border capitalize truncate ${typeBadgeColor(p.type)}`}
+          >
+            <Tag size={9} />
+            {p.type}
+          </span>
+        </div>
+        {/* Action buttons */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <button
+            onClick={onView}
+            className="w-9 h-9 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 active:scale-95 transition-all"
+            title="View"
+          >
+            <Eye size={14} />
+          </button>
+          <button
+            onClick={onEdit}
+            className="w-9 h-9 rounded-xl border border-amber-200 bg-amber-50 flex items-center justify-center text-amber-600 hover:bg-amber-100 active:scale-95 transition-all"
+            title="Edit"
+          >
+            <Pencil size={14} />
+          </button>
+          <button
+            onClick={onDelete}
+            className="w-9 h-9 rounded-xl border border-red-200 bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-100 active:scale-95 transition-all"
+            title="Delete"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Percentage bar */}
+      <div className="flex items-center gap-3">
+        <span className="text-[18px] font-extrabold text-indigo-600 leading-none">
+          {p.percentage === null ? "—" : `${p.percentage.toFixed(2)}%`}
+        </span>
+        {p.percentage !== null && (
+          <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+              style={{ width: `${Math.min(100, p.percentage)}%` }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Dates */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Clock size={10} className="text-gray-300 flex-shrink-0" />
+          <span className="text-[10px] text-gray-400 font-semibold truncate">
+            {p.createdAt}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -475,51 +560,49 @@ export default function PercentageManager() {
 
   return (
     <>
-      <div className="min-h-screen p-3 sm:p-4 lg:p-6">
+      <div className="min-h-screen bg-white p-3 sm:p-4 lg:p-6">
         {/* ═══ HEADER CARD ═══ */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 sm:mb-5 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 overflow-hidden">
           {/* Gradient top band */}
           <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-500 px-4 sm:px-6 py-4 sm:py-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-              {/* Left */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/30">
-                  <BarChart3 size={20} className="text-white" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-200 mb-0.5">
-                    Admin · Finance
-                  </p>
-                  <h1 className="text-[17px] sm:text-[22px] font-extrabold text-white tracking-tight leading-none">
-                    Percentage Manager
-                  </h1>
-                  <p className="text-[11px] sm:text-[12px] text-indigo-200 mt-1 font-medium">
-                    Create, edit and manage commission percentages
-                  </p>
-                </div>
+            {/* Title row */}
+            <div className="flex items-start gap-3 mb-3 sm:mb-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/30">
+                <BarChart3 size={20} className="text-white" />
               </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-200 mb-0.5">
+                  Admin · Finance
+                </p>
+                <h1 className="text-[18px] sm:text-[22px] font-extrabold text-white tracking-tight leading-none">
+                  Percentage Manager
+                </h1>
+                <p className="text-[11px] text-indigo-200 mt-1 font-medium">
+                  Create, edit and manage commission percentages
+                </p>
+              </div>
+            </div>
 
-              {/* Right */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl">
-                  <TrendingUp size={12} />
-                  {items.length} Entries
-                </span>
-                <button
-                  onClick={() => refetch()}
-                  className="inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl hover:bg-white/25 transition-colors"
-                >
-                  <RefreshCw size={12} />
-                  <span className="hidden sm:inline">Refresh</span>
-                </button>
-                <button
-                  onClick={() => setModal({ type: "create" })}
-                  className="inline-flex items-center gap-1.5 bg-white text-indigo-600 text-[12px] font-extrabold px-4 py-2 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
-                >
-                  <Plus size={14} />
-                  Create Percentage
-                </button>
-              </div>
+            {/* Action buttons row — below title on mobile */}
+            <div className="flex items-center gap-2 flex-wrap mt-3 sm:mt-0 sm:absolute sm:top-4 sm:right-6">
+              <span className="inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl">
+                <TrendingUp size={12} />
+                {items.length} Entries
+              </span>
+              <button
+                onClick={() => refetch()}
+                className="inline-flex items-center gap-1.5 bg-white/15 border border-white/25 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl hover:bg-white/25 active:scale-95 transition-all"
+              >
+                <RefreshCw size={12} />
+                <span>Refresh</span>
+              </button>
+              <button
+                onClick={() => setModal({ type: "create" })}
+                className="inline-flex items-center gap-1.5 bg-white text-indigo-600 text-[12px] font-extrabold px-4 py-2 rounded-xl hover:bg-indigo-50 active:scale-95 transition-all shadow-lg"
+              >
+                <Plus size={14} />
+                <span>Create</span>
+              </button>
             </div>
           </div>
 
@@ -527,21 +610,21 @@ export default function PercentageManager() {
           <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
             {[
               {
-                label: "Total Entries",
+                label: "Total",
                 value: items.length,
                 icon: Hash,
                 color: "text-indigo-600",
                 bg: "bg-indigo-50",
               },
               {
-                label: "Avg. Percentage",
+                label: "Avg. %",
                 value: `${avgPct.toFixed(2)}%`,
                 icon: Percent,
                 color: "text-violet-600",
                 bg: "bg-violet-50",
               },
               {
-                label: "Current Page",
+                label: "Page",
                 value: `${page} / ${totalPages}`,
                 icon: BarChart3,
                 color: "text-slate-600",
@@ -550,18 +633,18 @@ export default function PercentageManager() {
             ].map(({ label, value, icon: Icon, color, bg }) => (
               <div
                 key={label}
-                className="px-4 sm:px-6 py-3 flex items-center gap-3"
+                className="px-3 sm:px-6 py-3 flex items-center gap-2 sm:gap-3"
               >
                 <div
-                  className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center flex-shrink-0`}
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl ${bg} flex items-center justify-center flex-shrink-0`}
                 >
-                  <Icon size={15} className={color} />
+                  <Icon size={14} className={color} />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">
                     {label}
                   </p>
-                  <p className="text-[15px] sm:text-[18px] font-extrabold text-gray-900 leading-none mt-0.5">
+                  <p className="text-[14px] sm:text-[18px] font-extrabold text-gray-900 leading-none mt-0.5 truncate">
                     {value}
                   </p>
                 </div>
@@ -570,11 +653,12 @@ export default function PercentageManager() {
           </div>
         </div>
 
-        {/* ═══ TABLE CARD ═══ */}
+        {/* ═══ TABLE / CARD SECTION ═══ */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           {/* Toolbar */}
           <div className="px-4 sm:px-5 py-3.5 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 w-full sm:w-72 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+            {/* Search */}
+            <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 w-full sm:w-72 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
               <Search size={14} className="text-gray-400 flex-shrink-0" />
               <input
                 value={search}
@@ -583,7 +667,7 @@ export default function PercentageManager() {
                   setPage(1);
                 }}
                 placeholder="Search by type…"
-                className="w-full text-[12px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none bg-transparent"
+                className="w-full text-[13px] font-semibold text-gray-700 placeholder:text-gray-400 outline-none bg-transparent"
               />
               {search && (
                 <button
@@ -598,11 +682,12 @@ export default function PercentageManager() {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Pagination controls */}
+            <div className="flex items-center gap-2 self-end sm:self-auto">
               <button
                 onClick={() => canPrev && setPage((p) => p - 1)}
                 disabled={!canPrev}
-                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 active:scale-95 transition-all"
               >
                 <ChevronLeft size={15} />
               </button>
@@ -612,15 +697,15 @@ export default function PercentageManager() {
               <button
                 onClick={() => canNext && setPage((p) => p + 1)}
                 disabled={!canNext}
-                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                className="h-9 w-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 active:scale-95 transition-all"
               >
                 <ChevronRight size={15} />
               </button>
             </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
+          {/* ─── DESKTOP: Table (hidden on mobile) ─── */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50/70 border-b border-gray-100">
@@ -679,14 +764,11 @@ export default function PercentageManager() {
                       key={p.id}
                       className="hover:bg-indigo-50/20 transition-colors"
                     >
-                      {/* ID */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-[12px] font-bold text-gray-500 font-mono">
                           #{p.id}
                         </span>
                       </td>
-
-                      {/* Type */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border capitalize ${typeBadgeColor(p.type)}`}
@@ -695,8 +777,6 @@ export default function PercentageManager() {
                           {p.type}
                         </span>
                       </td>
-
-                      {/* Percentage */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <span className="text-[13px] font-extrabold text-indigo-600">
@@ -716,22 +796,16 @@ export default function PercentageManager() {
                           )}
                         </div>
                       </td>
-
-                      {/* Created */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <p className="text-[11px] font-semibold text-gray-500">
                           {p.createdAt}
                         </p>
                       </td>
-
-                      {/* Updated */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <p className="text-[11px] font-semibold text-gray-500">
                           {p.updatedAt}
                         </p>
                       </td>
-
-                      {/* Actions */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
                           <button
@@ -768,6 +842,41 @@ export default function PercentageManager() {
             </table>
           </div>
 
+          {/* ─── MOBILE: Card list (shown only on mobile) ─── */}
+          <div className="sm:hidden">
+            {isFetching ? (
+              <div className="flex flex-col items-center gap-2 text-gray-400 py-14">
+                <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+                <p className="text-[12px] font-semibold">Loading…</p>
+              </div>
+            ) : isError ? (
+              <div className="px-4 py-14 text-center text-[12px] font-semibold text-red-500">
+                Failed to load percentages
+              </div>
+            ) : items.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-14">
+                <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
+                  <BarChart3 size={20} className="text-gray-300" />
+                </div>
+                <p className="text-[12px] font-semibold text-gray-400">
+                  No percentages found
+                </p>
+              </div>
+            ) : (
+              <div className="p-3 space-y-2.5">
+                {items.map((p) => (
+                  <MobileCard
+                    key={p.id}
+                    p={p}
+                    onView={() => setModal({ type: "details", id: p.id })}
+                    onEdit={() => setModal({ type: "edit", item: p })}
+                    onDelete={() => setModal({ type: "delete", item: p })}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Footer */}
           {items.length > 0 && (
             <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
@@ -780,7 +889,7 @@ export default function PercentageManager() {
                 <button
                   onClick={() => canPrev && setPage((p) => p - 1)}
                   disabled={!canPrev}
-                  className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                  className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 active:scale-95 transition-all"
                 >
                   <ChevronLeft size={14} />
                 </button>
@@ -790,7 +899,7 @@ export default function PercentageManager() {
                 <button
                   onClick={() => canNext && setPage((p) => p + 1)}
                   disabled={!canNext}
-                  className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                  className="h-8 w-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 active:scale-95 transition-all"
                 >
                   <ChevronRight size={14} />
                 </button>
