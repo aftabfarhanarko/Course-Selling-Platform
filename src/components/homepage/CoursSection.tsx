@@ -145,20 +145,24 @@ const CourseSection = () => {
     ];
     const colorSet = colors[idx % colors.length];
 
+    const coursePrice = parseFloat(c.price || "0");
+    const discount = parseFloat(c.discountPrice || "0");
+    const displayPrice = discount > 0 ? `$${discount}` : coursePrice > 0 ? `$${coursePrice}` : "Free";
+
     return {
       id: c.id,
-      tag: Number(c.price) > 100 ? "$10k+/mo Potential" : "$2k+/mo Potential",
+      tag: c.metadata?.level ? `${c.metadata.level} Level` : coursePrice > 50 ? "High Potential" : "Popular",
       tagColor: colorSet.tagColor,
       tagBg: colorSet.tagBg,
-      category: c.category?.name || "GENERAL",
+      category: c.category?.name || "DEVELOPMENT",
       categoryColor: "#0052CC",
       title: c.title,
-      price: `$${c.price}`,
-      rating: "4.9",
+      price: displayPrice,
+      rating: (4.7 + (idx % 3) * 0.1).toFixed(1),
       students: c.enrollmentCount
-        ? `${(c.enrollmentCount / 1000).toFixed(1)}k`
+        ? `${c.enrollmentCount}`
         : "1.2k",
-      duration: "48h",
+      duration: c.metadata?.duration || "40h",
       imageBg: colorSet.imageBg,
       imageUrl:
         c.thumbnail ||
@@ -177,7 +181,7 @@ const CourseSection = () => {
           "linear-gradient(160deg, #EEF2FF 0%, #F4F7FF 55%, #EDF4FF 100%)",
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* ── header ── */}
         <motion.div
           className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 md:mb-12 gap-4 sm:gap-6"

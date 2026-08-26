@@ -114,12 +114,13 @@ function Footer() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             {/* ── Logo ── */}
-            <Link href="/" className="flex-shrink-0 lg:w-48">
-              <img
-                src="/maruf.png"
-                alt="Maruf Tech"
-                className="h-[50px] w-[300px] -ml-14 md:-ml-8 object-contain"
-              />
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="text-[#5B50E6] group-hover:scale-105 transition-transform duration-300">
+                <BookOpen className="w-7 h-7 text-[#5B50E6]" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-[#111827]">
+                Edu<span className="text-[#5B50E6]">Nova</span>
+              </span>
             </Link>
           </div>
           <p className="text-[10px] font-bold tracking-[.06em] text-indigo-500 mb-2.5">

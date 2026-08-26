@@ -2,304 +2,171 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Plus_Jakarta_Sans } from "next/font/google";
-import { ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
+import { CheckCircle2, Mail } from "lucide-react";
 
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-// ── Fixed Animation Helper ─────────────────────────────────────────────────────
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 28 },
-  animate: { opacity: 1, y: 0 },
-  transition: { 
-    duration: 0.6, 
-    delay, 
-    ease: [0.22, 1, 0.36, 1] as const 
-  },
-});
-
-// ── Animated Number Component ─────────────────────────────────────────────────
-function AnimatedDollar({
-  value,
-  isInView,
-  delay,
-}: {
-  value: string;
-  isInView: boolean;
-  delay: number;
-}) {
-  return (
-    <motion.span
-      className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight"
-      initial={{ opacity: 0, x: -12 }}
-      animate={isInView ? { opacity: 1, x: 0 } : {}}
-      transition={{ 
-        delay, 
-        duration: 0.5, 
-        ease: [0.22, 1, 0.36, 1] as const 
-      }}
-    >
-      {value}
-    </motion.span>
-  );
-}
-
-// ── Main Component ───────────────────────────────────────────────────────────
-const ArchitectureProgress = () => {
+export default function ArchitectureProgress() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
+  const benefits = [
+    "Learn from industry experts",
+    "Flexible and self-paced learning",
+    "Certificate on course completion",
+    "Access on any device, anytime",
+  ];
+
   return (
-    <section
-      ref={ref}
-      className={`py-20 md:py-22 relative overflow-hidden ${plusJakarta.className}`}
-      style={{
-        background:
-          "linear-gradient(160deg, #EEF2FF 0%, #F4F7FF 55%, #EDF4FF 100%)",
-      }}
-    >
-      {/* subtle bg grid */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.025]">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern
-              id="g"
-              x="0"
-              y="0"
-              width="32"
-              height="32"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 32 0 L 0 0 0 32"
-                fill="none"
-                stroke="#0052CC"
-                strokeWidth="0.6"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#g)" />
-        </svg>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-14 md:gap-20 items-center">
-          {/* LEFT SIDE */}
-          <div>
-            {/* Heading - Fixed */}
-            <motion.h2
-              className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-10"
-              initial={{ opacity: 0, y: 28 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-              transition={{ 
-                duration: 0.6, 
-                delay: 0, 
-                ease: [0.22, 1, 0.36, 1] as const 
-              }}
-            >
-              The Architecture of{" "}
-              <span className="text-[#0052CC]">Progress</span>
-            </motion.h2>
-
-            {/* BEFORE card */}
-            <motion.div
-              className="relative bg-white rounded-2xl px-6 py-5 mb-2 border border-gray-100 shadow-sm overflow-hidden"
-              initial={{ opacity: 0, x: -24 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{
-                delay: 0.15,
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1] as const,
-              }}
-            >
-              <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-red-300" />
-
-              <p className="text-[10px] font-extrabold tracking-[0.16em] text-gray-400 uppercase mb-3">
-                Before IncomeArchitect
-              </p>
-              <div className="flex items-center gap-4 flex-wrap">
-                <AnimatedDollar
-                  value="$1,200/mo"
-                  isInView={isInView}
-                  delay={0.3}
-                />
-                <span className="flex items-center gap-1 text-sm text-gray-400 font-medium">
-                  <TrendingDown className="w-4 h-4 text-red-400" />
-                  Stagnant wage, no growth roadmap.
-                </span>
-              </div>
-            </motion.div>
-
-            {/* Arrow */}
-            <motion.div
-              className="flex justify-center my-3"
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{
-                delay: 0.42,
-                duration: 0.4,
-                type: "spring",
-                stiffness: 220,
-              }}
-            >
-              <div className="w-8 h-8 rounded-full bg-[#0052CC] flex items-center justify-center shadow-md shadow-blue-200">
-                <ChevronDown className="text-white w-5 h-5" />
-              </div>
-            </motion.div>
-
-            {/* AFTER card */}
-            <motion.div
-              className="relative bg-[#f0fdf4] rounded-2xl px-6 py-5 border border-green-100 shadow-sm overflow-hidden"
-              initial={{ opacity: 0, x: -24 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{
-                delay: 0.5,
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1] as const,
-              }}
-            >
-              <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-green-500" />
-
-              <p className="text-[10px] font-extrabold tracking-[0.16em] text-green-600 uppercase mb-3">
-                After 6 Months
-              </p>
-              <div className="flex items-center gap-4 flex-wrap">
-                <AnimatedDollar
-                  value="$7,850/mo"
-                  isInView={isInView}
-                  delay={0.65}
-                />
-                <motion.span
-                  className="flex items-center gap-1.5 text-sm font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ 
-                    delay: 0.8, 
-                    duration: 0.4, 
-                    type: "spring" 
-                  }}
-                >
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  +554% Growth
-                </motion.span>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* RIGHT SIDE */}
+    <section ref={ref} className="py-16 md:py-20 bg-white">
+      <div className="max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          
+          {/* Left Feature Box */}
           <motion.div
-            className="relative flex justify-center"
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: -30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ 
-              delay: 0.2, 
-              duration: 0.7, 
-              ease: [0.22, 1, 0.36, 1] as const 
-            }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-7 bg-gradient-to-br from-[#EEF2FF] to-[#E0E7FF]/70 rounded-3xl p-8 sm:p-12 relative overflow-hidden flex flex-col justify-between"
           >
-            {/* glow */}
-            <div className="absolute inset-4 rounded-3xl bg-gradient-to-br from-green-200/40 to-blue-100/30 blur-2xl pointer-events-none" />
+            <div>
+              <span className="text-xs font-black tracking-widest text-[#4F46E5] uppercase">
+                Why Choose EduNova?
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-2 mb-6">
+                The Best Way to <br />
+                Achieve Your Goals
+              </h2>
 
-            {/* Main Image Card */}
-            <div className="relative w-[300px] md:w-[340px] rounded-3xl overflow-hidden shadow-2xl">
-              <img
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=700&q=85"
-                alt="Student success"
-                className="w-full h-[400px] object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(170deg, rgba(40,48,20,0.55) 0%, rgba(30,38,15,0.82) 100%)",
-                }}
-              />
-
-              <div className="absolute inset-0 flex flex-col justify-center px-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 0.55, duration: 0.6 }}
-                >
-                  <p className="text-[11px] font-bold tracking-[0.22em] text-white/50 uppercase mb-1">
-                    Student
-                  </p>
-                  <h3
-                    className="font-extrabold text-white leading-[1.05] mb-5"
-                    style={{
-                      fontSize: "clamp(2.4rem, 5vw, 3rem)",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Student
-                    <br />
-                    <span style={{ fontStyle: "normal" }}>Success</span>
-                  </h3>
-                  <p className="text-[12px] text-white/50 leading-relaxed max-w-[220px]">
-                    I went from struggling freelancer to running a $10k/mo agency in
-                    less than a year thanks to the systems here.
-                  </p>
-                </motion.div>
-              </div>
+              <ul className="space-y-3.5 mb-8">
+                {benefits.map((benefit, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-[#4F46E5] flex items-center justify-center text-white flex-shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">
+                      {benefit}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {/* Floating Testimonial */}
-            <motion.div
-              className="absolute -bottom-4 -left-4 md:-left-10 bg-white rounded-2xl shadow-xl p-5 w-[240px] md:w-[270px] border border-gray-100"
-              initial={{ opacity: 0, y: 24, x: -10 }}
-              animate={isInView ? { opacity: 1, y: 0, x: 0 } : {}}
-              transition={{
-                delay: 0.8,
-                duration: 0.65,
-                ease: [0.22, 1, 0.36, 1] as const,
-              }}
-            >
-              <div className="text-[32px] text-green-200 font-serif leading-none mb-1 select-none">
-                "
-              </div>
-              <p className="text-[13px] text-gray-600 leading-relaxed mb-3">
-                I went from struggling freelancer to running a $10k/mo agency in
-                less than a year thanks to the systems here.
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-[#0052CC] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                  MJ
-                </div>
-                <p className="text-[13px] font-bold text-[#0052CC]">
-                  — Marcus J., UI Architect
-                </p>
-              </div>
-            </motion.div>
+            {/* Illustration */}
+            <div className="relative mt-4 flex justify-center">
+              <svg
+                viewBox="0 0 400 320"
+                className="w-full max-w-sm h-auto drop-shadow-xl"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* soft background glow */}
+                <circle cx="210" cy="150" r="160" fill="#4F46E5" opacity="0.06" />
 
-            {/* Floating Stat Badge */}
-            <motion.div
-              className="absolute -top-3 -right-3 bg-[#0052CC] text-white rounded-xl px-3 py-2 shadow-lg text-center"
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{
-                delay: 1,
-                duration: 0.4,
-                type: "spring",
-                stiffness: 220,
-              }}
-            >
-              <p className="text-[10px] font-semibold text-white/70 leading-none mb-0.5">
-                Avg. Income Jump
-              </p>
-              <p className="text-base font-extrabold leading-none">+$6,650</p>
-            </motion.div>
+                {/* plant */}
+                <path d="M78 250 C58 200 58 158 80 128 C102 158 102 200 82 250 Z" fill="#059669" />
+                <path d="M58 256 C28 220 18 180 40 150 C66 176 70 216 58 256 Z" fill="#10B981" />
+                <path d="M102 256 C132 220 142 180 122 150 C96 176 90 216 102 256 Z" fill="#34D399" />
+                <path d="M38 258 L122 258 L112 300 L50 300 Z" fill="#D97706" />
+                <rect x="33" y="248" width="94" height="14" rx="4" fill="#F59E0B" />
+
+                {/* books */}
+                <rect x="228" y="272" width="150" height="22" rx="4" fill="#4F46E5" />
+                <rect x="228" y="272" width="150" height="6" rx="3" fill="#6366F1" />
+                <rect x="244" y="250" width="120" height="20" rx="4" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="2" />
+                <rect x="244" y="250" width="120" height="5" rx="2.5" fill="#EEF2FF" />
+
+                {/* laptop */}
+                <rect x="108" y="58" width="222" height="152" rx="16" fill="#312E81" />
+                <rect x="120" y="70" width="198" height="128" rx="9" fill="#EEF2FF" />
+
+                {/* video thumbnail */}
+                <rect x="138" y="84" width="162" height="72" rx="8" fill="#C7D2FE" />
+                <circle cx="219" cy="120" r="19" fill="#4F46E5" />
+                <path d="M213 111 L213 129 L230 120 Z" fill="#FFFFFF" />
+
+                {/* content lines */}
+                <rect x="138" y="166" width="100" height="8" rx="4" fill="#A5B4FC" />
+                <rect x="138" y="180" width="70" height="8" rx="4" fill="#C7D2FE" />
+
+                {/* keyboard base */}
+                <path d="M93 210 L337 210 L358 236 L72 236 Z" fill="#4338CA" />
+                <rect x="192" y="216" width="44" height="6" rx="3" fill="#818CF8" />
+
+                {/* graduation cap */}
+                <g transform="rotate(-8 285 48)">
+                  <rect x="262" y="46" width="46" height="11" rx="2" fill="#1E1B4B" />
+                  <path d="M285 20 L332 44 L285 68 L238 44 Z" fill="#1E1B4B" />
+                  <circle cx="285" cy="44" r="4" fill="#F59E0B" />
+                  <path d="M320 44 L320 72" stroke="#F59E0B" strokeWidth="2" />
+                  <circle cx="320" cy="76" r="4" fill="#F59E0B" />
+                </g>
+
+                {/* decorative dots */}
+                <circle cx="60" cy="90" r="5" fill="#4F46E5" opacity="0.3" />
+                <circle cx="360" cy="120" r="6" fill="#F59E0B" opacity="0.3" />
+                <circle cx="340" cy="250" r="4" fill="#10B981" opacity="0.3" />
+              </svg>
+            </div>
           </motion.div>
+
+          {/* Right Newsletter Card */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="lg:col-span-5 bg-[#FFFDF5] rounded-3xl p-8 sm:p-10 border border-amber-100 flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 mb-6">
+                <Mail className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">
+                Get the Latest Updates
+              </h3>
+              <p className="text-xs font-normal text-slate-500 leading-relaxed mb-6">
+                Subscribe to our newsletter and get the latest courses and special discount offers directly in your inbox.
+              </p>
+
+              <form onSubmit={(e) => e.preventDefault()} className="space-y-3 mb-8">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5] bg-white"
+                />
+                <button
+                  type="submit"
+                  className="w-full py-3.5 px-6 rounded-xl bg-[#4F46E5] text-white text-sm font-bold hover:bg-[#4338CA] transition-colors shadow-md shadow-indigo-500/20"
+                >
+                  Subscribe Now
+                </button>
+              </form>
+            </div>
+
+            <div className="flex items-center gap-3 pt-4 border-t border-amker-100/60">
+              <div className="flex -space-x-2">
+                <img
+                  className="h-8 w-8 rounded-full ring-2 ring-white object-cover"
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+                  alt="Learner"
+                />
+                <img
+                  className="h-8 w-8 rounded-full ring-2 ring-white object-cover"
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
+                  alt="Learner"
+                />
+                <img
+                  className="h-8 w-8 rounded-full ring-2 ring-white object-cover"
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
+                  alt="Learner"
+                />
+              </div>
+              <p className="text-xs font-bold text-slate-700">
+                Trusted by 50,000+ learners <br className="hidden sm:block" /> around the world
+              </p>
+            </div>
+          </motion.div>
+
         </div>
       </div>
     </section>
   );
-};
-
-export default ArchitectureProgress;
+}
