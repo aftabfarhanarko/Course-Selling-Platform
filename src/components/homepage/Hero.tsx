@@ -109,8 +109,8 @@ function HeroStatCard({ stat, index, isInView }: { stat: any; index: number; isI
 export default function HomeHero() {
   const heroRef = useRef<HTMLElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
-  const isHeroInView = useInView(heroRef, { once: true });
-  const isStatsInView = useInView(statsRef, { once: true, margin: "-50px" });
+  const isHeroInView = useInView(heroRef, { once: false, amount: 0.2 });
+  const isStatsInView = useInView(statsRef, { once: false, amount: 0.2 });
 
   const { data: statsData } = useGetStatsQuery();
 
@@ -264,13 +264,18 @@ export default function HomeHero() {
           {/* ══ RIGHT HERO GRAPHIC & FLOATING CARDS ══ */}
           <div className="lg:col-span-6 relative flex justify-center items-center">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={isHeroInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 1, ease: [0.215, 0.61, 0.355, 1.0], delay: 0.4 }}
+              initial={{ opacity: 0, scale: 0.85, y: 30 }}
+              animate={isHeroInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.85, y: 30 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
               className="relative z-10 w-full max-w-[460px] flex items-center justify-center py-4"
             >
-              {/* Soft Purple Circle Backdrop */}
-              <div className="absolute w-[350px] sm:w-[420px] h-[350px] sm:h-[420px] rounded-full bg-[#E2E6FF] -z-10 shadow-inner" />
+              {/* Soft Purple Circle Backdrop with scroll pulse */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={isHeroInView ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute w-[350px] sm:w-[420px] h-[350px] sm:h-[420px] rounded-full bg-[#E2E6FF] -z-10 shadow-inner"
+              />
 
               {/* Dotted Paper Plane Swirl Background SVG */}
               <svg
@@ -303,13 +308,17 @@ export default function HomeHero() {
               {/* ── Floating Badge 1: Award-Winning Curriculum (Top Left) ── */}
               <motion.div
                 initial={{ opacity: 0, x: -60, scale: 0.8, rotate: -4 }}
-                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, rotate: 0, y: [0, -12, 0] } : {}}
+                animate={
+                  isHeroInView
+                    ? { opacity: 1, x: 0, scale: 1, rotate: 0, y: [0, -12, 0] }
+                    : { opacity: 0, x: -60, scale: 0.8, rotate: -4 }
+                }
                 transition={{
-                  opacity: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  x: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  scale: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  rotate: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 },
+                  opacity: { delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  rotate: { delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1.3 },
                 }}
                 className="absolute -top-2 -left-3 sm:-left-16 z-20 bg-white/90 backdrop-blur-xl p-2.5 sm:p-3.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex flex-col gap-1 sm:gap-1.5 max-w-[130px] sm:max-w-[155px] scale-90 sm:scale-100 hover:scale-105 hover:-rotate-2 transition-all duration-500 ease-out cursor-pointer group"
               >
@@ -334,13 +343,17 @@ export default function HomeHero() {
               {/* ── Floating Badge 2: Your Progress 75% (Top Right) ── */}
               <motion.div
                 initial={{ opacity: 0, x: 60, scale: 0.8, rotate: 4 }}
-                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, rotate: 0, y: [0, -14, 0] } : {}}
+                animate={
+                  isHeroInView
+                    ? { opacity: 1, x: 0, scale: 1, rotate: 0, y: [0, -14, 0] }
+                    : { opacity: 0, x: 60, scale: 0.8, rotate: 4 }
+                }
                 transition={{
-                  opacity: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  x: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  scale: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  rotate: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.6 },
+                  opacity: { delay: 0.65, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 0.65, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.65, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  rotate: { delay: 0.65, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.45 },
                 }}
                 className="absolute top-2 -right-3 sm:-right-14 z-20 bg-white/90 backdrop-blur-xl p-2.5 sm:p-3.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 w-32 sm:w-40 scale-90 sm:scale-100 hover:scale-105 hover:rotate-2 transition-all duration-500 ease-out cursor-pointer group"
               >
@@ -354,12 +367,16 @@ export default function HomeHero() {
               {/* ── Floating Badge 3: 24/7 Live Mentor Support (Mid Left) ── */}
               <motion.div
                 initial={{ opacity: 0, x: -50, scale: 0.8 }}
-                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, y: [0, -10, 0] } : {}}
+                animate={
+                  isHeroInView
+                    ? { opacity: 1, x: 0, scale: 1, y: [0, -10, 0] }
+                    : { opacity: 0, x: -50, scale: 0.8 }
+                }
                 transition={{
-                  opacity: { delay: 0.9, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  x: { delay: 0.9, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  scale: { delay: 0.9, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 1.8 },
+                  opacity: { delay: 0.75, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 0.75, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.75, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 1.55 },
                 }}
                 className="absolute top-44 -left-3 sm:-left-20 z-20 bg-white/90 backdrop-blur-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center gap-2 sm:gap-2.5 scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
               >
@@ -378,12 +395,16 @@ export default function HomeHero() {
               {/* ── Floating Badge 4: Verified Certificate (Mid Right) ── */}
               <motion.div
                 initial={{ opacity: 0, x: 50, scale: 0.8 }}
-                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, y: [0, -11, 0] } : {}}
+                animate={
+                  isHeroInView
+                    ? { opacity: 1, x: 0, scale: 1, y: [0, -11, 0] }
+                    : { opacity: 0, x: 50, scale: 0.8 }
+                }
                 transition={{
-                  opacity: { delay: 1.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  x: { delay: 1.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  scale: { delay: 1.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 2.0 },
+                  opacity: { delay: 0.85, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 0.85, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.85, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 1.65 },
                 }}
                 className="absolute top-48 -right-3 sm:-right-16 z-20 bg-white/90 backdrop-blur-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center gap-2 sm:gap-2.5 scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
               >
@@ -399,11 +420,15 @@ export default function HomeHero() {
               {/* ── Floating Badge 5: Top Instructors (Bottom Left) ── */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.7, y: 20 }}
-                animate={isHeroInView ? { opacity: 1, scale: 1, y: [0, -10, 0] } : {}}
+                animate={
+                  isHeroInView
+                    ? { opacity: 1, scale: 1, y: [0, -10, 0] }
+                    : { opacity: 0, scale: 0.7, y: 20 }
+                }
                 transition={{
-                  opacity: { delay: 1.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  scale: { delay: 1.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 4.0, repeat: Infinity, ease: "easeInOut", delay: 2.1 },
+                  opacity: { delay: 0.95, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.95, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.0, repeat: Infinity, ease: "easeInOut", delay: 1.75 },
                 }}
                 className="absolute -bottom-2 -left-2 sm:-left-12 z-20 bg-white/90 backdrop-blur-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center gap-1.5 sm:gap-2 scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
               >
@@ -418,11 +443,15 @@ export default function HomeHero() {
               {/* ── Floating Badge 6: Certified icon (Bottom Right) ── */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.7, y: 20 }}
-                animate={isHeroInView ? { opacity: 1, scale: 1, y: [0, -9, 0] } : {}}
+                animate={
+                  isHeroInView
+                    ? { opacity: 1, scale: 1, y: [0, -9, 0] }
+                    : { opacity: 0, scale: 0.7, y: 20 }
+                }
                 transition={{
-                  opacity: { delay: 1.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  scale: { delay: 1.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 2.2 },
+                  opacity: { delay: 0.9, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.9, duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 1.8 },
                 }}
                 className="absolute -bottom-2 -right-2 sm:-right-8 z-20 bg-white/90 backdrop-blur-xl p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center justify-center scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
               >

@@ -220,26 +220,26 @@ function Header() {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`relative flex items-center gap-1.5 py-2 px-3.5 rounded-full text-[14.5px] font-semibold overflow-hidden group transition-colors duration-500 ease-out ${
+                    className={`relative flex items-center gap-1.5 py-1.5 px-3 rounded-full text-[14px] font-bold overflow-hidden group transition-all duration-300 ease-out ${
                       active
-                        ? "text-white"
-                        : "text-slate-700 hover:text-[#4F46E5]"
+                        ? "text-[#5B50E6]"
+                        : "text-slate-700 hover:text-[#5B50E6]"
                     }`}
                   >
                     {/* animated pill fill */}
                     <span
-                      className={`absolute inset-0 rounded-full transition-all duration-500 ease-out ${
+                      className={`absolute inset-0 rounded-full transition-all duration-300 ease-out ${
                         active
-                          ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 opacity-100 scale-100 shadow-md shadow-indigo-500/30"
-                          : "bg-indigo-50 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"
+                          ? "bg-[#EEF2FF] border border-[#5B50E6]/20 opacity-100 scale-100 shadow-sm"
+                          : "bg-slate-100/70 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"
                       }`}
                     />
                     <Icon
-                      className={`relative z-10 w-4 h-4 transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6 ${
-                        active ? "text-white" : "text-slate-500 group-hover:text-[#4F46E5]"
+                      className={`relative z-10 w-4 h-4 transition-transform duration-300 ease-out group-hover:scale-110 ${
+                        active ? "text-[#5B50E6]" : "text-slate-500 group-hover:text-[#5B50E6]"
                       }`}
                     />
-                    <span className="relative z-10 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 inline-block">
+                    <span className="relative z-10 transition-transform duration-300 ease-out inline-block">
                       {link.name}
                     </span>
                   </Link>
@@ -292,24 +292,24 @@ function Header() {
               </Link>
 
               {!isAuthenticated ? (
-                <Link
-                  href="/signup"
-                  className="relative group overflow-hidden rounded-xl p-[1px] transition-all duration-500 ease-out active:scale-95 shadow-md shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5"
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_100%] group-hover:animate-none group-hover:bg-[position:100%_0] transition-[background-position] duration-700 ease-out" />
-                  <span className="relative inline-flex items-center justify-center h-10 px-6 rounded-[11px] bg-[#4F46E5] text-white text-[14px] font-bold overflow-hidden transition-colors duration-500 ease-out">
-                    {/* shine sweep on hover */}
-                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100">
-                      <span
-                        className="absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                        style={{
-                          animation: "shine-sweep 1.1s ease-out",
-                        }}
-                      />
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-[13.5px] font-bold text-slate-700 bg-[#EEF2FF] hover:text-[#5B50E6] transition-all duration-300 ease-out hover:scale-105 active:scale-95 shadow-sm"
+                  >
+                    Login
+                  </Link>
+
+                  <Link
+                    href="/signup"
+                    className="relative group overflow-hidden rounded-xl
+                     p-[1px] transition-all duration-300 ease-out active:scale-95 hover:shadow-lg hover:shadow-[#5B50E6]/40 hover:scale-105"
+                  >
+                    <span className="relative inline-flex items-center justify-center h-9 px-5 rounded-full bg-[#5B50E6] text-white text-[13.5px] font-bold overflow-hidden transition-all duration-300 group-hover:bg-[#4D42DB]">
+                      <span className="relative z-10">Register</span>
                     </span>
-                    <span className="relative z-10">Get Started</span>
-                  </span>
-                </Link>
+                  </Link>
+                </div>
               ) : (
                 <>
                   <Link
