@@ -101,48 +101,120 @@ export default function AboutPage() {
         <div className="absolute top-1/2 -left-32 w-[450px] h-[450px] rounded-full bg-[#EEF2FF]/60 blur-3xl" />
       </div>
 
-      <div className="w-full max-w-[96%] lg:max-w-10/12 mx-auto px-2.5 sm:px-6 relative z-10">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-10 relative z-10">
         
-        {/* ── HERO HEADER ── */}
+        {/* ── HERO BREADCRUMB & TITLE (Matches screenshot design) ── */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isPageInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-3"
+          className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-3"
         >
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2FF] border border-[#5B50E6]/20 text-[#5B50E6] text-[11px] font-bold uppercase tracking-wider shadow-sm">
-            <GraduationCap className="w-3.5 h-3.5" /> Empowering Future Developers
+          <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 font-medium">
+            <span>Home</span>
+            <span>/</span>
+            <span>About</span>
+            <span>/</span>
+            <span className="text-slate-800 font-bold">About EduNova</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
-            We Are Transforming <span className="text-[#5B50E6]">Tech Education</span>
+
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Our Mission To Make Education <br className="hidden sm:inline" /> Easy And Accessible To All
           </h1>
-          <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
-            EduNova is a premier online learning platform engineered to bridge the gap between aspirational learners and industry-grade engineering expertise.
+          <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium max-w-xl mx-auto">
+            Begin your program at any of EduNova's global centers, laying a strong groundwork for advancement and propelling your success to new heights.
           </p>
         </motion.div>
 
-        {/* ── STATS GRID ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-16 sm:mb-24">
-          {stats.map((stat, i) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30, scale: 0.96 }}
-                animate={isPageInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.96 }}
-                transition={{ duration: 0.85, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-lg shadow-indigo-500/5 hover:shadow-xl hover:border-[#5B50E6]/30 transition-all duration-500 group"
-              >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#EEF2FF] text-[#5B50E6] flex items-center justify-center mb-3.5 group-hover:scale-110 group-hover:bg-[#5B50E6] group-hover:text-white transition-all duration-300">
-                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mb-1 group-hover:text-[#5B50E6] transition-colors">{stat.value}</h3>
-                <p className="text-xs sm:text-sm font-bold text-slate-800">{stat.label}</p>
-                <p className="text-[11px] text-slate-400 mt-1 font-medium leading-normal">{stat.desc}</p>
-              </motion.div>
-            );
-          })}
-        </div>
+        {/* ── HERO IMAGE GALLERY (Matches screenshot layout) ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 35 }}
+          animate={isPageInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 35 }}
+          transition={{ duration: 0.95, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center justify-center gap-3 sm:gap-5 overflow-x-auto pb-4 mb-16 sm:mb-20 no-scrollbar px-2"
+        >
+          <div className="shrink-0 w-32 sm:w-44 h-48 sm:h-64 rounded-2xl overflow-hidden shadow-md border border-slate-100 opacity-60 hover:opacity-100 transition-all duration-300">
+            <img
+              src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=500&q=80"
+              alt="Students studying"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="shrink-0 w-44 sm:w-60 h-64 sm:h-80 rounded-3xl overflow-hidden shadow-xl border border-slate-100 hover:scale-[1.02] transition-transform duration-300">
+            <img
+              src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
+              alt="Group of students"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="shrink-0 w-52 sm:w-72 h-72 sm:h-96 rounded-3xl overflow-hidden shadow-2xl border border-slate-100 hover:scale-[1.02] transition-transform duration-300 ring-4 ring-[#5B50E6]/10">
+            <img
+              src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=700&q=80"
+              alt="Campus building"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="shrink-0 w-44 sm:w-60 h-64 sm:h-80 rounded-3xl overflow-hidden shadow-xl border border-slate-100 hover:scale-[1.02] transition-transform duration-300">
+            <img
+              src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80"
+              alt="Tech learners collaboration"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="shrink-0 w-32 sm:w-44 h-48 sm:h-64 rounded-2xl overflow-hidden shadow-md border border-slate-100 opacity-60 hover:opacity-100 transition-all duration-300">
+            <img
+              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=500&q=80"
+              alt="Graduation celebration"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </motion.div>
+
+        {/* ── GLOBAL ACCREDITATION & OVERVIEW SECTION (Matches bottom section in screenshot) ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 35 }}
+          animate={isPageInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 35 }}
+          transition={{ duration: 0.95, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-16 sm:mb-24 text-center max-w-full mx-auto space-y-8"
+        >
+          {/* Location Badges Pill */}
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-full bg-white border border-slate-200/80 shadow-sm text-xs font-bold text-slate-700">
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-100">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" /> EduNova Global
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-100">
+              <span className="w-2 h-2 rounded-full bg-blue-500" /> EduNova UK
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-100">
+              <span className="w-2 h-2 rounded-full bg-[#5B50E6]" /> EduNova Worldwide
+            </span>
+          </div>
+
+          <p className="text-slate-500 text-xs sm:text-xs leading-relaxed max-w-2xl mx-auto font-medium">
+            EduNova is an authorized global educational institute offering accredited software engineering, AI, and vocational programs recognized by top tech enterprises worldwide.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center text-left bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/60 border border-slate-100">
+            <div className="md:col-span-5 h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md">
+              <img
+                src="https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=700&q=80"
+                alt="EduNova Headquarters"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="md:col-span-7 space-y-3">
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">
+                Globally Recognized Tech Qualifications & Career Pathways
+              </h3>
+              <p className="text-slate-500 text-xs sm:text-xs leading-relaxed font-medium">
+                EduNova is a leading educational technology institution offering internationally recognized software certifications. As an accredited partner of global tech frameworks, we ensure that our students receive high-quality, practical engineering skills.
+              </p>
+              <p className="text-slate-500 text-xs sm:text-xs leading-relaxed font-medium">
+                With our industry partnership network, students can access a wide range of career opportunities. Our team of senior architects provides 1-on-1 guidance on structuring your tech portfolio and optimizing your career trajectory.
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
         {/* ── OUR MISSION & VISION GRID ── */}
         <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-16 sm:mb-24">
