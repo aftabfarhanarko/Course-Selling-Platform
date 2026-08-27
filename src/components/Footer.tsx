@@ -83,29 +83,30 @@ export function Footer() {
 
   if (isDashboardPage) return null;
 
+  const statsRaw = statsData as any;
   const stats = [
     {
       label: "Active Learners",
-      value: statsData?.data?.totalUsers
-        ? `${statsData.data.totalUsers.toLocaleString()}+`
+      value: statsRaw?.data?.totalUsers || statsRaw?.totalUsers
+        ? `${(statsRaw?.data?.totalUsers || statsRaw?.totalUsers).toLocaleString()}+`
         : "50,000+",
     },
     {
       label: "Curated Courses",
-      value: statsData?.data?.totalCourses
-        ? `${statsData.data.totalCourses}+`
+      value: statsRaw?.data?.totalCourses || statsRaw?.totalCourses
+        ? `${statsRaw?.data?.totalCourses || statsRaw?.totalCourses}+`
         : "1,200+",
     },
     {
       label: "Verified Mentors",
-      value: statsData?.data?.totalInstructors
-        ? `${statsData.data.totalInstructors}+`
+      value: statsRaw?.data?.totalInstructors || statsRaw?.totalInstructors
+        ? `${statsRaw?.data?.totalInstructors || statsRaw?.totalInstructors}+`
         : "250+",
     },
     {
       label: "Career Success",
-      value: statsData?.data?.totalEnrollments
-        ? `${statsData.data.totalEnrollments.toLocaleString()}+`
+      value: statsRaw?.data?.totalEnrollments || statsRaw?.totalEnrollments
+        ? `${(statsRaw?.data?.totalEnrollments || statsRaw?.totalEnrollments).toLocaleString()}+`
         : "98.4%",
     },
   ];
