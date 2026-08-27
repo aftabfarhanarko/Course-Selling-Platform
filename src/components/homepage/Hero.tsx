@@ -13,6 +13,7 @@ import {
   Star,
   Sparkles,
   GraduationCap,
+  Crown,
 } from "lucide-react";
 import { useGetStatsQuery } from "@/lib/api/statsApi";
 
@@ -90,9 +91,9 @@ function HeroStatCard({ stat, index, isInView }: { stat: any; index: number; isI
         delay: index * 0.2,
         ease: [0.215, 0.61, 0.355, 1.0],
       }}
-      className="flex flex-col items-center justify-center gap-2 py-6 px-4 text-center group hover:-translate-y-1 transition-transform duration-300"
+      className="relative flex flex-col items-center justify-center gap-2 py-6 px-4 text-center group hover:-translate-y-1 transition-transform duration-300"
     >
-      <div className="w-11 h-11 rounded-xl bg-[#EEF2FF] group-hover:bg-[#4F46E5] group-hover:text-white flex items-center justify-center text-[#4F46E5] transition-all duration-300">
+      <div className="w-11 h-11 rounded-xl bg-white/50 border border-white/60 group-hover:bg-[#4F46E5] group-hover:text-white flex items-center justify-center text-[#4F46E5] transition-all duration-300 shadow-sm">
         {statIconMap[stat.label] ?? <Award className="w-5 h-5" />}
       </div>
       <p className="text-xl sm:text-2xl font-black text-slate-900">
@@ -139,6 +140,15 @@ export default function HomeHero() {
           className="absolute top-1/2 -left-32 w-[450px] h-[450px] rounded-full bg-[#EEF2FF]/60 blur-3xl"
         />
 
+        {/* Subtle premium grain texture, sits above the blobs at very low opacity */}
+        <div
+          className="absolute inset-0 opacity-[0.035] mix-blend-multiply"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
+
         <svg
           className="absolute top-20 right-1/3 w-[300px] h-[200px] text-indigo-300/40 hidden xl:block"
           viewBox="0 0 300 200"
@@ -165,19 +175,19 @@ export default function HomeHero() {
           >
             <motion.div
               variants={fadeUpItem}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EEF2FF] border border-[#E0E7FF] text-[#4F46E5] text-xs font-bold tracking-wide shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EEF2FF]/80 backdrop-blur-sm border border-white/60 text-[#4F46E5] text-xs font-bold tracking-wide shadow-sm"
             >
-              <Sparkles className="w-4 h-4 text-[#4F46E5]" />
-              <span>Unlock Your Potential</span>
+              <Crown className="w-4 h-4 text-[#4F46E5]" />
+              <span>Loved by 50,000+ learners worldwide</span>
             </motion.div>
 
             <motion.div variants={fadeUpItem} className="space-y-2">
               <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black text-slate-900 leading-[1.12] tracking-tight">
-                Learn Today, <br />
-                Lead <span className="bg-gradient-to-r from-[#4F46E5] via-purple-600 to-indigo-600 bg-clip-text text-transparent">Tomorrow</span>
+                Turn Curiosity <br />
+                Into <span className="bg-gradient-to-r from-[#4F46E5] via-purple-600 to-indigo-600 bg-clip-text text-transparent">Capability</span>
               </h1>
               <p className="text-slate-600 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed pt-2">
-                Discover world-class online courses from expert instructors. Learn at your pace and achieve your professional goals.
+                Structured courses, real mentors, and a pace that fits your life. Everything you need to turn a skill into a career, in one place.
               </p>
             </motion.div>
 
@@ -189,7 +199,7 @@ export default function HomeHero() {
                 href="/courses"
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#4F46E5] text-white font-bold text-sm hover:bg-[#4338CA] transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105 active:scale-95 duration-300"
               >
-                <span>Explore Courses</span>
+                <span>Browse Courses</span>
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
                   <ArrowRight className="w-3.5 h-3.5 text-white" />
                 </div>
@@ -200,12 +210,12 @@ export default function HomeHero() {
                 onClick={() => {
                   window.open("https://www.youtube.com", "_blank");
                 }}
-                className="inline-flex items-center gap-3 px-6 py-3.5 rounded-full bg-white text-slate-800 font-bold text-sm border border-slate-200 hover:bg-slate-50 transition-all shadow-sm hover:scale-105 active:scale-95 duration-300"
+                className="inline-flex items-center gap-3 px-6 py-3.5 rounded-full bg-white/70 backdrop-blur-sm text-slate-800 font-bold text-sm border border-white/70 hover:bg-white transition-all shadow-sm hover:scale-105 active:scale-95 duration-300"
               >
                 <div className="w-8 h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[#4F46E5]">
                   <Play className="w-4 h-4 fill-[#4F46E5] ml-0.5" />
                 </div>
-                <span>Watch Demo</span>
+                <span>Watch Preview</span>
               </button>
             </motion.div>
 
@@ -238,10 +248,10 @@ export default function HomeHero() {
 
               <div className="text-left">
                 <p className="text-sm font-extrabold text-slate-900 leading-tight">
-                  Join {activeStudentCount}+ students
+                  Join {activeStudentCount}+ learners
                 </p>
                 <p className="text-xs font-medium text-slate-500">
-                  learning worldwide
+                  already growing with us
                 </p>
               </div>
             </motion.div>
@@ -288,7 +298,7 @@ export default function HomeHero() {
                 />
               </div>
 
-              {/* ── Floating Badge 1: Best Learning Experience (Left) ── */}
+              {/* ── Floating Badge 1: Award-Winning Curriculum (Left) ── */}
               <motion.div
                 initial={{ opacity: 0, x: -40, y: 0 }}
                 animate={isHeroInView ? { opacity: 1, x: 0, y: [0, -10, 0] } : {}}
@@ -297,14 +307,14 @@ export default function HomeHero() {
                   x: { delay: 0.7, duration: 0.8 },
                   y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 },
                 }}
-                className="absolute top-16 -left-2 sm:-left-6 z-20 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-slate-100/90 flex flex-col gap-1.5 max-w-[150px]"
+                className="absolute top-16 -left-2 sm:-left-6 z-20 bg-white/80 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-white/70 flex flex-col gap-1.5 max-w-[150px]"
               >
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center text-[#5B50E6]">
                     <GraduationCap className="w-4 h-4 text-[#5B50E6]" />
                   </div>
                   <p className="text-[11px] font-bold text-slate-900 leading-tight">
-                    Best Learning Experience
+                    Award-Winning Curriculum
                   </p>
                 </div>
                 <svg className="w-full h-2.5 text-[#5B50E6]" viewBox="0 0 100 20" fill="none">
@@ -326,7 +336,7 @@ export default function HomeHero() {
                   x: { delay: 0.85, duration: 0.8 },
                   y: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1.6 },
                 }}
-                className="absolute top-24 -right-2 sm:-right-4 z-20 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-slate-100/90 w-40"
+                className="absolute top-24 -right-2 sm:-right-4 z-20 bg-white/80 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-white/70 w-40"
               >
                 <p className="text-[10px] font-bold text-slate-500 mb-0.5">Your Progress</p>
                 <p className="text-lg font-black text-[#5B50E6] mb-1.5">75%</p>
@@ -335,7 +345,7 @@ export default function HomeHero() {
                 </div>
               </motion.div>
 
-              {/* ── Floating Badge 3: Book icon (Bottom Right) ── */}
+              {/* ── Floating Badge 3: Certified icon (Bottom Right) ── */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.7, y: 0 }}
                 animate={isHeroInView ? { opacity: 1, scale: 1, y: [0, -8, 0] } : {}}
@@ -344,7 +354,7 @@ export default function HomeHero() {
                   scale: { delay: 1, duration: 0.8 },
                   y: { duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1.8 },
                 }}
-                className="absolute bottom-6 right-2 sm:right-4 z-20 bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-slate-100/90 flex items-center justify-center"
+                className="absolute bottom-6 right-2 sm:right-4 z-20 bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-white/70 flex items-center justify-center"
               >
                 <div className="relative">
                   <BookOpen className="w-6 h-6 text-[#5B50E6]" />
@@ -356,11 +366,23 @@ export default function HomeHero() {
           </div>
         </div>
 
-        {/* ══ STATS BAR WITH SCROLL COUNTING ══ */}
+        {/* ══ STATS BAR — GLASS PANEL WITH LIGHT SWEEP ══ */}
         <div
           ref={statsRef}
-          className="mt-16 lg:mt-20 bg-white/90 backdrop-blur-md rounded-3xl shadow-xl shadow-indigo-500/5 border border-slate-100 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100"
+          className="relative mt-16 lg:mt-20 bg-white/30 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-500/10 border border-white/50 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-white/40 overflow-hidden"
         >
+          {/* top glass edge highlight */}
+          <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+
+          {/* premium light sweep, loops slowly across the glass panel */}
+          <motion.div
+            aria-hidden
+            initial={{ x: "-120%" }}
+            animate={isStatsInView ? { x: "220%" } : { x: "-120%" }}
+            transition={{ duration: 3, delay: 1.4, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }}
+            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]"
+          />
+
           {defaultStats.map((stat, i) => (
             <HeroStatCard key={stat.label} stat={stat} index={i} isInView={isStatsInView} />
           ))}

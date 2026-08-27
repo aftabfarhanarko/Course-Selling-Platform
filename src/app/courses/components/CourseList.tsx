@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SlidersHorizontal, Sparkles, TrendingUp } from "lucide-react";
+import { SlidersHorizontal, Sparkles, TrendingUp, Search, X, Users, Star } from "lucide-react";
 import { useGetPublicCoursesQuery } from "@/lib/api/courseApi";
 import { useAdminCategoriesQuery } from "@/lib/api/admin/category";
 import { Course, EarningTier, SortKey } from "./types";
@@ -28,7 +28,7 @@ export default function CourseList() {
 
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [selectedEarning, setSelectedEarning] = useState<EarningTier | "">("");
-  const [maxPrice, setMaxPrice] = useState(100000);
+  const [maxPrice, setMaxPrice] = useState(300);
   const [searchQ, setSearchQ] = useState("");
   const [sortBy, setSortBy] = useState<SortKey>("potential");
   const [page, setPage] = useState(1);
@@ -37,7 +37,7 @@ export default function CourseList() {
   useEffect(() => {
     const cats = (searchParams.get("categories")?.split(",") ?? []) as string[];
     const earn = (searchParams.get("earnings") ?? "") as EarningTier | "";
-    const price = parseInt(searchParams.get("price") ?? "3000", 10);
+    const price = parseInt(searchParams.get("price") ?? "300", 10);
     const sort = (searchParams.get("sort") ?? "potential") as SortKey;
     const q = searchParams.get("q") ?? "";
     if (cats.length) setSelectedCats(cats);
@@ -52,7 +52,7 @@ export default function CourseList() {
       const p = new URLSearchParams();
       if (cats.length) p.set("categories", cats.join(","));
       if (earn) p.set("earnings", earn);
-      if (price < 100000) p.set("price", String(price));
+      if (price < 300) p.set("price", String(price));
       p.set("sort", sort);
       if (q) p.set("q", q);
       router.replace(`/courses?${p.toString()}`, { scroll: false });
@@ -89,7 +89,7 @@ export default function CourseList() {
   const clearAll = () => {
     setSelectedCats([]);
     setSelectedEarning("");
-    setMaxPrice(100000);
+    setMaxPrice(300);
     setSearchQ("");
     setPage(1);
     router.replace("/courses");
@@ -107,25 +107,154 @@ export default function CourseList() {
     return map;
   }, [categoriesFromApi]);
 
+  const HARDCODED_COURSES: Course[] = useMemo(
+    () => [
+      {
+        id: "course-1",
+        title: "Next.js 14 Production Architecture & SaaS Blueprint",
+        desc: "Master Next.js App Router, Server Actions, Stripe payments, Prisma ORM, and deployment on Vercel.",
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=700&q=85",
+        price: 99,
+        category: "Development",
+        potential: "$10k+/mo Potential",
+        potentialVal: 10000,
+        commission: "25%",
+        commissionVal: 25,
+        earnings: "High",
+        rating: 4.9,
+        reviews: "1.4k",
+      },
+      {
+        id: "course-2",
+        title: "Mastering Kubernetes, Docker & GitOps Pipelines",
+        desc: "Build scalable cloud-native infrastructure with Kubernetes, Helm, ArgoCD, and AWS EKS.",
+        image: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=700&q=85",
+        price: 129,
+        category: "Cloud & DevOps",
+        potential: "$12k+/mo Potential",
+        potentialVal: 12000,
+        commission: "30%",
+        commissionVal: 30,
+        earnings: "High",
+        rating: 4.8,
+        reviews: "950",
+      },
+      {
+        id: "course-3",
+        title: "Advanced TypeScript & Microservice Patterns",
+        desc: "Deep dive into generics, AST transformations, gRPC, and event-driven microservices architecture.",
+        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=700&q=85",
+        price: 79,
+        category: "Development",
+        potential: "$8k+/mo Potential",
+        potentialVal: 8000,
+        commission: "20%",
+        commissionVal: 20,
+        earnings: "Mid",
+        rating: 4.9,
+        reviews: "2.1k",
+      },
+      {
+        id: "course-4",
+        title: "Fullstack SaaS Boilerplate & AI Agent Integration",
+        desc: "Learn to build multi-tenant AI SaaS apps with OpenAI API, LangChain, and TailwindCSS.",
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&q=85",
+        price: 149,
+        category: "AI & Data Science",
+        potential: "$15k+/mo Potential",
+        potentialVal: 15000,
+        commission: "35%",
+        commissionVal: 35,
+        earnings: "High",
+        rating: 5.0,
+        reviews: "820",
+      },
+      {
+        id: "course-5",
+        title: "UI/UX Masterclass & Design Systems in Figma",
+        desc: "Design responsive web & mobile apps, build component libraries, and master modern UX research.",
+        image: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=700&q=85",
+        price: 69,
+        category: "Design & UI/UX",
+        potential: "$5k+/mo Potential",
+        potentialVal: 5000,
+        commission: "15%",
+        commissionVal: 15,
+        earnings: "Beginner",
+        rating: 4.8,
+        reviews: "1.8k",
+      },
+      {
+        id: "course-6",
+        title: "Flutter & Dart: Cross-Platform Mobile Apps",
+        desc: "Build iOS and Android apps with a single codebase using Riverpod, Firebase, and Clean Architecture.",
+        image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=700&q=85",
+        price: 89,
+        category: "Mobile Dev",
+        potential: "$7k+/mo Potential",
+        potentialVal: 7000,
+        commission: "20%",
+        commissionVal: 20,
+        earnings: "Mid",
+        rating: 4.7,
+        reviews: "1.1k",
+      },
+      {
+        id: "course-7",
+        title: "Ethical Hacking & Web Application Penetration Testing",
+        desc: "Discover OWASP top 10 vulnerabilities, conduct penetration tests, and secure cloud infrastructure.",
+        image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=700&q=85",
+        price: 119,
+        category: "Cybersecurity",
+        potential: "$11k+/mo Potential",
+        potentialVal: 11000,
+        commission: "25%",
+        commissionVal: 25,
+        earnings: "High",
+        rating: 4.9,
+        reviews: "640",
+      },
+      {
+        id: "course-8",
+        title: "Startup Growth & Product Management Playbook",
+        desc: "Master product discovery, customer retention, growth hacking, and seed fundraising strategies.",
+        image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=700&q=85",
+        price: 95,
+        category: "Business",
+        potential: "$9k+/mo Potential",
+        potentialVal: 9000,
+        commission: "20%",
+        commissionVal: 20,
+        earnings: "Mid",
+        rating: 4.8,
+        reviews: "890",
+      },
+    ],
+    [],
+  );
+
   const courses: Course[] = useMemo(() => {
-    const rawItems = allCoursesData?.items || [];
-    return rawItems.map((c: any) => ({
-      id: c.id,
-      title: c.title ?? "Untitled",
-      desc: c.description ?? "",
-      image: c.thumbnail ?? "/placeholder.jpg",
-      price: Number(c.price ?? 0),
-      category: c.category?.name ?? "Uncategorized",
-      potential:
-        Number(c.price) > 100 ? "$10k+/mo Potential" : "$2k+/mo Potential",
-      potentialVal: Number(c.price) > 100 ? 10000 : 2000,
-      commission: "0%",
-      commissionVal: 0,
-      earnings: "Beginner",
-      rating: 4.9,
-      reviews: "1.2k",
-    }));
-  }, [allCoursesData]);
+    const rawItems = allCoursesData?.items;
+    if (rawItems && rawItems.length > 0) {
+      return rawItems.map((c: any) => ({
+        id: c.id,
+        title: c.title ?? "Untitled",
+        desc: c.description ?? "",
+        image: c.thumbnail ?? "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=700&q=85",
+        price: Number(c.price ?? 0),
+        category: c.category?.name ?? "Development",
+        potential:
+          Number(c.price) > 100 ? "$10k+/mo Potential" : "$2k+/mo Potential",
+        potentialVal: Number(c.price) > 100 ? 10000 : 2000,
+        commission: "20%",
+        commissionVal: 20,
+        earnings: Number(c.price) > 100 ? "High" : "Beginner",
+        rating: 4.9,
+        reviews: "1.2k",
+      }));
+    }
+    return HARDCODED_COURSES;
+  }, [allCoursesData, HARDCODED_COURSES]);
 
   const filtered = courses
     .filter((c) => {
@@ -166,12 +295,12 @@ export default function CourseList() {
   const hasActive =
     selectedCats.length > 0 ||
     !!selectedEarning ||
-    maxPrice < 100000 ||
+    maxPrice < 300 ||
     !!searchQ;
   const activeCount =
     selectedCats.length +
     (selectedEarning ? 1 : 0) +
-    (maxPrice < 100000 ? 1 : 0) +
+    (maxPrice < 300 ? 1 : 0) +
     (searchQ ? 1 : 0);
 
   const filterPanelProps = {
@@ -188,95 +317,94 @@ export default function CourseList() {
     clearAll,
   };
 
-  // ── NEW BLUE PALETTE ──
-  const grad = "linear-gradient(135deg, #0047FF 0%, #0066FF 50%, #0039CC 100%)";
-  const gradSoft =
-    "linear-gradient(135deg, #f0f4ff 0%, #e6edff 50%, #dbe6ff 100%)";
-
   return (
-    <div
-      className="min-h-screen bg-[#f0f4ff]"
-      style={{ fontFamily: "var(--font-bai-jamjuree, sans-serif)" }}
-    >
-      {/* HERO BANNER */}
-      <div
-        className="relative overflow-hidden border-b border-blue-200/60"
-        style={{ background: gradSoft }}
-      >
-        {/* blobs */}
-        <div
-          className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-25 blur-3xl pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, #3388FF, transparent)",
-          }}
-        />
-        <div
-          className="absolute -bottom-12 right-0 w-56 h-56 rounded-full opacity-20 blur-2xl pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, #0066FF, transparent)",
-          }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-32 opacity-10 blur-3xl pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse, #66a3ff, transparent)",
-          }}
-        />
+    <div className="min-h-screen bg-slate-50/60">
+      {/* ── HERO BANNER ── */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50/90 via-blue-50/30 to-slate-50 border-b border-slate-100/80 py-12 sm:py-16">
+        {/* Background glow blobs */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          {/* PREMIUM pill */}
-          <div
-            className="inline-flex items-center gap-1.5 text-[10.5px] font-black px-3 py-1 rounded-full mb-4 border border-blue-300/60 text-blue-700"
-            style={{ background: "rgba(0,71,255,0.1)" }}
-          >
-            <Sparkles className="w-3 h-3" />
-            PREMIUM COURSES
-          </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            {/* Left Header Content */}
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4 border border-blue-200/60 bg-white/80 backdrop-blur-md text-[#0052CC] text-xs font-extrabold uppercase tracking-wider shadow-sm">
+                <Sparkles className="w-3.5 h-3.5" />
+                Curated Engineering Catalog
+              </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            {/* Left — heading */}
-            <div>
-              <h1 className="text-[26px] sm:text-[32px] font-black text-slate-900 tracking-tight leading-tight">
-                Active{" "}
-                <span
-                  className="bg-clip-text text-transparent"
-                  style={{ backgroundImage: grad }}
-                >
-                  Opportunities
-                </span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                Explore All <span className="text-[#0052CC]">Courses</span>
               </h1>
-              <p className="text-[13px] sm:text-[13.5px] text-slate-500 mt-1.5 font-medium">
-                {filtered.length} course{filtered.length !== 1 ? "s" : ""}{" "}
-                available — hand-picked for maximum earning potential
+              <p className="text-slate-500 text-sm sm:text-base font-medium mt-3 leading-relaxed">
+                Showing {filtered.length} course{filtered.length !== 1 ? "s" : ""} — hand-picked to master high-income software engineering skills.
               </p>
+
+              {/* Integrated Hero Search Bar */}
+              <div className="mt-6 flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200/80 shadow-lg shadow-blue-500/5 max-w-lg">
+                <div className="flex items-center gap-2.5 flex-1 px-3">
+                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search by topic, skill, or keyword..."
+                    value={searchQ}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="w-full text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none"
+                  />
+                  {searchQ && (
+                    <button
+                      type="button"
+                      onClick={() => handleSearch("")}
+                      className="text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="px-5 py-2.5 rounded-xl bg-[#0052CC] text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors shrink-0"
+                >
+                  Search
+                </button>
+              </div>
             </div>
 
-            {/* Right — stat chips */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            {/* Right Stat Cards */}
+            <div className="grid grid-cols-3 sm:flex lg:flex-col gap-3 shrink-0">
               {[
-                { label: "Avg. ROI", value: "312%" },
-                { label: "Students", value: "24.8k" },
-                { label: "Rating", value: "4.9 ★" },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="flex flex-col items-center bg-white/75 backdrop-blur-sm border border-blue-100 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm min-w-[68px]"
-                >
-                  <span className="text-[14px] sm:text-[15px] font-black text-[#0047FF]">
-                    {s.value}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                    {s.label}
-                  </span>
-                </div>
-              ))}
+                { label: "Completion Rate", value: "96%", icon: TrendingUp, color: "text-emerald-500" },
+                { label: "Active Learners", value: "50k+", icon: Users, color: "text-[#0052CC]" },
+                { label: "Avg. Rating", value: "4.9 ★", icon: Star, color: "text-amber-500" },
+              ].map((s) => {
+                const Icon = s.icon;
+                return (
+                  <div
+                    key={s.label}
+                    className="flex items-center gap-3 bg-white/90 backdrop-blur-md border border-slate-200/70 rounded-2xl px-4 py-3 shadow-sm"
+                  >
+                    <div className={`w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center ${s.color}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-base font-extrabold text-slate-900 leading-none">
+                        {s.value}
+                      </p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
+                        {s.label}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
 
       {/* MOBILE SEARCH + FILTER TRIGGER */}
-      <div className="lg:hidden sticky top-[60px] z-40 bg-white/95 backdrop-blur-md border-b border-blue-100 px-4 py-3 shadow-sm">
+      <div className="lg:hidden sticky top-[60px] z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 py-3 shadow-sm">
         <SearchAndSortBar
           searchQ={searchQ}
           sortBy={sortBy}
@@ -288,32 +416,27 @@ export default function CourseList() {
         />
       </div>
 
-      {/* MAIN LAYOUT */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col lg:flex-row gap-6">
-        {/* Desktop sidebar */}
-        <aside className="hidden lg:block w-64 xl:w-[272px] shrink-0 lg:sticky lg:top-[76px] lg:self-start">
+      {/* ── MAIN LAYOUT ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col lg:flex-row gap-8">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block w-64 xl:w-72 shrink-0 lg:sticky lg:top-[84px] lg:self-start">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shadow-md shadow-blue-300/40"
-                style={{ background: grad }}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-white" />
+              <div className="w-8 h-8 rounded-xl bg-[#0052CC] text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+                <SlidersHorizontal className="w-4 h-4" />
               </div>
-              <span className="text-[14px] font-extrabold text-slate-900 tracking-tight">
-                Refine Pursuit
-              </span>
+              <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
+                Filter Courses
+              </h2>
             </div>
             {hasActive && (
-              <span
-                className="text-[10px] font-black text-white px-2.5 py-0.5 rounded-full shadow-sm"
-                style={{ background: grad }}
-              >
+              <span className="text-[10px] font-black text-white bg-[#0052CC] px-2.5 py-0.5 rounded-full shadow-sm">
                 {activeCount}
               </span>
             )}
           </div>
-          <div className="bg-white rounded-2xl border border-blue-100 p-5 shadow-[0_4px_24px_rgba(0,71,255,0.08)]">
+
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
             <FilterPanel {...filterPanelProps} />
           </div>
         </aside>

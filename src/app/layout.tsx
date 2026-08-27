@@ -1,15 +1,15 @@
 import { AppProviders } from "@/providers";
 import type { Metadata } from "next";
-import { Bai_Jamjuree } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Navbar";
 import RouteMeta from "@/components/RouteMeta";
 import Footer from "@/components/Footer";
 import "./globals.css";
 
-const baiJamjuree = Bai_Jamjuree({
-  variable: "--font-bai-jamjuree",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -102,10 +102,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${baiJamjuree.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full flex flex-col font-bai-jamjuree">
+      <body className="h-full flex flex-col font-sans">
         <AppProviders>
           <Header />
           <RouteMeta />

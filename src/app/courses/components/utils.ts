@@ -41,7 +41,17 @@ export const CATEGORY_PALETTE = [
 ];
 
 export function extractCategories(payload: any): string[] {
-  if (!payload) return [];
+  const defaultCats = [
+    "Development",
+    "Cloud & DevOps",
+    "AI & Data Science",
+    "Design & UI/UX",
+    "Mobile Dev",
+    "Cybersecurity",
+    "Business",
+  ];
+
+  if (!payload) return defaultCats;
 
   let arr: any[] = [];
 
@@ -52,9 +62,11 @@ export function extractCategories(payload: any): string[] {
     arr = payload.data.categories;
   }
 
-  return arr
+  const extracted = arr
     .map((c: any) => String(c?.name ?? c?.title ?? "").trim())
     .filter(Boolean);
+
+  return extracted.length > 0 ? extracted : defaultCats;
 }
 
 export function extractCourses(payload: any): any[] {

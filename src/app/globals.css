@@ -21,7 +21,9 @@
   --color-popover: oklch(1 0 0);
   --color-popover-foreground: oklch(0.145 0 0);
 
-  --font-bai-jamjuree: var(--font-bai-jamjuree);
+  --font-plus-jakarta-sans: var(--font-plus-jakarta-sans);
+  --font-sans: var(--font-plus-jakarta-sans);
+  --font-bai-jamjuree: var(--font-plus-jakarta-sans);
 }
 
 :root {
