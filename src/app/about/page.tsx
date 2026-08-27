@@ -126,47 +126,49 @@ export default function AboutPage() {
           </p>
         </motion.div>
 
-        {/* ── HERO IMAGE GALLERY (Matches screenshot layout) ── */}
+        {/* ── HERO IMAGE GALLERY (Centered Marquee Layout - No Scrollbar) ── */}
         <motion.div
           initial={{ opacity: 0, y: 35 }}
           animate={isPageInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 35 }}
           transition={{ duration: 0.95, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="flex items-center justify-center gap-3 sm:gap-5 overflow-x-auto pb-4 mb-16 sm:mb-20 no-scrollbar px-2"
+          className="w-full overflow-hidden py-4 mb-16 sm:mb-20"
         >
-          <div className="shrink-0 w-32 sm:w-44 h-48 sm:h-64 rounded-2xl overflow-hidden shadow-md border border-slate-100 opacity-60 hover:opacity-100 transition-all duration-300">
-            <img
-              src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=500&q=80"
-              alt="Students studying"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="shrink-0 w-44 sm:w-60 h-64 sm:h-80 rounded-3xl overflow-hidden shadow-xl border border-slate-100 hover:scale-[1.02] transition-transform duration-300">
-            <img
-              src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
-              alt="Group of students"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="shrink-0 w-52 sm:w-72 h-72 sm:h-96 rounded-3xl overflow-hidden shadow-2xl border border-slate-100 hover:scale-[1.02] transition-transform duration-300 ring-4 ring-[#5B50E6]/10">
-            <img
-              src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=700&q=80"
-              alt="Campus building"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="shrink-0 w-44 sm:w-60 h-64 sm:h-80 rounded-3xl overflow-hidden shadow-xl border border-slate-100 hover:scale-[1.02] transition-transform duration-300">
-            <img
-              src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80"
-              alt="Tech learners collaboration"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="shrink-0 w-32 sm:w-44 h-48 sm:h-64 rounded-2xl overflow-hidden shadow-md border border-slate-100 opacity-60 hover:opacity-100 transition-all duration-300">
-            <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=500&q=80"
-              alt="Graduation celebration"
-              className="w-full h-full object-cover"
-            />
+          <div className="flex items-center justify-center gap-3 sm:gap-6 md:gap-8 max-w-full mx-auto px-2">
+            <div className="shrink-0 w-28 sm:w-40 md:w-48 h-44 sm:h-60 md:h-64 rounded-2xl sm:rounded-3xl overflow-hidden shadow-md border border-slate-100 opacity-75 hover:opacity-100 hover:scale-105 transition-all duration-500">
+              <img
+                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=500&q=80"
+                alt="Students studying"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="shrink-0 w-36 sm:w-52 md:w-60 h-56 sm:h-72 md:h-80 rounded-3xl overflow-hidden shadow-xl border border-slate-100 hover:scale-105 transition-all duration-500">
+              <img
+                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
+                alt="Group of students"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="shrink-0 w-44 sm:w-64 md:w-72 h-64 sm:h-84 md:h-96 rounded-3xl overflow-hidden shadow-2xl border border-slate-100 hover:scale-105 transition-all duration-500 ring-4 ring-[#5B50E6]/15 z-10">
+              <img
+                src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=700&q=80"
+                alt="Campus building"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="shrink-0 w-36 sm:w-52 md:w-60 h-56 sm:h-72 md:h-80 rounded-3xl overflow-hidden shadow-xl border border-slate-100 hover:scale-105 transition-all duration-500">
+              <img
+                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80"
+                alt="Tech learners collaboration"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="shrink-0 w-28 sm:w-40 md:w-48 h-44 sm:h-60 md:h-64 rounded-2xl sm:rounded-3xl overflow-hidden shadow-md border border-slate-100 opacity-75 hover:opacity-100 hover:scale-105 transition-all duration-500">
+              <img
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=500&q=80"
+                alt="Graduation celebration"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </motion.div>
 
