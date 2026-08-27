@@ -42,16 +42,16 @@ function CourseCard({
   isInView: boolean;
 }) {
   const [saved, setSaved] = useState(false);
-  const baseDelay = index * 0.15;
+  const baseDelay = index * 0.12;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 44 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      initial={{ opacity: 0, y: 50, scale: 0.96 }}
+      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.96 }}
       transition={{
-        duration: 0.65,
+        duration: 0.85,
         delay: baseDelay,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.16, 1, 0.3, 1],
       }}
       className="group bg-white rounded-[20px] overflow-hidden border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_28px_56px_-20px_rgba(0,82,204,0.28)] hover:-translate-y-1.5 hover:border-transparent transition-all duration-500 ease-out flex flex-col"
     >
@@ -64,9 +64,9 @@ function CourseCard({
           src={course.imageUrl}
           alt={course.imageAlt}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
-          initial={{ scale: 1.1 }}
-          animate={isInView ? { scale: 1 } : {}}
-          transition={{ delay: baseDelay + 0.15, duration: 0.8, ease: "easeOut" }}
+          initial={{ scale: 1.12 }}
+          animate={isInView ? { scale: 1 } : { scale: 1.12 }}
+          transition={{ delay: baseDelay + 0.1, duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = "none";
           }}
@@ -80,9 +80,9 @@ function CourseCard({
           <motion.span
             className="text-[11px] font-extrabold px-3 py-1.5 rounded-full shadow-md backdrop-blur-md bg-white/90 border border-white/60"
             style={{ color: course.tagColor }}
-            initial={{ opacity: 0, y: -6, scale: 0.85 }}
-            animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-            transition={{ delay: baseDelay + 0.4, duration: 0.4, type: "spring", stiffness: 220 }}
+            initial={{ opacity: 0, y: -8, scale: 0.85 }}
+            animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: -8, scale: 0.85 }}
+            transition={{ delay: baseDelay + 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
             {course.tag}
           </motion.span>
@@ -95,8 +95,8 @@ function CourseCard({
             }}
             aria-label={saved ? "Remove from wishlist" : "Save course"}
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: baseDelay + 0.45, duration: 0.35 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+            transition={{ delay: baseDelay + 0.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="w-8 h-8 rounded-full bg-white/85 backdrop-blur-md border border-white/60 shadow-md flex items-center justify-center hover:bg-white hover:scale-110 active:scale-90 transition-all duration-200"
           >
             <Heart
@@ -111,9 +111,9 @@ function CourseCard({
       {/* floating glass stat bar — overlaps image + body */}
       <div className="relative px-5">
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: baseDelay + 0.32, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+          transition={{ delay: baseDelay + 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="relative z-10 -mt-7 flex items-center justify-between backdrop-blur-xl bg-white/80 border border-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.09)] rounded-2xl px-4 py-3"
         >
           <span className="flex items-center gap-1.5 text-[13px] font-extrabold text-gray-900">
@@ -138,9 +138,9 @@ function CourseCard({
       <div className="px-6 pt-4 pb-6 flex flex-col flex-1">
         {/* category */}
         <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: baseDelay + 0.4, duration: 0.4 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+          transition={{ delay: baseDelay + 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="flex items-center gap-1.5 text-[10.5px] font-extrabold tracking-[0.14em] mb-2.5 uppercase"
           style={{ color: course.categoryColor }}
         >
@@ -150,9 +150,9 @@ function CourseCard({
 
         {/* title */}
         <motion.h3
-          initial={{ opacity: 0, y: 10 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: baseDelay + 0.46, duration: 0.4 }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{ delay: baseDelay + 0.3, duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
           className="text-[14px] sm:text-[15px] font-bold text-gray-900 leading-[1.35] mb-3 flex-1 line-clamp-2 min-h-[2.5rem]"
         >
           {course.title}
@@ -160,9 +160,9 @@ function CourseCard({
 
         {/* price */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: baseDelay + 0.52, duration: 0.4 }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{ delay: baseDelay + 0.35, duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
           className="flex items-center justify-between mb-5"
         >
           <div className="flex items-baseline gap-2">
@@ -182,28 +182,20 @@ function CourseCard({
           ) : null}
         </motion.div>
 
-        {/* enroll button — glass icon chip + shine sweep */}
+        {/* enroll button — minimalist clean pill design */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: baseDelay + 0.58, duration: 0.4 }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{ delay: baseDelay + 0.4, duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link href={`/courses/${course.id}`}>
             <motion.button
-              className="group/btn relative w-full py-3.5 rounded-2xl text-[14px] font-bold text-white tracking-wide flex items-center justify-center gap-2 overflow-hidden"
-              style={{
-                backgroundColor: course.accent,
-                boxShadow: `0 16px 30px -12px ${course.accent}99`,
-              }}
-              whileHover={{ scale: 1.015 }}
+              className="group/btn relative w-full py-3 rounded-xl text-[13.5px] font-bold text-white bg-[#5B50E6] hover:bg-[#4D42DB] transition-all duration-300 flex items-center justify-center gap-1.5 shadow-md shadow-[#5B50E6]/20 hover:shadow-lg hover:shadow-[#5B50E6]/30"
+              whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* shine sweep */}
-              <span className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12" />
-              <span className="relative z-10">Enroll Now</span>
-              <span className="relative z-10 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover/btn:translate-x-1 group-hover/btn:bg-white/30 transition-all duration-300">
-                <ArrowRight className="w-3.5 h-3.5" />
-              </span>
+              <span>Enroll Now</span>
+              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
             </motion.button>
           </Link>
         </motion.div>
@@ -215,7 +207,7 @@ function CourseCard({
 // ── main ─────────────────────────────────────────────────────────────────────
 const CourseSection = () => {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useInView(ref, { once: false, amount: 0.15 });
 
   const { data, isLoading } = useGetPublicCoursesQuery({ page: 1, limit: 4 });
 
@@ -357,31 +349,31 @@ const CourseSection = () => {
       : fallbackCourses;
 
   return (
-    <section ref={ref} className={`py-10 md:py-13 bg-transparent ${plusJakarta.className}`}>
-      <div className="max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section ref={ref} className={`py-8 sm:py-12 bg-transparent ${plusJakarta.className}`}>
+      <div className="w-full max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-12 relative z-10">
         {/* ── header ── */}
         <motion.div
-          className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 md:mb-12 gap-4 sm:gap-6"
+          className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8 gap-3"
           initial={{ opacity: 0, y: 22 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="w-full">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.14em] uppercase text-[#0052CC] mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0052CC]" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.14em] uppercase text-[#5B50E6] mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5B50E6]" />
               Curated Catalog
             </span>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 tracking-tight">
               Explore Our Courses
             </h2>
-            <p className="text-gray-400 mt-2 text-sm sm:text-[12px] font-medium max-w-[260px] sm:max-w-none">
+            <p className="text-slate-500 mt-1 text-xs sm:text-xs font-medium max-w-[260px] sm:max-w-none">
               Curated paths to high-income mastery.
             </p>
           </div>
 
           <Link href="/courses" className="flex items-center self-start sm:self-auto flex-shrink-0">
             <motion.span
-              className="flex items-center gap-1.5 text-[#0052CC] font-semibold text-sm sm:text-[14px] group/link"
+              className="flex items-center gap-1.5 text-[#5B50E6] font-semibold text-sm sm:text-[14px] group/link"
               whileHover={{ x: 3 }}
               transition={{ type: "spring", stiffness: 300 }}
             >

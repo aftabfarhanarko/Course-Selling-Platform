@@ -102,10 +102,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plusJakartaSans.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full flex flex-col font-sans">
+      <body className="min-h-screen flex flex-col font-sans bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white text-slate-900">
         <AppProviders>
           <Header />
           <RouteMeta />

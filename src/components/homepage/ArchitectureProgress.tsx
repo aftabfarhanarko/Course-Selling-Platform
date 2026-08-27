@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 export default function ArchitectureProgress() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useInView(ref, { once: false, amount: 0.2 });
   const [email, setEmail] = useState("");
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -28,36 +28,57 @@ export default function ArchitectureProgress() {
   ];
 
   return (
-    <section ref={ref} className="py-16 sm:py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+    <section ref={ref} className="py-8 sm:py-12 bg-transparent overflow-hidden">
+      <div className="w-full max-w-[1440px] mx-auto px-3.5 sm:px-6 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
           {/* ── Left Feature Box (Why Choose EduNova?) ── */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="lg:col-span-7 bg-indigo-50/60 border border-indigo-100/80 rounded-3xl p-8 sm:p-10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6"
+            initial={{ opacity: 0, x: -45, scale: 0.96 }}
+            animate={isInView ? { opacity: 1, x: 0, scale: 1 } : { opacity: 0, x: -45, scale: 0.96 }}
+            transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 bg-indigo-50/60 border border-indigo-100/80 rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6"
           >
             {/* Left Content */}
             <div className="flex-1">
-              <span className="text-xs font-black tracking-widest text-[#4F46E5] uppercase">
+              <motion.span
+                initial={{ opacity: 0, y: 15 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="inline-block text-[11px] font-bold tracking-widest text-[#5B50E6] uppercase mb-1"
+              >
                 WHY CHOOSE EDUNOVA?
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-2 mb-4 leading-tight">
+              </motion.span>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-1 mb-4 leading-tight"
+              >
                 The Best Way to <br className="hidden sm:inline" />
                 Achieve Your Goals
-              </h2>
+              </motion.h2>
 
               <ul className="space-y-3.5">
                 {benefits.map((benefit, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#4F46E5] flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, x: -25 }}
+                    animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -25 }}
+                    transition={{
+                      duration: 0.85,
+                      delay: 0.4 + i * 0.12,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="flex items-center gap-3 group"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-[#5B50E6] flex items-center justify-center text-white flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-xs sm:text-sm font-semibold text-slate-700">
+                    <span className="text-xs sm:text-sm font-semibold text-slate-700 group-hover:text-[#5B50E6] transition-colors duration-300">
                       {benefit}
                     </span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             </div>
@@ -120,41 +141,68 @@ export default function ArchitectureProgress() {
 
           {/* ── Right Newsletter Card (Get the Latest Updates) ── */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            initial={{ opacity: 0, x: 45, scale: 0.96 }}
+            animate={isInView ? { opacity: 1, x: 0, scale: 1 } : { opacity: 0, x: 45, scale: 0.96 }}
+            transition={{ duration: 0.95, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 bg-[#FFFDF5] rounded-3xl p-8 sm:p-10 border border-amber-100/80 flex flex-col justify-between shadow-sm"
           >
             <div>
-              <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-6 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-6 shadow-sm"
+              >
                 <Mail className="w-7 h-7" />
-              </div>
+              </motion.div>
 
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">
+              <motion.h3
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.85, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="text-2xl font-black text-slate-900 tracking-tight mb-2"
+              >
                 Get the Latest Updates
-              </h3>
-              <p className="text-xs font-medium text-slate-500 leading-relaxed mb-6">
-                Subscribe to our newsletter and get the latest courses and offers directly in your inbox.
-              </p>
+              </motion.h3>
 
-              <form onSubmit={handleSubscribe} className="flex items-center gap-2 mb-8">
+              <motion.p
+                initial={{ opacity: 0, y: 15 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+                transition={{ duration: 0.85, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="text-xs font-medium text-slate-500 leading-relaxed mb-6"
+              >
+                Subscribe to our newsletter and get the latest courses and offers directly in your inbox.
+              </motion.p>
+
+              <motion.form
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.85, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                onSubmit={handleSubscribe}
+                className="flex items-center gap-2 mb-8"
+              >
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#4F46E5] bg-white text-slate-800 placeholder:text-slate-400"
+                  className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#5B50E6] bg-white text-slate-800 placeholder:text-slate-400"
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3.5 rounded-2xl bg-[#4F46E5] hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-500/20 shrink-0"
+                  className="px-6 py-3.5 rounded-2xl bg-[#5B50E6] hover:bg-[#4D42DB] text-white text-xs font-bold transition-all shadow-md shadow-[#5B50E6]/20 shrink-0 hover:scale-105 active:scale-95"
                 >
                   Subscribe
                 </button>
-              </form>
+              </motion.form>
             </div>
 
-            <div className="flex items-center gap-3.5 pt-4 border-t border-amber-200/50">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.85, delay: 0.65, ease: [0.16, 1, 0.3, 1] }}
+              className="flex items-center gap-3.5 pt-4 border-t border-amber-200/50"
+            >
               <div className="flex -space-x-2 shrink-0">
                 <img
                   className="h-8 w-8 rounded-full ring-2 ring-white object-cover"
@@ -175,7 +223,7 @@ export default function ArchitectureProgress() {
               <p className="text-xs font-bold text-slate-700 leading-snug">
                 Trusted by 50,000+ learners <br className="hidden sm:block" /> around the world
               </p>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

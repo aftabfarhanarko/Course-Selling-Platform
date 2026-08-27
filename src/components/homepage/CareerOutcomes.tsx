@@ -11,7 +11,7 @@ export default function CareerOutcomes() {
   ];
 
   return (
-    <section className="py-20 sm:py-24 bg-white text-slate-900 relative overflow-hidden">
+    <section className="py-20 sm:py-24 bg-transparent text-slate-900 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-extrabold uppercase tracking-wider">
