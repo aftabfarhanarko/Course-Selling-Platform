@@ -608,8 +608,8 @@ function Header() {
       </div>
 
       {/* ───── MOBILE BOTTOM NAV ───── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-xl border-t border-slate-200/80 pb-safe">
-        <div className="flex items-center justify-around h-[60px] max-w-lg mx-auto px-2">
+      <nav className="lg:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 max-w-md mx-auto z-[100] bg-white/90 backdrop-blur-2xl border border-slate-200/80 shadow-[0_12px_40px_-8px_rgba(91,80,230,0.25)] rounded-full px-2 py-1.5">
+        <div className="flex items-center justify-around h-[52px]">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.href);
@@ -617,27 +617,31 @@ function Header() {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`flex flex-col items-center justify-center gap-[3px] flex-1 py-1 px-2 rounded-2xl transition-all duration-300 ease-out ${
+                className={`relative flex flex-col items-center justify-center flex-1 py-1 px-1.5 rounded-full transition-all duration-300 ease-out group ${
                   active
-                    ? "text-[#4F46E5]"
-                    : "text-slate-400 hover:text-slate-600"
+                    ? "text-[#5B50E6]"
+                    : "text-slate-400 hover:text-slate-700"
                 }`}
               >
                 <div
-                  className={`relative flex items-center justify-center w-8 h-7 rounded-xl transition-all duration-300 ease-out ${
-                    active ? "bg-indigo-50 scale-110" : ""
+                  className={`relative flex items-center justify-center w-9 h-7 rounded-full transition-all duration-300 ease-out ${
+                    active ? "bg-[#EEF2FF] scale-110 shadow-sm" : "group-hover:scale-105"
                   }`}
                 >
                   <Icon
-                    className="w-[18px] h-[18px] transition-transform duration-300 ease-out"
+                    className={`w-[18px] h-[18px] transition-transform duration-300 ease-out ${
+                      active ? "text-[#5B50E6]" : "text-slate-400 group-hover:text-slate-600"
+                    }`}
                     strokeWidth={active ? 2.5 : 1.8}
                   />
                   {active && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#4F46E5] shadow-[0_0_8px_rgba(79,70,229,0.8)]" />
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#5B50E6] shadow-[0_0_10px_rgba(91,80,230,0.9)]" />
                   )}
                 </div>
                 <span
-                  className={`text-[9.5px] font-bold tracking-wide ${active ? "text-[#4F46E5]" : ""}`}
+                  className={`text-[9px] font-extrabold tracking-wide mt-0.5 transition-colors ${
+                    active ? "text-[#5B50E6]" : "text-slate-400"
+                  }`}
                 >
                   {link.name}
                 </span>
@@ -779,8 +783,7 @@ function Header() {
       </nav>
 
       {/* Spacers */}
-      <div className="h-[60px] lg:h-[68px]" />
-      <div className="lg:hidden h-[60px]" />
+      <div className="h-[52px] lg:h-[68px]" />
     </>
   );
 }

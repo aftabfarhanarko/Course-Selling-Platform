@@ -126,7 +126,7 @@ export default function HomeHero() {
   const activeStudentCount = useCounter(totalStudents, 0, isHeroInView);
 
   return (
-    <section ref={heroRef} className="relative w-full min-h-[92vh] bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white flex items-center pt-28 pb-16 overflow-hidden">
+    <section ref={heroRef} className="relative w-full min-h-[92vh] bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white flex items-center pt-14 sm:pt-28 pb-12 sm:pb-16 overflow-hidden">
       {/* Background Decorative Grid and Blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div

@@ -14,36 +14,45 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 
-// ✅ Production Ready Metadata
+// ✅ Production Ready SEO Metadata for EduNova
 export const metadata: Metadata = {
-  metadataBase: new URL("https://your-domain.com"), // পরে live domain add করবা
+  metadataBase: new URL("https://edunova.com"),
 
   title: {
-    default: "Course Selling Platform",
-    template: "%s | Course Selling Platform",
+    default: "EduNova — Learn High-Demand Engineering & Tech Skills",
+    template: "%s | EduNova",
   },
 
   description:
-    "A modern course selling platform for buying, selling, and learning premium online courses.",
+    "EduNova is the premier e-learning platform for mastering Web Development, AI & ML, Cloud DevOps, and System Architecture with verified industry mentors.",
 
   keywords: [
-    "Course Selling Platform",
-    "Online Courses",
-    "E-learning",
-    "Learning Platform",
-    "Programming Courses",
+    "EduNova",
+    "EduNova Learning Platform",
+    "Online Tech Courses",
+    "Software Engineering Courses",
     "Web Development",
+    "Fullstack React Next.js",
+    "AI Machine Learning Courses",
+    "Cloud DevOps Kubernetes",
+    "Learn Programming",
+    "Tech Mentorship",
   ],
 
   authors: [
     {
-      name: "Course Selling Platform Team",
+      name: "EduNova Engineering Team",
+      url: "https://edunova.com",
+    },
+    {
+      name: "Aftab Farhan Arko",
+      url: "https://aftabfarhan.tech",
     },
   ],
 
-  creator: "Course Selling Platform",
-  publisher: "Course Selling Platform",
-  applicationName: "Course Selling Platform",
+  creator: "EduNova Inc.",
+  publisher: "EduNova Platform",
+  applicationName: "EduNova",
 
   robots: {
     index: true,
@@ -62,29 +71,30 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: "Course Selling Platform",
+    title: "EduNova — Learn High-Demand Engineering & Tech Skills",
     description:
-      "A modern platform for buying and learning premium online courses.",
-    url: "/",
-    siteName: "Course Selling Platform",
+      "Master real-world tech skills, build production microservices, and land high-income engineering roles with top industry leads.",
+    url: "https://edunova.com",
+    siteName: "EduNova",
     type: "website",
     locale: "en_US",
     images: [
       {
-        url: "/og-image.png", // public folder এ রাখবা
+        url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&h=630&q=80",
         width: 1200,
         height: 630,
-        alt: "Course Selling Platform",
+        alt: "EduNova — Master High Demand Tech Skills",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Course Selling Platform",
+    title: "EduNova — Learn High-Demand Engineering & Tech Skills",
     description:
-      "A modern platform for buying and learning premium online courses.",
-    images: ["/og-image.png"],
+      "Master real-world tech skills, build production microservices, and land high-income engineering roles with top industry leads.",
+    creator: "@edunova",
+    images: ["https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&h=630&q=80"],
   },
 
   icons: {

@@ -126,11 +126,11 @@ export function Footer() {
           initial={{ opacity: 0, y: 35, scale: 0.98 }}
           animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
           transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12"
+          className="grid grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-12"
         >
           
           {/* ── Col 1: Brand Info & Bio (4 cols) ── */}
-          <div className="lg:col-span-4 space-y-4">
+          <div className="col-span-2 lg:col-span-4 space-y-4">
             <Link href="/" className="inline-flex items-center gap-2 group">
               <div className="relative text-[#5B50E6] group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-out">
                 <div className="absolute inset-0 bg-indigo-500/20 blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -166,7 +166,7 @@ export function Footer() {
           </div>
 
           {/* ── Col 2: Navigation Links (2 cols) ── */}
-          <div className="lg:col-span-2 space-y-3">
+          <div className="col-span-1 lg:col-span-2 space-y-3">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
               Quick Links
             </h4>
@@ -194,7 +194,7 @@ export function Footer() {
           </div>
 
           {/* ── Col 3: Popular Categories (3 cols) ── */}
-          <div className="lg:col-span-3 space-y-3">
+          <div className="col-span-1 lg:col-span-3 space-y-3">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
               Top Categories
             </h4>
@@ -222,7 +222,7 @@ export function Footer() {
           </div>
 
           {/* ── Col 4: Platform Metrics & Live Status (3 cols) ── */}
-          <div className="lg:col-span-3 space-y-3">
+          <div className="col-span-2 lg:col-span-3 space-y-3">
             <div className="inline-flex items-center gap-2 bg-[#EEF2FF] border border-[#5B50E6]/20 rounded-full px-3 py-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.2)] animate-pulse" />
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5B50E6]">
