@@ -182,7 +182,7 @@ export default function HomeHero() {
             </motion.div>
 
             <motion.div variants={fadeUpItem} className="space-y-2">
-              <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black text-slate-900 leading-[1.12] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-[1.15] tracking-tight">
                 Turn Curiosity <br />
                 Into <span className="bg-gradient-to-r from-[#4F46E5] via-purple-600 to-indigo-600 bg-clip-text text-transparent">Capability</span>
               </h1>

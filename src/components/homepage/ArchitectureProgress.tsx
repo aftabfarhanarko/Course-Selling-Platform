@@ -43,7 +43,7 @@ export default function ArchitectureProgress() {
               <span className="text-xs font-black tracking-widest text-[#4F46E5] uppercase">
                 WHY CHOOSE EDUNOVA?
               </span>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mt-2 mb-6 leading-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-2 mb-4 leading-tight">
                 The Best Way to <br className="hidden sm:inline" />
                 Achieve Your Goals
               </h2>

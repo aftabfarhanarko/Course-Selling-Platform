@@ -21,7 +21,7 @@ export default function CTASection() {
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-extrabold uppercase tracking-wider mb-4 border border-white/20">
               <Sparkles className="w-3.5 h-3.5" /> Start Learning Today
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-extrabold mb-3 tracking-tight">
               Ready to master high-demand tech skills?
             </h2>
             <p className="text-indigo-100 text-sm sm:text-base font-medium">

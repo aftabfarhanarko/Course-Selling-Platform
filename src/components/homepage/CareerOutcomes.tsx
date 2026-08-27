@@ -11,18 +11,16 @@ export default function CareerOutcomes() {
   ];
 
   return (
-    <section className="py-20 sm:py-24 bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <section className="py-20 sm:py-24 bg-white text-slate-900 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-extrabold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-extrabold uppercase tracking-wider">
             <Briefcase className="w-3.5 h-3.5" /> Proven Track Record
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Career Outcomes That Matter
           </h2>
-          <p className="text-slate-300 text-sm sm:text-base font-medium">
+          <p className="text-slate-600 text-sm sm:text-base font-medium">
             Transforming learners into high-paying software engineers.
           </p>
         </div>
@@ -36,12 +34,12 @@ export default function CareerOutcomes() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               whileHover={{ y: -4 }}
-              className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md text-center hover:bg-white/10 transition-all duration-300"
+              className="bg-slate-50 border border-slate-200/80 rounded-3xl p-8 text-center hover:shadow-xl hover:border-indigo-200 transition-all duration-300"
             >
-              <h3 className="text-3xl sm:text-4xl font-black text-indigo-300 mb-2">
+              <h3 className="text-3xl sm:text-4xl font-black text-indigo-600 mb-2">
                 {s.title}
               </h3>
-              <p className="text-slate-300 text-xs sm:text-sm font-medium">
+              <p className="text-slate-600 text-xs sm:text-sm font-medium">
                 {s.desc}
               </p>
             </motion.div>

@@ -19,7 +19,7 @@ export default function LiveInsight() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             {/* CTA Text */}
             <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight">
                 Ready to Start <br />
                 Your Learning Journey?
               </h2>

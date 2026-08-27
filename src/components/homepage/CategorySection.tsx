@@ -100,7 +100,7 @@ export default function CategorySection() {
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-[#4F46E5] text-xs font-extrabold uppercase tracking-wider mb-3">
               <Grid className="w-3.5 h-3.5" /> Top Learning Paths
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Explore Popular Categories
             </h2>
             <p className="text-slate-500 text-sm sm:text-base font-medium mt-1">

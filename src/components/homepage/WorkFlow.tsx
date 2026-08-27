@@ -55,7 +55,7 @@ export default function PrecisionWorkflow() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-[#4F46E5] text-xs font-extrabold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" /> Structured Learning Path
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
             How EduNova Works
           </h2>
           <p className="text-slate-500 text-sm sm:text-base font-medium">

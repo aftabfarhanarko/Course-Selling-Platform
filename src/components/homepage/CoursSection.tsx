@@ -153,7 +153,7 @@ function CourseCard({
           initial={{ opacity: 0, y: 10 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: baseDelay + 0.46, duration: 0.4 }}
-          className="text-[17px] font-bold text-gray-900 leading-[1.4] mb-4 flex-1 line-clamp-2 min-h-[3.1rem]"
+          className="text-[14px] sm:text-[15px] font-bold text-gray-900 leading-[1.35] mb-3 flex-1 line-clamp-2 min-h-[2.5rem]"
         >
           {course.title}
         </motion.h3>
@@ -371,10 +371,7 @@ const CourseSection = () => {
               <span className="w-1.5 h-1.5 rounded-full bg-[#0052CC]" />
               Curated Catalog
             </span>
-            <h2
-              className="font-extrabold text-gray-900 tracking-tight leading-[1.1]"
-              style={{ fontSize: "clamp(2rem, 6vw, 2rem)" }}
-            >
+            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
               Explore Our Courses
             </h2>
             <p className="text-gray-400 mt-2 text-sm sm:text-[12px] font-medium max-w-[260px] sm:max-w-none">
