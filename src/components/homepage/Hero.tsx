@@ -88,18 +88,18 @@ function HeroStatCard({ stat, index, isInView }: { stat: any; index: number; isI
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{
         duration: 0.8,
-        delay: index * 0.2,
+        delay: index * 0.15,
         ease: [0.215, 0.61, 0.355, 1.0],
       }}
-      className="relative flex flex-col items-center justify-center gap-2 py-6 px-4 text-center group hover:-translate-y-1 transition-transform duration-300"
+      className="relative flex flex-col items-center justify-center gap-2 py-4 px-4 text-center group hover:-translate-y-1.5 transition-transform duration-300 cursor-default"
     >
-      <div className="w-11 h-11 rounded-xl bg-white/50 border border-white/60 group-hover:bg-[#4F46E5] group-hover:text-white flex items-center justify-center text-[#4F46E5] transition-all duration-300 shadow-sm">
+      <div className="w-12 h-12 rounded-2xl bg-[#5B50E6]/10 border border-[#5B50E6]/20 group-hover:bg-[#5B50E6] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#5B50E6]/30 flex items-center justify-center text-[#5B50E6] transition-all duration-300">
         {statIconMap[stat.label] ?? <Award className="w-5 h-5" />}
       </div>
-      <p className="text-xl sm:text-2xl font-black text-slate-900">
+      <p className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-slate-900 via-[#1E1B4B] to-slate-800 bg-clip-text text-transparent group-hover:from-[#5B50E6] group-hover:to-[#5B50E6] transition-all duration-300 tracking-tight">
         {counterVal}{suffix}
       </p>
-      <p className="text-xs sm:text-sm font-medium text-slate-500">
+      <p className="text-xs sm:text-sm font-semibold text-slate-500 group-hover:text-slate-700 transition-colors duration-300">
         {stat.label}
       </p>
     </motion.div>
@@ -150,7 +150,7 @@ export default function HomeHero() {
         />
 
         <svg
-          className="absolute top-20 right-1/3 w-[300px] h-[200px] text-indigo-300/40 hidden xl:block"
+          className="absolute top-20 right-1/3 w-[300px] h-[200px] text-[#5B50E6]/40 hidden xl:block"
           viewBox="0 0 300 200"
           fill="none"
         >
@@ -164,7 +164,7 @@ export default function HomeHero() {
         </svg>
       </div>
 
-      <div className="max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+      <div className="w-full max-w-[96%] lg:max-w-10/12 mx-auto px-2.5 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* ══ LEFT HERO CONTENT (Staggered Children with Delay) ══ */}
           <motion.div
@@ -175,34 +175,38 @@ export default function HomeHero() {
           >
             <motion.div
               variants={fadeUpItem}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EEF2FF]/80 backdrop-blur-sm border border-white/60 text-[#4F46E5] text-xs font-bold tracking-wide shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EEF2FF]/80 backdrop-blur-sm border border-white/60 text-[#5B50E6] text-xs font-bold tracking-wide shadow-sm hover:scale-105 hover:bg-[#EEF2FF] transition-all duration-300 group cursor-default"
             >
-              <Crown className="w-4 h-4 text-[#4F46E5]" />
-              <span>Loved by 50,000+ learners worldwide</span>
+              <Crown className="w-4 h-4 text-[#5B50E6] group-hover:rotate-12 transition-transform duration-300" />
+              <span className="text-[#5B50E6] font-extrabold">Loved by 50,000+ learners worldwide</span>
             </motion.div>
 
-            <motion.div variants={fadeUpItem} className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-[1.15] tracking-tight">
+            <motion.div variants={fadeUpItem} className="space-y-3">
+              <h1 className="text-4xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-[1.18] tracking-tight">
                 Turn Curiosity <br />
-                Into <span className="bg-gradient-to-r from-[#4F46E5] via-purple-600 to-indigo-600 bg-clip-text text-transparent">Capability</span>
+                Into{" "}
+                <span className="text-[#5B50E6] inline-block drop-shadow-sm">
+                  Capability
+                </span>
               </h1>
-              <p className="text-slate-600 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed pt-2">
+              <p className="text-slate-600 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed pt-1 transition-colors duration-300 hover:text-slate-800">
                 Structured courses, real mentors, and a pace that fits your life. Everything you need to turn a skill into a career, in one place.
               </p>
             </motion.div>
 
             <motion.div
               variants={fadeUpItem}
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-4"
+              className="flex flex-row items-center justify-center lg:justify-start gap-2.5 sm:gap-4"
             >
               <Link
                 href="/courses"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#4F46E5] text-white font-bold text-sm hover:bg-[#4338CA] transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105 active:scale-95 duration-300"
+                className="group relative inline-flex items-center gap-1.5 sm:gap-2.5 px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-full bg-[#5B50E6] text-white font-bold text-xs sm:text-sm overflow-hidden shadow-lg shadow-[#5B50E6]/25 hover:shadow-[#5B50E6]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
               >
-                <span>Browse Courses</span>
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                  <ArrowRight className="w-3.5 h-3.5 text-white" />
+                <span className="relative z-10 whitespace-nowrap">Browse Courses</span>
+                <div className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-[#5B50E6] transition-all duration-300">
+                  <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5 group-hover:translate-x-0.5 transition-transform duration-300" />
                 </div>
+                <div className="absolute inset-0 bg-[#4D42DB] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Link>
 
               <button
@@ -210,12 +214,12 @@ export default function HomeHero() {
                 onClick={() => {
                   window.open("https://www.youtube.com", "_blank");
                 }}
-                className="inline-flex items-center gap-3 px-6 py-3.5 rounded-full bg-white/70 backdrop-blur-sm text-slate-800 font-bold text-sm border border-white/70 hover:bg-white transition-all shadow-sm hover:scale-105 active:scale-95 duration-300"
+                className="group inline-flex items-center gap-2 sm:gap-3 px-3.5 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-white/80 backdrop-blur-sm text-slate-800 font-bold text-xs sm:text-sm border border-slate-200/80 hover:border-[#5B50E6]/30 hover:bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
               >
-                <div className="w-8 h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[#4F46E5]">
-                  <Play className="w-4 h-4 fill-[#4F46E5] ml-0.5" />
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[#5B50E6] group-hover:scale-110 group-hover:bg-[#5B50E6] group-hover:text-white transition-all duration-300">
+                  <Play className="w-3 sm:w-3.5 h-3 sm:h-3.5 fill-current ml-0.5" />
                 </div>
-                <span>Watch Preview</span>
+                <span className="group-hover:text-[#5B50E6] transition-colors duration-300 whitespace-nowrap">Watch Preview</span>
               </button>
             </motion.div>
 
@@ -296,28 +300,28 @@ export default function HomeHero() {
                   sizes="(max-width: 768px) 100vw, 290px"
                   className="object-contain object-center"
                 />
-              </div>
-
-              {/* ── Floating Badge 1: Award-Winning Curriculum (Left) ── */}
+              {/* ── Floating Badge 1: Award-Winning Curriculum (Top Left) ── */}
               <motion.div
-                initial={{ opacity: 0, x: -40, y: 0 }}
-                animate={isHeroInView ? { opacity: 1, x: 0, y: [0, -10, 0] } : {}}
+                initial={{ opacity: 0, x: -60, scale: 0.8, rotate: -4 }}
+                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, rotate: 0, y: [0, -12, 0] } : {}}
                 transition={{
-                  opacity: { delay: 0.7, duration: 0.8 },
-                  x: { delay: 0.7, duration: 0.8 },
-                  y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 },
+                  opacity: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  rotate: { delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 },
                 }}
-                className="absolute top-16 -left-2 sm:-left-6 z-20 bg-white/80 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-white/70 flex flex-col gap-1.5 max-w-[150px]"
+                className="absolute -top-2 -left-3 sm:-left-16 z-20 bg-white/90 backdrop-blur-xl p-2.5 sm:p-3.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex flex-col gap-1 sm:gap-1.5 max-w-[130px] sm:max-w-[155px] scale-90 sm:scale-100 hover:scale-105 hover:-rotate-2 transition-all duration-500 ease-out cursor-pointer group"
               >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center text-[#5B50E6]">
-                    <GraduationCap className="w-4 h-4 text-[#5B50E6]" />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center text-[#5B50E6] group-hover:scale-110 group-hover:bg-[#5B50E6] group-hover:text-white transition-all duration-300">
+                    <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-900 leading-tight">
+                  <p className="text-[10px] sm:text-[11px] font-extrabold text-slate-900 leading-tight group-hover:text-[#5B50E6] transition-colors duration-300">
                     Award-Winning Curriculum
                   </p>
                 </div>
-                <svg className="w-full h-2.5 text-[#5B50E6]" viewBox="0 0 100 20" fill="none">
+                <svg className="w-full h-2 sm:h-2.5 text-[#5B50E6]" viewBox="0 0 100 20" fill="none">
                   <path
                     d="M 0 10 Q 12.5 0, 25 10 T 50 10 T 75 10 T 100 10"
                     stroke="currentColor"
@@ -327,62 +331,117 @@ export default function HomeHero() {
                 </svg>
               </motion.div>
 
-              {/* ── Floating Badge 2: Your Progress 75% (Right) ── */}
+              {/* ── Floating Badge 2: Your Progress 75% (Top Right) ── */}
               <motion.div
-                initial={{ opacity: 0, x: 40, y: 0 }}
-                animate={isHeroInView ? { opacity: 1, x: 0, y: [0, -12, 0] } : {}}
+                initial={{ opacity: 0, x: 60, scale: 0.8, rotate: 4 }}
+                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, rotate: 0, y: [0, -14, 0] } : {}}
                 transition={{
-                  opacity: { delay: 0.85, duration: 0.8 },
-                  x: { delay: 0.85, duration: 0.8 },
-                  y: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1.6 },
+                  opacity: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  rotate: { delay: 0.75, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.6 },
                 }}
-                className="absolute top-24 -right-2 sm:-right-4 z-20 bg-white/80 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-white/70 w-40"
+                className="absolute top-2 -right-3 sm:-right-14 z-20 bg-white/90 backdrop-blur-xl p-2.5 sm:p-3.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 w-32 sm:w-40 scale-90 sm:scale-100 hover:scale-105 hover:rotate-2 transition-all duration-500 ease-out cursor-pointer group"
               >
-                <p className="text-[10px] font-bold text-slate-500 mb-0.5">Your Progress</p>
-                <p className="text-lg font-black text-[#5B50E6] mb-1.5">75%</p>
-                <div className="w-full h-1.5 bg-[#EEF2FF] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5B50E6] rounded-full w-[75%]" />
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 mb-0.5 group-hover:text-[#5B50E6] transition-colors duration-300">Your Progress</p>
+                <p className="text-base sm:text-lg font-black text-[#5B50E6] mb-1 sm:mb-1.5 group-hover:scale-105 transition-transform duration-300 origin-left">75%</p>
+                <div className="w-full h-1 sm:h-1.5 bg-[#EEF2FF] rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-[#5B50E6] to-purple-600 rounded-full w-[75%] group-hover:w-[85%] transition-all duration-700 ease-out" />
                 </div>
               </motion.div>
 
-              {/* ── Floating Badge 3: Certified icon (Bottom Right) ── */}
+              {/* ── Floating Badge 3: 24/7 Live Mentor Support (Mid Left) ── */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.7, y: 0 }}
-                animate={isHeroInView ? { opacity: 1, scale: 1, y: [0, -8, 0] } : {}}
+                initial={{ opacity: 0, x: -50, scale: 0.8 }}
+                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, y: [0, -10, 0] } : {}}
                 transition={{
-                  opacity: { delay: 1, duration: 0.8 },
-                  scale: { delay: 1, duration: 0.8 },
-                  y: { duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1.8 },
+                  opacity: { delay: 0.9, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 0.9, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 0.9, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 1.8 },
                 }}
-                className="absolute bottom-6 right-2 sm:right-4 z-20 bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-white/70 flex items-center justify-center"
+                className="absolute top-44 -left-3 sm:-left-20 z-20 bg-white/90 backdrop-blur-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center gap-2 sm:gap-2.5 scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
               >
-                <div className="relative">
-                  <BookOpen className="w-6 h-6 text-[#5B50E6]" />
-                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full absolute -top-1 -right-1 ring-2 ring-white animate-ping" />
-                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full absolute -top-1 -right-1 ring-2 ring-white" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-white transition-all duration-300">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-extrabold text-slate-900 leading-tight group-hover:text-[#5B50E6] transition-colors duration-300">24/7 Support</p>
+                  <p className="text-[8px] sm:text-[9px] font-semibold text-emerald-600 flex items-center gap-1">
+                    <span className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Mentors Online
+                  </p>
                 </div>
               </motion.div>
+
+              {/* ── Floating Badge 4: Verified Certificate (Mid Right) ── */}
+              <motion.div
+                initial={{ opacity: 0, x: 50, scale: 0.8 }}
+                animate={isHeroInView ? { opacity: 1, x: 0, scale: 1, y: [0, -11, 0] } : {}}
+                transition={{
+                  opacity: { delay: 1.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  x: { delay: 1.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 1.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 2.0 },
+                }}
+                className="absolute top-48 -right-3 sm:-right-16 z-20 bg-white/90 backdrop-blur-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center gap-2 sm:gap-2.5 scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
+              >
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
+                  <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-extrabold text-slate-900 leading-tight group-hover:text-emerald-600 transition-colors duration-300">Verified Certs</p>
+                  <p className="text-[8px] sm:text-[9px] font-medium text-slate-500">Sharable PDF</p>
+                </div>
+              </motion.div>
+
+              {/* ── Floating Badge 5: Top Instructors (Bottom Left) ── */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.7, y: 20 }}
+                animate={isHeroInView ? { opacity: 1, scale: 1, y: [0, -10, 0] } : {}}
+                transition={{
+                  opacity: { delay: 1.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 1.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 4.0, repeat: Infinity, ease: "easeInOut", delay: 2.1 },
+                }}
+                className="absolute -bottom-2 -left-2 sm:-left-12 z-20 bg-white/90 backdrop-blur-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center gap-1.5 sm:gap-2 scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
+              >
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-[#5B50E6] group-hover:scale-110 group-hover:bg-[#5B50E6] group-hover:text-white transition-all duration-300">
+                  <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                </div>
+                <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-slate-800 group-hover:text-[#5B50E6] transition-colors duration-300">
+                  <span>300+ Mentors</span>
+                </div>
+              </motion.div>
+
+              {/* ── Floating Badge 6: Certified icon (Bottom Right) ── */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.7, y: 20 }}
+                animate={isHeroInView ? { opacity: 1, scale: 1, y: [0, -9, 0] } : {}}
+                transition={{
+                  opacity: { delay: 1.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  scale: { delay: 1.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+                  y: { duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 2.2 },
+                }}
+                className="absolute -bottom-2 -right-2 sm:-right-8 z-20 bg-white/90 backdrop-blur-xl p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_35px_-5px_rgba(91,80,230,0.18)] border border-white/80 flex items-center justify-center scale-90 sm:scale-100 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group"
+              >
+                <div className="relative">
+                  <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-[#5B50E6] group-hover:scale-110 transition-transform duration-300" />
+                  <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 bg-emerald-500 rounded-full absolute -top-1 -right-1 ring-2 ring-white animate-ping" />
+                  <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 bg-emerald-500 rounded-full absolute -top-1 -right-1 ring-2 ring-white" />
+                </div>
+              </motion.div>
+              </div>
             </motion.div>
           </div>
         </div>
 
-        {/* ══ STATS BAR — GLASS PANEL WITH LIGHT SWEEP ══ */}
+        {/* ══ STATS BAR — CLEAN TRANSPARENT PREMIUM STATS ══ */}
         <div
           ref={statsRef}
-          className="relative mt-16 lg:mt-20 bg-white/30 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-500/10 border border-white/50 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-white/40 overflow-hidden"
+          className="relative mt-14 lg:mt-16 pt-8 border-t border-slate-200/60 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-4 items-center justify-center"
         >
-          {/* top glass edge highlight */}
-          <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-
-          {/* premium light sweep, loops slowly across the glass panel */}
-          <motion.div
-            aria-hidden
-            initial={{ x: "-120%" }}
-            animate={isStatsInView ? { x: "220%" } : { x: "-120%" }}
-            transition={{ duration: 3, delay: 1.4, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }}
-            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]"
-          />
-
           {defaultStats.map((stat, i) => (
             <HeroStatCard key={stat.label} stat={stat} index={i} isInView={isStatsInView} />
           ))}

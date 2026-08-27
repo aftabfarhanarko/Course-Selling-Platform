@@ -16,7 +16,7 @@ export default function TrustedCompanies() {
   ];
 
   return (
-    <section className="py-8 bg-white/40 backdrop-blur-sm overflow-hidden">
+    <section className="py-6 bg-gradient-to-b from-white to-[#F8FAFC]  overflow-hidden">
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -25,7 +25,7 @@ export default function TrustedCompanies() {
         .marquee-inner {
           display: flex;
           width: max-content;
-          animation: marquee 30s linear infinite;
+          animation: marquee 25s linear infinite;
         }
         .marquee-inner:hover {
           animation-play-state: paused;
@@ -34,18 +34,18 @@ export default function TrustedCompanies() {
       <div 
         className="relative w-full overflow-hidden"
         style={{
-          maskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)",
-          WebkitMaskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)"
+          maskImage: "linear-gradient(to right, transparent, white 10%, white 90%, transparent)",
+          WebkitMaskImage: "linear-gradient(to right, transparent, white 10%, white 90%, transparent)"
         }}
       >
-        <div className="marquee-inner flex items-center gap-16 py-2">
+        <div className="marquee-inner flex items-center gap-12 sm:gap-16 py-1">
           {/* First set */}
           {companies.map((c, i) => (
             <img 
               key={`${c.name}-1-${i}`} 
               src={c.logo} 
               alt={c.name} 
-              className="h-7 sm:h-9 object-contain opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 shrink-0" 
+              className="h-5 sm:h-6 object-contain opacity-75 hover:opacity-100 hover:scale-110 transition-all duration-300 shrink-0" 
             />
           ))}
           {/* Second set (duplicate for seamless loop) */}
@@ -54,7 +54,7 @@ export default function TrustedCompanies() {
               key={`${c.name}-2-${i}`} 
               src={c.logo} 
               alt={c.name} 
-              className="h-7 sm:h-9 object-contain opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 shrink-0" 
+              className="h-5 sm:h-6 object-contain opacity-75 hover:opacity-100 hover:scale-110 transition-all duration-300 shrink-0" 
             />
           ))}
         </div>
