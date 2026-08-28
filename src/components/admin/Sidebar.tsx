@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Home,
   LayoutDashboard,
   Users,
   Layers,
@@ -16,12 +17,33 @@ import {
   BarChart,
   LogOut,
   X,
-  ChevronRight,
+  ChevronDown,
   Sparkles,
-  ShieldAlert,
-  UserCircle,
   PieChart,
   BookOpen,
+  Search,
+  User,
+  Shield,
+  Briefcase,
+  UserPlus,
+  Wrench,
+  Package,
+  Globe,
+  Receipt,
+  Mail,
+  Ticket,
+  MessageSquare,
+  Bot,
+  Truck,
+  Zap,
+  Coins,
+  Heart,
+  HelpCircle,
+  Building2,
+  Trash2,
+  PlusCircle,
+  MapPin,
+  UserCheck,
 } from "lucide-react";
 import { LiaCloudShowersHeavySolid } from "react-icons/lia";
 import { useLogoutMutation } from "@/lib/api/authApi";
@@ -30,6 +52,7 @@ import { logout } from "@/store/slices/authSlice";
 import { baseApi } from "@/lib/api/baseApi";
 import { toast } from "sonner";
 import type { RootState } from "@/store";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navGroups = [
   {
@@ -83,7 +106,9 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
-  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openGroups, setOpenGroups] = useState<string[]>(["Overview"]);
 
   const authUser = useSelector((state: RootState) => state.auth.user);
 
@@ -120,200 +145,266 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     }
   };
 
+  // Multi-word search matching
+  const isSearchMatch = (text: string, query: string) => {
+    if (!query.trim()) return true;
+    const cleanText = text.toLowerCase();
+    const queryTokens = query.toLowerCase().trim().split(/\s+/);
+    return queryTokens.every((token) => cleanText.includes(token));
+  };
+
+  // Filter menu items by search query
+  const filteredNavGroups = useMemo(() => {
+    if (!searchQuery.trim()) return navGroups;
+
+    return navGroups
+      .map((group) => {
+        const matchedItems = group.items.filter(
+          (item) =>
+            isSearchMatch(item.label, searchQuery) ||
+            isSearchMatch(item.href, searchQuery),
+        );
+        if (matchedItems.length > 0 || isSearchMatch(group.label, searchQuery)) {
+          return {
+            ...group,
+            items: matchedItems.length > 0 ? matchedItems : group.items,
+          };
+        }
+        return null;
+      })
+      .filter((g): g is typeof navGroups[0] => g !== null);
+  }, [searchQuery]);
+
+  // Keep active group open without closing previously opened groups
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const matched = navGroups.find(
+        (g) =>
+          isSearchMatch(g.label, searchQuery) ||
+          g.items.some(
+            (i) =>
+              isSearchMatch(i.label, searchQuery) ||
+              isSearchMatch(i.href, searchQuery),
+          ),
+      );
+      if (matched && !openGroups.includes(matched.label)) {
+        setOpenGroups((prev) => [...prev, matched.label]);
+      }
+    } else {
+      const activeGroup = navGroups.find((g) =>
+        g.items.some(
+          (item) =>
+            pathname === item.href || pathname?.startsWith(item.href + "/"),
+        ),
+      );
+      if (activeGroup && !openGroups.includes(activeGroup.label)) {
+        setOpenGroups((prev) => [...prev, activeGroup.label]);
+      }
+    }
+  }, [pathname, searchQuery]);
+
   return (
     <aside
       className="
-        relative z-50 flex h-full w-[220px] flex-col
-        border-r border-slate-200 bg-white dark:bg-white dark:border-slate-200 shadow-sm
+        relative z-50 flex h-full w-[260px] flex-col
+        border-r-[2px] border-[#5B50E6]/15 bg-slate-50/40 shadow-[6px_0_24px_rgba(0,0,0,0.015)]
       "
     >
-      {/* Subtle top blue tint */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[180px] bg-[radial-gradient(ellipse_at_50%_-10%,rgba(79,142,247,0.08)_0%,transparent_70%)]" />
+      {/* ─── BRAND LOGO & SUPER ADMIN BADGE HEADER ─── */}
+      <div className="p-5 pb-3 flex flex-col items-start gap-2.5 relative z-10 border-b border-slate-100/80">
+        <div className="flex items-center justify-between w-full">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="relative text-[#5B50E6] group-hover:scale-110 transition-transform duration-300">
+              <GraduationCap className="w-8 h-8 text-[#5B50E6] stroke-[2.2]" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight text-[#111827]">
+              Edu<span className="text-[#5B50E6]">Nova</span>
+            </span>
+          </Link>
 
-      {/* Close button – mobile only */}
-      {onClose && (
-        <div className="mb-2 flex justify-end px-3 pt-4 lg:hidden">
-          <button
-            onClick={onClose}
-            className="flex cursor-pointer items-center justify-center rounded-lg border-none bg-slate-100 p-1.5 text-slate-400 transition-all duration-200 hover:bg-slate-200 hover:text-slate-600"
-          >
-            <X size={15} />
-          </button>
+          {/* Close button – mobile only */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="flex cursor-pointer items-center justify-center rounded-xl bg-slate-100 p-1.5 text-slate-400 transition-all hover:bg-slate-200 hover:text-slate-600 lg:hidden"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
-      )}
 
-      {/* ─── PROFILE CARD (VERTICAL) ─── */}
-      <div className="px-3 pb-4 md:mt-8">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-200 dark:bg-white">
-          <div className="flex flex-col items-center text-center gap-3">
-            {/* Avatar */}
-            <div className="relative flex-shrink-0">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-[#4f8ef7] via-[#7b5cfa] to-[#34d399] p-[2px]">
-                <img
-                  src={avatarUrl || "https://i.ibb.co.com/pjRGYLkQ/image.png"}
-                  alt={displayName}
-                  className="h-full w-full rounded-full bg-white object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src =
-                      "https://i.ibb.co.com/pjRGYLkQ/image.png";
-                  }}
-                />
-              </div>
-              {/* Online Status */}
-              <span className="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400" />
-            </div>
-
-            {/* Name, Role, Email */}
-            <div className="space-y-0.5 w-full min-w-0">
-              <h3 className="truncate text-[13px] font-semibold text-slate-800">
-                {displayName}
-              </h3>
-              <p className="truncate text-[10px] font-medium capitalize text-[#4f8ef7]">
-                {String(authUser?.role ?? "Administrator")
-                  .replace(/_/g, " ")
-                  .toLowerCase()}
-              </p>
-              <p className="truncate text-[10px] text-slate-400">
-                {email || "admin@panel.io"}
-              </p>
-              {country && (
-                <p className="truncate text-[10px] text-slate-400">{country}</p>
-              )}
-            </div>
-          </div>
+        {/* Super Admin Badge Pill */}
+        <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50/80 border border-[#5B50E6]/30 shadow-2xs">
+          <span className="text-[10px] font-black text-[#5B50E6] tracking-widest uppercase">
+            SUPER ADMIN
+          </span>
         </div>
       </div>
 
-      {/* Scrollable Navigation */}
-      <nav
-        className="flex-1 overflow-y-auto px-3
-          [scrollbar-width:thin] [scrollbar-color:rgba(0,0,0,0.08)_transparent]
-          [&::-webkit-scrollbar]:w-[3px]
-          [&::-webkit-scrollbar-track]:bg-transparent
-          [&::-webkit-scrollbar-thumb]:rounded-full
-          [&::-webkit-scrollbar-thumb]:bg-slate-200
-        "
-      >
-        {navGroups.map((group) => {
-          const GroupIcon = group.icon;
+      {/* ─── SEARCH MENU BAR ─── */}
+      <div className="px-4 pt-4 pb-2 relative z-10">
+        <div className="relative">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            size={16}
+          />
+          <input
+            type="text"
+            placeholder="Search menu..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white border border-slate-200/80 rounded-2xl py-2.5 pl-10 pr-4 text-xs font-bold text-slate-700 placeholder:text-slate-400/80 outline-none focus:border-[#5B50E6] focus:ring-4 focus:ring-[#5B50E6]/10 transition-all shadow-sm focus:shadow-[0_0_20px_-3px_rgba(91,80,230,0.15)]"
+          />
+        </div>
+      </div>
+
+      {/* ─── ACCORDION TREE NAVIGATION MENU ─── */}
+      <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto custom-sidebar-scrollbar relative z-10">
+        {/* 1. Home Page Item */}
+        <Link
+          href="/"
+          onClick={onClose}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group border border-transparent text-slate-600 hover:bg-[#5B50E6]/5 hover:text-[#5B50E6] hover:translate-x-1 font-semibold text-[14px]"
+        >
+          <Home size={18} className="text-slate-400 group-hover:text-[#5B50E6] transition-colors" />
+          <span>Home Page</span>
+        </Link>
+        {filteredNavGroups.map((group, index) => {
+          const isExpanded = openGroups.includes(group.label);
+          const containsActive = group.items.some(
+            (item) =>
+              pathname === item.href || pathname?.startsWith(item.href + "/"),
+          );
+
+          const handleToggle = () => {
+            setOpenGroups((prev) =>
+              prev.includes(group.label)
+                ? prev.filter((g) => g !== group.label)
+                : [...prev, group.label],
+            );
+          };
+
           return (
-            <div key={group.label}>
-              {/* Group label with icon */}
-              <div className="mb-1 mt-[18px] flex items-center gap-1.5 px-2.5">
-                <GroupIcon
-                  size={12}
-                  className="flex-shrink-0 text-[#4f8ef7]"
-                  strokeWidth={2.5}
+            <div key={index} className="space-y-1">
+              {/* Group Header Button */}
+              <button
+                onClick={handleToggle}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group border relative ${
+                  containsActive
+                    ? isExpanded
+                      ? "bg-[#5B50E6]/5 border-[#5B50E6]/15 text-[#5B50E6] font-extrabold shadow-sm"
+                      : "bg-gradient-to-r from-[#5B50E6] to-[#4D42DB] text-white font-extrabold shadow-md shadow-[#5B50E6]/20 scale-[1.01] border-transparent"
+                    : "border-transparent text-slate-600 hover:bg-[#5B50E6]/5 hover:text-[#5B50E6] hover:translate-x-1 font-semibold"
+                }`}
+              >
+                {containsActive && isExpanded && (
+                  <div className="absolute left-1.5 w-1 h-5 bg-[#5B50E6] rounded-full" />
+                )}
+                {containsActive && !isExpanded && (
+                  <div className="absolute left-1.5 w-1 h-5 bg-white rounded-full" />
+                )}
+                <div className="flex items-center gap-3">
+                  <group.icon
+                    size={18}
+                    className={
+                      containsActive
+                        ? isExpanded
+                          ? "text-[#5B50E6]"
+                          : "text-white"
+                        : "text-slate-400 group-hover:text-slate-600 transition-colors"
+                    }
+                  />
+                  <span className="text-[14px]">{group.label}</span>
+                </div>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${
+                    containsActive
+                      ? isExpanded
+                        ? "text-[#5B50E6]/70"
+                        : "text-white/70"
+                      : "text-slate-400"
+                  } ${isExpanded ? "rotate-180" : ""}`}
                 />
-                <span className="text-[9px] font-bold uppercase tracking-[0.12em] bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
-                  {group.label}
-                </span>
-                <div className="h-px flex-1 bg-slate-100" />
-              </div>
+              </button>
 
-              {/* Items */}
-              <div className="flex flex-col gap-0.5">
-                {group.items.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    pathname?.startsWith(item.href + "/");
-                  const Icon = item.icon;
+              {/* Collapsible Sub-menu Tree */}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.22, ease: "easeInOut" }}
+                    className="relative pl-6 space-y-1 overflow-hidden"
+                  >
+                    {/* Trunk Line */}
+                    <div className="absolute left-[27px] top-0 bottom-4 w-[1.5px] bg-[#5B50E6]/25" />
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={onClose}
-                      onMouseEnter={() => setHoveredHref(item.href)}
-                      onMouseLeave={() => setHoveredHref(null)}
-                      className={`
-                        group relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 no-underline
-                        transition-all duration-[180ms] ease-[cubic-bezier(.4,0,.2,1)]
-                        ${
-                          isActive
-                            ? "bg-blue-50 text-slate-800 shadow-sm"
-                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-                        }
-                      `}
-                    >
-                      {/* Active left bar */}
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 h-[60%] w-[3px] -translate-y-1/2 rounded-r-[3px] bg-[#4f8ef7] shadow-[0_0_10px_rgba(79,142,247,0.5)]" />
-                      )}
+                    {group.items.map((item, cIdx) => {
+                      const isChildActive =
+                        pathname === item.href ||
+                        pathname?.startsWith(item.href + "/");
+                      const ItemIcon = item.icon;
 
-                      {/* Icon wrapper */}
-                      <span
-                        className={`
-                          flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-lg
-                          transition-all duration-[180ms]
-                          ${
-                            isActive
-                              ? "bg-blue-100 text-[#4f8ef7] scale-105"
-                              : "bg-slate-100 text-slate-400 group-hover:bg-blue-50 group-hover:text-[#4f8ef7] group-hover:scale-105"
-                          }
-                        `}
-                      >
-                        <Icon size={14} />
-                      </span>
+                      return (
+                        <Link
+                          key={cIdx}
+                          href={item.href}
+                          onClick={onClose}
+                          className={`flex items-center gap-2.5 pl-9 pr-3 py-2.5 rounded-xl text-[13px] font-bold transition-all relative group border ${
+                            isChildActive
+                              ? "bg-gradient-to-r from-[#5B50E6] to-[#4D42DB] text-white shadow-md shadow-[#5B50E6]/15 border-transparent scale-[1.01]"
+                              : "border-transparent text-slate-600 hover:bg-[#5B50E6]/5 hover:text-[#5B50E6] hover:translate-x-1.5"
+                          }`}
+                        >
+                          {/* Branch Connector Hook */}
+                          <div className="absolute left-[27px] top-0 w-3.5 h-[20px] border-l-[1.5px] border-b-[1.5px] border-[#5B50E6]/30 rounded-bl-lg pointer-events-none" />
 
-                      {/* Label */}
-                      <span
-                        className={`text-[12px] leading-none ${
-                          isActive ? "font-semibold" : "font-medium"
-                        }`}
-                      >
-                        {item.label}
-                      </span>
+                          {isChildActive && (
+                            <div className="absolute left-[25px] top-[14px] w-1.5 h-1.5 bg-white rounded-full ring-2 ring-[#5B50E6] z-10" />
+                          )}
 
-                      {/* Chevron */}
-                      <ChevronRight
-                        size={11}
-                        className={`
-                          ml-auto text-[#4f8ef7] transition-all duration-[180ms]
-                          ${
-                            isActive || hoveredHref === item.href
-                              ? "translate-x-0 opacity-100"
-                              : "-translate-x-1 opacity-0"
-                          }
-                        `}
-                      />
-                    </Link>
-                  );
-                })}
-              </div>
+                          <ItemIcon
+                            size={16}
+                            className={
+                              isChildActive
+                                ? "text-white shrink-0"
+                                : "text-slate-400 group-hover:text-slate-600 transition-colors shrink-0"
+                            }
+                          />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
       </nav>
 
-      {/* Bottom section (always visible) */}
-      <div className="flex-shrink-0 px-3 pb-4 pt-1">
-        {/* Divider */}
-        <div className="mb-4 h-px bg-slate-100" />
-
-        {/* Logout */}
+      {/* ─── BOTTOM LOGOUT & VERSION CONTROLS ─── */}
+      <div className="p-3 border-t border-slate-100 bg-gradient-to-b from-white/40 to-slate-50/60 relative z-10 space-y-1.5">
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className={`
-            group flex w-full cursor-pointer items-center gap-2.5 rounded-xl border-none
-            bg-transparent px-2.5 py-2.5 text-red-400
-            transition-all duration-[180ms] hover:bg-red-50 hover:text-red-500
-            ${isLoggingOut ? "opacity-60" : "opacity-100"}
-          `}
+          className="flex items-center gap-3 px-3.5 py-2.5 text-slate-600 hover:text-rose-600 w-full rounded-2xl bg-white border border-slate-200/70 hover:border-rose-200 hover:bg-rose-50/50 transition-all duration-200 shadow-xs cursor-pointer group disabled:opacity-50"
         >
-          <span className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-lg bg-red-50 transition-all duration-[180ms] group-hover:bg-red-100 group-hover:scale-105">
-            <LogOut size={13} />
-          </span>
-          <span className="text-[12px] font-semibold">
-            {isLoggingOut ? "Signing out…" : "Sign Out"}
+          <div className="p-1.5 rounded-xl bg-slate-100 group-hover:bg-rose-100/80 text-slate-500 group-hover:text-rose-600 transition-colors shrink-0">
+            <LogOut size={16} />
+          </div>
+          <span className="text-xs font-black text-slate-700 group-hover:text-rose-600 transition-colors">
+            {isLoggingOut ? "Signing Out..." : "Sign Out"}
           </span>
         </button>
 
-        {/* Footer */}
-        <p className="mt-3.5 text-center text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-300">
-          Admin Panel · v2.0
-        </p>
+        <div className="mt-1 text-center">
+          <span className="text-[10px] font-bold tracking-wider text-slate-300 uppercase">
+            ADMIN PANEL · V2.0
+          </span>
+        </div>
       </div>
     </aside>
   );

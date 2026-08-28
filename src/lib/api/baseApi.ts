@@ -24,7 +24,10 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://api.maruftech.online",
+    baseUrl:
+      (process.env.NEXT_PUBLIC_API_BASE_URL
+        ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "")
+        : "https://course-selling-platform-api-uwr3.onrender.com"),
 
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;

@@ -318,77 +318,102 @@ export default function CourseList() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60">
-      {/* ── HERO BANNER ── */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50/90 via-blue-50/30 to-slate-50 border-b border-slate-100/80 py-12 sm:py-16">
-        {/* Background glow blobs */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#F8FAFC]">
+      {/* ── HERO BANNER & INTERACTIVE SEARCH BAR ── */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50/80 via-slate-50 to-[#F8FAFC] border-b border-slate-200/60 pt-10 sm:pt-14 pb-12 sm:pb-16">
+        {/* Decorative Background Orbs */}
+        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-[#E0E7FF]/40 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 -left-32 w-[450px] h-[450px] rounded-full bg-[#EEF2FF]/50 blur-3xl pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            {/* Left Header Content */}
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4 border border-blue-200/60 bg-white/80 backdrop-blur-md text-[#0052CC] text-xs font-extrabold uppercase tracking-wider shadow-sm">
+            
+            {/* Left Header & Search Interface */}
+            <div className="max-w-2xl space-y-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-200/80 bg-white/90 backdrop-blur-md text-[#5B50E6] text-xs font-extrabold uppercase tracking-wider shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
-                Curated Engineering Catalog
+                <span>Next-Gen Learning Catalog</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
-                Explore All <span className="text-[#0052CC]">Courses</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                Discover & Master <br className="hidden sm:inline" />
+                <span className="bg-gradient-to-r from-[#5B50E6] via-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                  High-Impact Skills
+                </span>
               </h1>
-              <p className="text-slate-500 text-sm sm:text-base font-medium mt-3 leading-relaxed">
-                Showing {filtered.length} course{filtered.length !== 1 ? "s" : ""} — hand-picked to master high-income software engineering skills.
+              
+              <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
+                Choose from over {filtered.length} curated programs with hands-on projects, real-world architecture, and industry certifications.
               </p>
 
-              {/* Integrated Hero Search Bar */}
-              <div className="mt-6 flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200/80 shadow-lg shadow-blue-500/5 max-w-lg">
-                <div className="flex items-center gap-2.5 flex-1 px-3">
-                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Search by topic, skill, or keyword..."
-                    value={searchQ}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="w-full text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none"
-                  />
-                  {searchQ && (
-                    <button
-                      type="button"
-                      onClick={() => handleSearch("")}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+              {/* Advanced Glass Search Command Bar */}
+              <div className="pt-2">
+                <div className="relative flex items-center bg-white p-2 rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200/60 transition-all focus-within:border-[#5B50E6] focus-within:ring-4 focus-within:ring-[#5B50E6]/10">
+                  <div className="flex items-center gap-3 flex-1 px-3">
+                    <Search className="w-5 h-5 text-slate-400 shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search courses, skills, technologies (e.g. Next.js, AI, Figma)..."
+                      value={searchQ}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="w-full text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none"
+                    />
+                    {searchQ && (
+                      <button
+                        type="button"
+                        onClick={() => handleSearch("")}
+                        className="text-slate-400 hover:text-slate-600 p-1"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="px-6 py-3 rounded-xl bg-[#5B50E6] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5B50E6]/30 hover:bg-[#4D42DB] transition-all hover:scale-105 shrink-0"
+                  >
+                    Search
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  className="px-5 py-2.5 rounded-xl bg-[#0052CC] text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors shrink-0"
-                >
-                  Search
-                </button>
+
+                {/* Popular Search Quick Pills */}
+                <div className="flex flex-wrap items-center gap-2 pt-3 text-xs font-semibold text-slate-400">
+                  <span className="text-[11px] text-slate-400 font-bold">Popular:</span>
+                  {["Development", "AI & Data Science", "Design & UI/UX", "Cloud & DevOps"].map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => toggleCat(tag)}
+                      className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all ${
+                        selectedCats.includes(tag)
+                          ? "bg-[#5B50E6] text-white shadow-sm"
+                          : "bg-white/80 text-slate-600 hover:bg-white border border-slate-200/60 shadow-2xs"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Right Stat Cards */}
+            {/* Right Interactive Live Stats Cards */}
             <div className="grid grid-cols-3 sm:flex lg:flex-col gap-3 shrink-0">
               {[
-                { label: "Completion Rate", value: "96%", icon: TrendingUp, color: "text-emerald-500" },
-                { label: "Active Learners", value: "50k+", icon: Users, color: "text-[#0052CC]" },
-                { label: "Avg. Rating", value: "4.9 ★", icon: Star, color: "text-amber-500" },
+                { label: "Completion Rate", value: "99%", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-50" },
+                { label: "Active Students", value: "50k+", icon: Users, color: "text-[#5B50E6]", bg: "bg-indigo-50" },
+                { label: "Avg. Rating", value: "4.9 ★", icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
               ].map((s) => {
                 const Icon = s.icon;
                 return (
                   <div
                     key={s.label}
-                    className="flex items-center gap-3 bg-white/90 backdrop-blur-md border border-slate-200/70 rounded-2xl px-4 py-3 shadow-sm"
+                    className="flex items-center gap-3 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl px-4 py-3.5 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className={`w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center ${s.color}`}>
-                      <Icon className="w-4 h-4" />
+                    <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center ${s.color}`}>
+                      <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-base font-extrabold text-slate-900 leading-none">
+                      <p className="text-base sm:text-lg font-black text-slate-900 leading-none">
                         {s.value}
                       </p>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
@@ -399,6 +424,7 @@ export default function CourseList() {
                 );
               })}
             </div>
+
           </div>
         </div>
       </div>

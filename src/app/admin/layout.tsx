@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { AppProviders } from "@/providers";
@@ -67,7 +67,7 @@ export default function AdminLayout({
       </div>
 
       {/* Main content – flush against sidebar on desktop */}
-      <div className="flex-1 lg:ml-[220px] flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-[260px] flex flex-col min-h-screen">
         <TopNavbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
         <main className="flex-1 overflow-x-hidden">

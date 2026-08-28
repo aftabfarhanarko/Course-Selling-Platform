@@ -63,11 +63,11 @@ export default function FilterPanel({
       <div>
         <div className="flex items-center justify-between mb-3.5">
           <p className="flex items-center gap-2 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
-            <LayoutGrid className="w-3.5 h-3.5 text-[#0052CC]" /> Categories
+            <LayoutGrid className="w-3.5 h-3.5 text-[#5B50E6]" /> Categories
           </p>
           {selectedCats.length > 0 && (
-            <span className="text-[10px] font-bold text-[#0052CC] bg-blue-50 px-2 py-0.5 rounded-full">
-              {selectedCats.length} selected
+            <span className="text-[10px] font-bold text-[#5B50E6] bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
+              {selectedCats.length} active
             </span>
           )}
         </div>
@@ -81,10 +81,10 @@ export default function FilterPanel({
                 key={cat}
                 type="button"
                 onClick={() => toggleCat(cat)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-[13px] font-bold transition-all text-left ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all text-left ${
                   isSelected
-                    ? "bg-[#0052CC] text-white shadow-lg shadow-blue-500/20"
-                    : "text-slate-700 bg-slate-50/70 hover:bg-slate-100 hover:text-slate-900 border border-slate-100/80"
+                    ? "bg-[#5B50E6] text-white shadow-md shadow-[#5B50E6]/25 scale-[1.01]"
+                    : "text-slate-700 bg-slate-50/80 hover:bg-white hover:text-slate-900 border border-slate-200/60 hover:shadow-xs"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -99,7 +99,7 @@ export default function FilterPanel({
                 <div
                   className={`w-4 h-4 rounded-lg border flex items-center justify-center transition-all ${
                     isSelected
-                      ? "bg-white border-white text-[#0052CC]"
+                      ? "bg-white border-white text-[#5B50E6]"
                       : "border-slate-300 bg-white"
                   }`}
                 >
@@ -113,21 +113,39 @@ export default function FilterPanel({
 
       <div className="border-t border-slate-100" />
 
-      {/* ── Price Range ── */}
+      {/* ── Price Range & Quick Presets ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="flex items-center gap-2 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
-            <Tag className="w-3.5 h-3.5 text-[#0052CC]" /> Max Budget
+            <Tag className="w-3.5 h-3.5 text-[#5B50E6]" /> Max Budget
           </p>
-          <span className="text-[12px] font-black text-[#0052CC] bg-blue-50 px-3 py-0.5 rounded-full border border-blue-100">
+          <span className="text-xs font-black text-[#5B50E6] bg-indigo-50 px-3 py-0.5 rounded-full border border-indigo-100">
             ${currentMax}
           </span>
+        </div>
+
+        {/* Quick Price Preset Chips */}
+        <div className="grid grid-cols-4 gap-1.5 mb-3">
+          {[50, 100, 200, 300].map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => handlePriceChange(preset)}
+              className={`py-1 rounded-xl text-[11px] font-bold transition-all border ${
+                currentMax === preset
+                  ? "bg-[#5B50E6] text-white border-[#5B50E6] shadow-2xs"
+                  : "bg-slate-50 text-slate-600 border-slate-200/80 hover:bg-slate-100"
+              }`}
+            >
+              ${preset}
+            </button>
+          ))}
         </div>
 
         <div className="relative pt-2 pb-2">
           <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className="absolute left-0 top-0 h-full bg-[#0052CC] rounded-full transition-all"
+              className="absolute left-0 top-0 h-full bg-[#5B50E6] rounded-full transition-all"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

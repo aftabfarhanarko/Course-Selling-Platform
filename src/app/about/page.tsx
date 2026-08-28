@@ -96,9 +96,15 @@ export default function AboutPage() {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
             Our Mission To Make Education <br className="hidden sm:inline" /> Easy And Accessible To All
           </h1>
-          <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium max-w-xl mx-auto">
+          <motion.p 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-slate-600 sm:text-base text-xs sm:text-sm leading-relaxed font-semibold max-w-xl mx-auto"
+          >
             Begin your program at any of EduNova's global centers, laying a strong groundwork for advancement and propelling your success to new heights.
-          </p>
+          </motion.p>
         </motion.div>
 
         {/* ── HERO IMAGE GALLERY ── */}
@@ -167,9 +173,15 @@ export default function AboutPage() {
             </span>
           </div>
 
-          <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto font-medium">
+          <motion.p 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-slate-600 sm:text-base text-xs sm:text-sm leading-relaxed max-w-xl mx-auto font-semibold"
+          >
             EduNova is an authorized global educational institute offering vocational and language courses, licensed by the global education authority. We are committed to delivering high-quality education.
-          </p>
+          </motion.p>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center text-left pt-2">
             <div className="lg:col-span-6 h-72 sm:h-88 rounded-3xl overflow-hidden shadow-xl border border-slate-100">
@@ -181,9 +193,15 @@ export default function AboutPage() {
             </div>
 
             <div className="lg:col-span-6 space-y-4 max-w-lg">
-              <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
+              <motion.p 
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+                className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium"
+              >
                 EduNova is a leading educational company that offers internationally recognized education at levels 3, 4, and 5. As an accredited partner of global education bodies, we ensure that our students receive high-quality and globally recognized qualifications. With our partnership, students can access a wide range of educational opportunities and benefit from a comprehensive and reputable educational experience. At our learning facility, students can freely choose the international qualification they desire to pursue. Depending on the program chosen by the student, our team of experts will provide guidance on the most effective strategy for structuring their studies and optimizing their learning approach.
-              </p>
+              </motion.p>
               <Link
                 href="/courses"
                 className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#5B50E6] hover:bg-[#4D42DB] text-white font-bold text-xs transition-all duration-500 shadow-md shadow-[#5B50E6]/25 hover:scale-105"
@@ -208,9 +226,15 @@ export default function AboutPage() {
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
                   A diverse range of programs offered in various languages and educational frameworks
                 </h2>
-                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
+                <motion.p 
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="text-slate-600 sm:text-base text-xs sm:text-sm leading-relaxed font-medium"
+                >
                   We service wide range of educational programs where each lead tailored outcome depend on the qualification provider we using on the program you assigned for and depend on which center you are assigned or studying in. As student its highly advice you learn more about each program you applying for and the qualification provider of what you applying for.
-                </p>
+                </motion.p>
               </div>
 
               {/* Accordion Programs List */}
@@ -231,27 +255,41 @@ export default function AboutPage() {
                 ].map((item, index) => {
                   const isOpen = activeAccordion === index;
                   return (
-                    <div
+                    <motion.div
                       key={item.title}
+                      initial={false}
                       onClick={() => setActiveAccordion(isOpen ? null : index)}
-                      className={`border rounded-2xl p-4 space-y-2 cursor-pointer transition-all duration-500 ${
+                      className={`border rounded-2xl p-4 cursor-pointer transition-colors duration-300 ${
                         isOpen
                           ? "bg-slate-50 border-slate-300 shadow-sm"
                           : "bg-white border-slate-200 hover:border-[#5B50E6]/40 hover:shadow-sm"
                       }`}
                     >
-                      <div className="flex items-center justify-between font-bold text-xs sm:text-sm text-slate-900">
+                      <div className="flex items-center justify-between font-bold text-xs sm:text-sm text-slate-900 select-none">
                         <span>{item.title}</span>
-                        <span className="w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-600">
-                          {isOpen ? "−" : "+"}
-                        </span>
+                        <motion.span 
+                          animate={{ rotate: isOpen ? 180 : 0 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          className="w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-600 bg-white"
+                        >
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-600" />
+                        </motion.span>
                       </div>
-                      {isOpen && (
-                        <p className="text-slate-500 text-xs leading-relaxed font-medium pt-1 border-t border-slate-200/60">
+                      
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ 
+                          height: isOpen ? "auto" : 0,
+                          opacity: isOpen ? 1 : 0
+                        }}
+                        transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        className="overflow-hidden"
+                      >
+                        <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium pt-3 mt-2 border-t border-slate-200/80">
                           {item.content}
                         </p>
-                      )}
-                    </div>
+                      </motion.div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -282,7 +320,13 @@ export default function AboutPage() {
                 History and Background
               </h2>
 
-              <div className="space-y-4 text-slate-500 text-xs sm:text-sm leading-relaxed font-medium max-w-xl">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="space-y-4 text-slate-600 text-xs sm:text-sm leading-relaxed font-medium max-w-xl"
+              >
                 <p>
                   EduNova is a subsidiary of the renowned Global Tech Group, a leading educational entity with a rich history dating back to 2012. Backed by the education division, EduNova provides students with a world-class educational experience, drawing upon the vast expertise, resources, and global networks of the founders.
                 </p>
@@ -296,7 +340,7 @@ export default function AboutPage() {
                     EduNova operates under modern interactive learning models. Firstly, we establish and operate digital academies across Europe, Asia, and North America. Secondly, we invest in existing educational projects worldwide, fostering growth and development in the tech education sector. Thirdly, we offer career counseling and portfolio development services, assisting learners in achieving their dream tech roles. Lastly, our higher education focus enables students to obtain verified industry credentials online.
                   </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Right Column: Founder Quote Card */}
@@ -337,9 +381,15 @@ export default function AboutPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 max-w-sm">
-              <p className="text-slate-500 text-xs font-medium leading-relaxed">
+              <motion.p 
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="text-slate-600 text-xs sm:text-sm font-semibold leading-relaxed"
+              >
                 Our diverse team of strategists, developers, and technologists is united by a passion for solving real-world problems with smart, scalable solutions.
-              </p>
+              </motion.p>
               <Link
                 href="/about"
                 className="shrink-0 px-5 py-2.5 rounded-full bg-[#DCEBCA] hover:bg-[#cbe0b3] text-slate-900 font-bold text-xs transition-all duration-500 hover:scale-105 shadow-sm"
@@ -354,9 +404,14 @@ export default function AboutPage() {
             {teamMembers.map((member, idx) => (
               <motion.div
                 key={member.name}
-                initial={{ opacity: 0, y: 35 }}
-                animate={isPageInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 35 }}
-                transition={getSmoothTransition(0.85 + idx * 0.15)}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: idx * 0.15,
+                  ease: [0.21, 0.47, 0.32, 0.98] 
+                }}
                 className="group flex flex-col space-y-3"
               >
                 {/* Full Height Portrait Image Container with Glass Overlay */}

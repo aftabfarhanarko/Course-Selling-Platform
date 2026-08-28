@@ -57,7 +57,12 @@ export default function BlogPage() {
         
         {/* ── HERO & FEATURED STORY UNIFIED GLASS BANNER ── */}
         {featuredPost && (
-          <div className="mb-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="mb-12"
+          >
             <div className="group relative rounded-3xl overflow-hidden shadow-2xl border border-slate-800/80 min-h-[420px] sm:min-h-[460px] md:min-h-[500px] flex flex-col justify-end">
               {/* Full Bleed Image Background with Gradient Overlay */}
               <img
@@ -122,11 +127,16 @@ export default function BlogPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* ── SEARCH & CATEGORY FILTER BAR (Glassmorphic Bar) ── */}
-        <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/70 backdrop-blur-xl p-3.5 sm:p-4 rounded-3xl border border-white/60 shadow-lg shadow-slate-200/50">
+        <motion.div 
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
+          className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/70 backdrop-blur-xl p-3.5 sm:p-4 rounded-3xl border border-white/60 shadow-lg shadow-slate-200/50"
+        >
           {/* Category Tabs */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
             {categories.map((cat) => (
@@ -155,7 +165,7 @@ export default function BlogPage() {
               className="w-full pl-9 pr-4 py-2 bg-white/80 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#5B50E6] focus:bg-white focus:ring-2 focus:ring-[#5B50E6]/20 transition-all shadow-xs"
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* ── DYNAMIC VARIED GLASSMORPHIC CARDS GRID ── */}
         {filteredPosts.length > 0 ? (
@@ -164,8 +174,11 @@ export default function BlogPage() {
               // 1. Horizontal Wide Card (Col-span 2)
               if (idx === 0) {
                 return (
-                  <article
+                  <motion.article
                     key={post.id}
+                    initial={{ opacity: 0, y: 35 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.25 + idx * 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
                     className="md:col-span-2 group bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:border-[#5B50E6]/40 hover:-translate-y-1 transition-all duration-500 flex flex-col justify-between"
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-12 h-full">
@@ -225,15 +238,18 @@ export default function BlogPage() {
                         </div>
                       </div>
                     </div>
-                  </article>
+                  </motion.article>
                 );
               }
 
               // 2. Dark Glassmorphic Card Style
               if (idx === 3) {
                 return (
-                  <article
+                  <motion.article
                     key={post.id}
+                    initial={{ opacity: 0, y: 35 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.25 + idx * 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
                     className="group bg-gradient-to-br from-slate-900/90 via-indigo-950/90 to-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-500 flex flex-col justify-between text-white"
                   >
                     <div className="p-6 space-y-4">
@@ -277,14 +293,17 @@ export default function BlogPage() {
                         </Link>
                       </div>
                     </div>
-                  </article>
+                  </motion.article>
                 );
               }
 
               // 3. Standard Glass Vertical Card (Short Image)
               return (
-                <article
+                <motion.article
                   key={post.id}
+                  initial={{ opacity: 0, y: 35 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.25 + idx * 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
                   className="group bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:border-[#5B50E6]/40 hover:-translate-y-1 transition-all duration-500 flex flex-col justify-between"
                 >
                   <div>
@@ -347,7 +366,7 @@ export default function BlogPage() {
                       </Link>
                     </div>
                   </div>
-                </article>
+                </motion.article>
               );
             })}
           </div>

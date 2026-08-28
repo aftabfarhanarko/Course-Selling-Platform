@@ -44,7 +44,7 @@ export async function uploadImageToBackend(file: File | Blob): Promise<string> {
   const form = new FormData();
   form.append("image", file);
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://course-selling-api.up.railway.app";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://course-selling-platform-api-uwr3.onrender.com";
   
   // Get token
   let token = "";

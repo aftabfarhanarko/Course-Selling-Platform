@@ -80,7 +80,7 @@ async function fetchCurrentUser(
 
     const res = await axios.get(
       (process.env.NEXT_PUBLIC_API_BASE_URL ||
-        "https://course-selling-api.up.railway.app") + "/auth/profile",
+        "https://course-selling-platform-api-uwr3.onrender.com") + "/auth/profile",
       {
         headers,
       },
